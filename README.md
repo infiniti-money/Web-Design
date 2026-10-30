@@ -1,6 +1,15 @@
-# ATELIER HOME — Website thiết kế nội thất
+# ATELIER HOME — Website thiết kế nội thất (v1.1 codebase)
 
 Website giới thiệu thiết kế nội thất bằng tiếng Việt, responsive, triển khai theo dạng static website không cần build.
+
+## Phiên bản v1.1 — Nền tảng quản trị
+- Giao diện `admin.html` với đăng nhập Supabase Auth (không có tài khoản admin mặc định).
+- Quản lý dự án và yêu cầu tư vấn khi đã kết nối Supabase.
+- Database schema và chính sách phân quyền trong `supabase/schema.sql`.
+- Cấu hình frontend tại `app-config.js` (chỉ chứa URL và publishable key).
+- Hướng dẫn thực tế: [SUPABASE_SETUP.md](SUPABASE_SETUP.md).
+
+**Hiện chưa có Supabase project được cấu hình.** Chưa thể khẳng định chức năng quản trị và lưu khách hàng trực tuyến đang hoạt động. Khi cấu hình trống, website tự dùng demo localStorage như trước.
 
 ## Chạy website
 - Tải repository về máy và mở `index.html` trên trình duyệt.
