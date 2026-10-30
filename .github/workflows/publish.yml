@@ -1,0 +1,66 @@
+name: Publish ATELIER HOME
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "publish-atelier-home"
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: GitHub Release v1.0.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Validate static entry point
+        run: |
+          test -s index.html
+          grep -qi '<!doctype html>' index.html
+          grep -q 'id="project-grid"' index.html
+          grep -q 'id="lead-form"' index.html
+      - name: Package website
+        run: |
+          mkdir -p dist/atelier-home-v1.0.0
+          cp index.html README.md dist/atelier-home-v1.0.0/
+          cd dist
+          zip -qr atelier-home-v1.0.0.zip atelier-home-v1.0.0
+      - name: Publish first version (once)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v1.0.0 >/dev/null 2>&1; then
+            echo "Release v1.0.0 already exists; keeping the published version immutable."
+          else
+            gh release create v1.0.0 ./dist/atelier-home-v1.0.0.zip \
+              --target "$GITHUB_SHA" \
+              --title "ATELIER HOME v1.0.0 — First Release" \
+              --notes-file RELEASE_NOTES.md
+          fi
+
+  pages:
+    name: Deploy GitHub Pages
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload website
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+      - name: Deploy website
+        id: deployment
+        uses: actions/deploy-pages@v4
