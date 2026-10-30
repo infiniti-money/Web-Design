@@ -44,16 +44,13 @@ jobs:
               --notes-file RELEASE_NOTES_V1_1.md
           fi
 
-  pages:
-    name: Deploy GitHub Pages (if enabled)
+  pages-check:
+    name: Check GitHub Pages availability
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      enabled: ${{ steps.pages_check.outputs.enabled }}
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-      - name: Check GitHub Pages configuration
+      - name: Check Pages site status
         id: pages_check
         env:
           GH_TOKEN: ${{ github.token }}
@@ -62,22 +59,30 @@ jobs:
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::GitHub Pages is not enabled. Go to Settings > Pages and select GitHub Actions."
+            echo "::notice::Pages not enabled. In repository Settings > Pages, select GitHub Actions source."
           fi
+
+  pages:
+    name: Deploy GitHub Pages (if enabled)
+    needs: pages-check
+    if: needs.pages-check.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
       - name: Prepare public site
-        if: steps.pages_check.outputs.enabled == 'true'
         run: |
           mkdir -p public-site
           cp index.html admin.html admin.js app-config.js site-backend.js public-site/
       - name: Configure GitHub Pages
-        if: steps.pages_check.outputs.enabled == 'true'
         uses: actions/configure-pages@v5
       - name: Upload website
-        if: steps.pages_check.outputs.enabled == 'true'
         uses: actions/upload-pages-artifact@v4
         with:
           path: public-site
       - name: Deploy website
-        if: steps.pages_check.outputs.enabled == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
