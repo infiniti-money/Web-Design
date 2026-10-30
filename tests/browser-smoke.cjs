@@ -45,6 +45,24 @@ async function main() {
     assert.equal(await desktop.locator("#project-modal").getAttribute("aria-hidden"), "true");
     console.log("INTERACTION: category filter and modal keyboard controls passed");
 
+    // Exercise the real consultation form without storing synthetic customer PII.
+    const intercepted = [];
+    await desktop.route("**/functions/v1/submit-inquiry", async route => {
+      const payload = route.request().postDataJSON();
+      intercepted.push(payload);
+      assert.equal(route.request().method(), "POST");
+      await route.fulfill({status:201,contentType:"application/json",body:JSON.stringify({ok:true})});
+    });
+    await desktop.locator("#full-name").fill("Người kiểm thử");
+    await desktop.locator("#phone").fill("0900000000");
+    await desktop.locator("#service").selectOption({label:"Thiết kế nội thất"});
+    await desktop.locator("#consent").check();
+    await desktop.locator("#lead-form [type=submit]").click();
+    await desktop.locator("#form-feedback").getByText("Yêu cầu đã được hệ thống ghi nhận").waitFor();
+    assert.equal(intercepted.length,1,"Form must use Edge Function exactly once");
+    assert.equal(intercepted[0].full_name,"Người kiểm thử");
+    console.log("CONSULTATION: Edge Function request sent; mocked success without writing customer data");
+
     const admin = await browser.newPage({ viewport: { width: 1280, height: 850 }, locale: "vi-VN" });
     admin.on("pageerror", error => consoleErrors.push("admin: " + error.message));
     const ar = await admin.goto(new URL("admin.html", origin).toString(), { waitUntil: "domcontentloaded", timeout: 45000 });
