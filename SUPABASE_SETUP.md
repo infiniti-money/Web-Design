@@ -6,7 +6,7 @@
 - Database migration `atelier_home_initial_schema` đã chạy; có `public.projects`, `public.inquiries`, RLS và 6 dự án minh họa.
 - Frontend `app-config.js` đã cấu hình Project URL và **publishable API key**.
 - Theo kiểm tra lúc cấu hình: **0 Auth users, 0 admin users**. Chưa có ai được đăng nhập quản trị.
-- GitHub Pages chưa bật. Chưa có URL website trực tuyến được xác nhận.
+- **GitHub Pages đã bật**; các workflow Jekyll và Publish ATELIER HOME đã triển khai thành công. Truy cập https://infiniti-money.github.io/Web-Design/ .
 
 ## 1. Tạo tài khoản quản trị
 
@@ -26,9 +26,9 @@ returning id, email, raw_app_meta_data ->> 'role' as assigned_role;
 4. Xác minh truy vấn trả về **đúng 1 dòng**. Nếu trả về 0, tài khoản hoặc email chưa tồn tại/chưa xác minh. Không gán quyền theo `user_metadata`; không tạo tài khoản admin mặc định.
 5. Đăng xuất và đăng nhập lại ở `/admin.html` để JWT cập nhật quyền.
 
-## 2. Bật website GitHub Pages
+## 2. Triển khai / tái triển khai GitHub Pages
 
-1. Mở [Settings → Pages](https://github.com/infiniti-money/Web-Design/settings/pages).
+1. GitHub Pages hiện đã hoạt động. Nếu cần kiểm tra cấu hình, mở [Settings → Pages](https://github.com/infiniti-money/Web-Design/settings/pages).
 2. Chọn **Build and deployment → Source = GitHub Actions**.
 3. Mở [Publish ATELIER HOME](https://github.com/infiniti-money/Web-Design/actions/workflows/publish.yml), chọn **Run workflow**.
 4. Khi deploy thành công, địa chỉ dự kiến: `https://infiniti-money.github.io/Web-Design/`; admin: `https://infiniti-money.github.io/Web-Design/admin.html`.
