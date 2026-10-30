@@ -1,0 +1,25 @@
+name: Live Supabase API smoke tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tests/live-api.test.cjs"
+      - ".github/workflows/live-smoke.yml"
+      - "app-config.js"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Test public portfolio and customer-data privacy
+        run: node --test tests/live-api.test.cjs
