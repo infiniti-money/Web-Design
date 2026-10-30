@@ -44,7 +44,7 @@ revoke all on public.projects from anon, authenticated;
 revoke all on public.inquiries from anon, authenticated;
 grant select on public.projects to anon;
 grant select, insert, update, delete on public.projects to authenticated;
-grant insert on public.inquiries to anon;
+revoke insert on public.inquiries from anon;
 grant select, insert, update, delete on public.inquiries to authenticated;
 
 drop policy if exists "public can read published projects" on public.projects;
@@ -74,12 +74,9 @@ create policy "admins remove projects"
 on public.projects for delete to authenticated
 using ( (select auth.uid()) is not null and ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
 
--- Public visitors can submit a request but cannot read customers, update, or delete.
--- Add server-side CAPTCHA and rate limiting before accepting live campaigns.
+-- All public inquiry creation MUST go through the server-side submit-inquiry Edge Function.
+-- Anonymous users are not permitted to INSERT directly via Data API.
 drop policy if exists "visitors send inquiries" on public.inquiries;
-create policy "visitors send inquiries"
-on public.inquiries for insert to anon
-with check (status = 'new');
 
 drop policy if exists "admins view inquiries" on public.inquiries;
 create policy "admins view inquiries"
