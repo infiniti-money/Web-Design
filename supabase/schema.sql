@@ -48,30 +48,31 @@ grant insert on public.inquiries to anon;
 grant select, insert, update, delete on public.inquiries to authenticated;
 
 drop policy if exists "public can read published projects" on public.projects;
+drop policy if exists "admins read projects" on public.projects;
 create policy "public can read published projects"
 on public.projects for select to anon, authenticated
-using (published = true);
-
-drop policy if exists "admins read projects" on public.projects;
-create policy "admins read projects"
-on public.projects for select to authenticated
-using ( (select auth.uid()) is not null and (select (select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
+using (
+  published = true or (
+    (select auth.uid()) is not null and
+    ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin'
+  )
+);
 
 drop policy if exists "admins add projects" on public.projects;
 create policy "admins add projects"
 on public.projects for insert to authenticated
-with check ( (select auth.uid()) is not null and (select (select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
+with check ( (select auth.uid()) is not null and ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
 
 drop policy if exists "admins edit projects" on public.projects;
 create policy "admins edit projects"
 on public.projects for update to authenticated
-using ( (select auth.uid()) is not null and (select (select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' )
-with check ( (select auth.uid()) is not null and (select (select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
+using ( (select auth.uid()) is not null and ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' )
+with check ( (select auth.uid()) is not null and ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
 
 drop policy if exists "admins remove projects" on public.projects;
 create policy "admins remove projects"
 on public.projects for delete to authenticated
-using ( (select auth.uid()) is not null and (select (select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
+using ( (select auth.uid()) is not null and ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
 
 -- Public visitors can submit a request but cannot read customers, update, or delete.
 -- Add server-side CAPTCHA and rate limiting before accepting live campaigns.
@@ -83,18 +84,18 @@ with check (status = 'new');
 drop policy if exists "admins view inquiries" on public.inquiries;
 create policy "admins view inquiries"
 on public.inquiries for select to authenticated
-using ( (select auth.uid()) is not null and (select (select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
+using ( (select auth.uid()) is not null and ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
 
 drop policy if exists "admins edit inquiries" on public.inquiries;
 create policy "admins edit inquiries"
 on public.inquiries for update to authenticated
-using ( (select auth.uid()) is not null and (select (select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' )
-with check ( (select auth.uid()) is not null and (select (select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
+using ( (select auth.uid()) is not null and ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' )
+with check ( (select auth.uid()) is not null and ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
 
 drop policy if exists "admins remove inquiries" on public.inquiries;
 create policy "admins remove inquiries"
 on public.inquiries for delete to authenticated
-using ( (select auth.uid()) is not null and (select (select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
+using ( (select auth.uid()) is not null and ((select auth.jwt()) -> 'app_metadata' ->> 'role') = 'admin' );
 
 -- Demonstration projects only; replace all imagery/copy with actual portfolio.
 insert into public.projects (slug,title,category,area,style,image_url,summary,published,sort_order)
