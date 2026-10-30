@@ -66,6 +66,17 @@ async function main() {
     assert.equal(overflow, false, "Homepage should not overflow horizontally at mobile width");
     console.log("MOBILE: loaded; no horizontal overflow");
 
+    // If the CDN fails on a LIVE site, never silently save a local demo lead.
+    const disconnected = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    await disconnected.route("**/cdn.jsdelivr.net/npm/@supabase/**", route => route.abort());
+    await disconnected.goto(origin, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await disconnected.locator("#form-feedback").getByText("Kết nối tạm gián đoạn").waitFor({ timeout: 15000 });
+    assert.equal(await disconnected.locator("#lead-form [type=submit]").isDisabled(), true,
+      "Production form must be disabled if Supabase SDK fails");
+    assert.equal(await disconnected.locator("#admin-toggle").isVisible(), false,
+      "Demo leads panel must stay hidden in configured production");
+    console.log("OUTAGE: consultation submission safely disabled (no silent demo fallback)");
+
     assert.deepEqual(consoleErrors, [], "Browser JavaScript exceptions: " + consoleErrors.join("; "));
     console.log("Browser smoke tests passed.");
   } finally {
