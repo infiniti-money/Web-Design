@@ -1,43 +1,36 @@
-# ATELIER HOME — Website thiết kế nội thất (v1.1 codebase)
+# ATELIER HOME — Thiết kế nội thất
 
-Website giới thiệu thiết kế nội thất bằng tiếng Việt, responsive, triển khai theo dạng static website không cần build.
+Website nội thất tiếng Việt, responsive; đã kết nối dự án Supabase thực tế.
 
-## Phiên bản v1.1 — Nền tảng quản trị
-- Giao diện `admin.html` với đăng nhập Supabase Auth (không có tài khoản admin mặc định).
-- Quản lý dự án và yêu cầu tư vấn khi đã kết nối Supabase.
-- Database schema và chính sách phân quyền trong `supabase/schema.sql`.
-- Cấu hình frontend tại `app-config.js` (chỉ chứa URL và publishable key).
-- Hướng dẫn thực tế: [SUPABASE_SETUP.md](SUPABASE_SETUP.md).
+## Trạng thái kết nối — 30/10/2026
 
-**Hiện chưa có Supabase project được cấu hình.** Chưa thể khẳng định chức năng quản trị và lưu khách hàng trực tuyến đang hoạt động. Khi cấu hình trống, website tự dùng demo localStorage như trước.
+- **Supabase:** `atelier-home-web-design` (ID `mswiegltusllzvuavjdh`), Singapore; trạng thái ACTIVE_HEALTHY.
+- **Database:** `public.projects` (6 dự án minh họa) và `public.inquiries` (ban đầu trống).
+- **RLS:** đã bật. Khách chỉ được đọc dự án published và gửi yêu cầu; không được xem hồ sơ người khác.
+- **Frontend:** `app-config.js` đã chứa URL Supabase và khóa publishable. Không có khóa bí mật.
+- **Admin:** `admin.html` hỗ trợ Supabase Auth và quản lý dự án/yêu cầu, nhưng **chưa có tài khoản admin**. Cần tạo user xác minh và gán `app_metadata.role=admin`.
+- **GitHub Pages:** chưa bật; cần chọn Settings → Pages → Source = GitHub Actions rồi chạy workflow xuất bản.
 
-## Chạy website
-- Tải repository về máy và mở `index.html` trên trình duyệt.
-- Hoặc dùng VS Code Live Server.
-- Khi bật GitHub Pages cho nhánh `main` thư mục `/ (root)`, trang có thể xuất bản trực tiếp từ `index.html`.
+Xem **[SUPABASE_SETUP.md](SUPABASE_SETUP.md)** để hoàn tất tạo tài khoản quản trị và kiểm thử.
 
-## Chức năng hiện có
-- Landing page cao cấp, responsive, điều hướng theo khu vực.
-- Giới thiệu, dịch vụ, quy trình, bộ sưu tập cảm hứng.
-- Danh sách dự án mẫu và bộ lọc căn hộ / biệt thự / nhà phố / thương mại.
-- Xem chi tiết dự án trong modal, hỗ trợ thao tác bàn phím.
-- Form yêu cầu tư vấn có kiểm tra dữ liệu nhập và checkbox đồng ý.
-- Chế độ demo xem và xuất JSON các yêu cầu đã lưu cục bộ, xóa dữ liệu demo.
-- Metadata cơ bản và hình ảnh lazy-load.
+## Tính năng
 
-## Giới hạn của bản demo
-**Chưa có backend hoặc xác thực.** Dữ liệu form chỉ lưu bằng localStorage trên máy/trình duyệt đang sử dụng; không gửi mail, không đồng bộ và không tự chuyển đến doanh nghiệp. Khu vực "Quản lý yêu cầu (demo)" không phải hệ thống quản trị bảo mật, không phù hợp lưu dữ liệu khách hàng thật.
+Trang chủ, dự án, bộ lọc, chi tiết, dịch vụ, giới thiệu, quy trình; kết nối Supabase lấy dự án xuất bản; form yêu cầu tư vấn; giao diện quản trị thêm/sửa/xóa dự án và xử lý trạng thái yêu cầu; CI kiểm tra cú pháp JavaScript, cấu trúc bảng và RLS.
 
-Tên ATELIER HOME, các dự án, con số thống kê, thời gian hoạt động và nội dung mô tả là **nội dung minh họa**, không phải thành tích hay thông tin đã được xác minh. Hình ảnh tải từ Unsplash và phải kiểm tra bản quyền / giấy phép sử dụng trước khi đưa vào hoạt động thương mại.
+## Lưu ý trước khi vận hành
 
-## Các bước để triển khai sản phẩm thật
-1. Xác nhận tên thương hiệu, thông tin liên hệ, logo, dự án thực tế và dịch vụ.
-2. Kết nối backend/API lưu yêu cầu tư vấn, gửi email thông báo, chống spam và bảo vệ dữ liệu cá nhân.
-3. Xây dựng trang quản trị có đăng nhập và phân quyền, quản lý dự án, ảnh, bài viết, dịch vụ, khách hàng.
-4. Cài đặt domain, HTTPS, analytics, sitemap, SEO, chính sách bảo mật và quy trình sao lưu.
-5. Kiểm thử trên các thiết bị và trình duyệt trước khi công bố.
+- Chưa triển khai CAPTCHA, kiểm soát tần suất gửi phía máy chủ và thông báo email. Form public hiện cho phép anonymous INSERT và có nguy cơ bị spam.
+- Nội dung thống kê, tên dự án và ảnh Unsplash đang mang tính minh họa, không phải bằng chứng dự án doanh nghiệp đã thực hiện.
+- Chưa có dữ liệu pháp lý và chính sách quyền riêng tư hoàn thiện. Không thu thập thông tin khách thật quy mô lớn trước khi bổ sung bảo vệ dữ liệu.
+- Supabase `sb_publishable_...` được phép công khai khi RLS hoạt động; **không** đưa `sb_secret_`, `service_role`, token riêng, mật khẩu hay JWT signing secret vào GitHub.
+- Nếu lỗi mạng hoặc SDK, trang chủ có thể hiển thị dự án demo, không có nghĩa là dữ liệu kết nối đã tải thành công.
 
-## Công nghệ
-HTML5, CSS3, JavaScript thuần. Không cần package manager hay môi trường build.
+## Kiểm tra
 
-Copyright: Website concept for Web-Design repository.
+```sh
+node --test tests/static.test.cjs
+```
+
+Có thể dùng VS Code Live Server để thử website tĩnh. Đăng nhập quản trị tại `admin.html` sau khi cấp quyền cho người dùng.
+
+Schema gốc: `supabase/schema.sql`. Tài liệu: `SUPABASE_SETUP.md`.
