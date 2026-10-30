@@ -103,8 +103,21 @@
     if (submit) submit.disabled = true;
     if (feedback) feedback.textContent = "Đang gửi yêu cầu...";
     try {
-      const { error } = await client.from("inquiries").insert(inquiry);
-      if (error) throw error;
+      const response = await fetch(cfg.supabaseUrl.replace(/\/$/,"") + "/functions/v1/submit-inquiry", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({...inquiry, website: String(values.get("website") || "")}),
+      });
+      if (!response.ok) {
+        if (response.status === 429) {
+          if (feedback) feedback.textContent =
+            "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.";
+          return;
+        }
+        throw new Error("gateway_http_" + response.status);
+      }
+      const receipt = await response.json();
+      if (receipt?.ok !== true) throw new Error("invalid_gateway_receipt");
       form.reset();
       if (feedback) feedback.textContent =
         "Yêu cầu đã được hệ thống ghi nhận. Chúng tôi sẽ liên hệ theo số điện thoại bạn cung cấp.";
