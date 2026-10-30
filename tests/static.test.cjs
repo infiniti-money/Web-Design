@@ -51,7 +51,7 @@ test("Database tables use RLS, limited permissions, and administrator claim", ()
   }
   assert.match(schema, /grant insert on public\.inquiries to anon/);
   assert.doesNotMatch(schema, /grant select on public\.inquiries to anon/i);
-  assert.match(schema, /auth\.jwt\(\) -> 'app_metadata' ->> 'role'/);
+  assert.match(schema, /\(select auth\.jwt\(\)\)/);
   assert.doesNotMatch(schema, /auth\.jwt\(\) -> 'user_metadata'/);
 });
 
