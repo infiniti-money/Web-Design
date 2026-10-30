@@ -2,7 +2,7 @@ name: Browser smoke test (deployed site)
 
 on:
   workflow_run:
-    workflows: ["Publish ATELIER HOME"]
+    workflows: ["Deploy Jekyll with GitHub Pages dependencies preinstalled"]
     types: [completed]
   workflow_dispatch:
 
