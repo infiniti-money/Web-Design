@@ -49,14 +49,15 @@ test("Database tables use RLS, limited permissions, and administrator claim", ()
     assert.match(schema, new RegExp("alter table public\\."+table+" enable row level security"));
     assert.match(schema, new RegExp("revoke all on public\\."+table+" from anon, authenticated"));
   }
-  assert.match(schema, /grant insert on public\.inquiries to anon/);
+  assert.match(schema, /revoke insert on public\.inquiries from anon/);
   assert.doesNotMatch(schema, /grant select on public\.inquiries to anon/i);
   assert.match(schema, /\(select auth\.jwt\(\)\)/);
   assert.doesNotMatch(schema, /auth\.jwt\(\) -> 'user_metadata'/);
 });
 
 test("Configured public site uses live API, demo fallback remains explicit", () => {
-  assert.match(read("site-backend.js"), /from\("inquiries"\)\.insert/);
+  assert.match(read("site-backend.js"), /\/functions\/v1\/submit-inquiry/);
+  assert.doesNotMatch(read("site-backend.js"), /from\("inquiries"\)\.insert/);
   assert.match(read("site-backend.js"), /from\("projects"\)/);
   assert.match(index, /ATELIER_SET_PROJECTS/);
   assert.match(index, /localStorage/);
