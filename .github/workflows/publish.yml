@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   release:
-    name: GitHub Release v1.1.1
+    name: GitHub Release v1.1.2
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
@@ -24,24 +24,24 @@ jobs:
       - name: Verify source
         run: |
           node --test tests/static.test.cjs
-      - name: Package v1.1.1
+      - name: Package v1.1.2
         run: |
-          mkdir -p dist/atelier-home-v1.1.1/supabase
-          cp index.html admin.html admin.js app-config.js site-backend.js README.md SUPABASE_SETUP.md RELEASE_NOTES_V1_1_1.md dist/atelier-home-v1.1.1/
-          cp supabase/schema.sql dist/atelier-home-v1.1.1/supabase/schema.sql
+          mkdir -p dist/atelier-home-v1.1.2/supabase
+          cp index.html admin.html admin.js app-config.js site-backend.js README.md SUPABASE_SETUP.md RELEASE_NOTES_V1_1_2.md dist/atelier-home-v1.1.2/
+          cp supabase/schema.sql dist/atelier-home-v1.1.2/supabase/schema.sql
           cd dist
-          zip -qr atelier-home-v1.1.1.zip atelier-home-v1.1.1
+          zip -qr atelier-home-v1.1.2.zip atelier-home-v1.1.2
       - name: Create Release if not yet published
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v1.1.1 >/dev/null 2>&1; then
-            echo "Existing v1.1.1 release remains unchanged."
+          if gh release view v1.1.2 >/dev/null 2>&1; then
+            echo "Existing v1.1.2 release remains unchanged."
           else
-            gh release create v1.1.1 ./dist/atelier-home-v1.1.1.zip \
+            gh release create v1.1.2 ./dist/atelier-home-v1.1.2.zip \
               --target "$GITHUB_SHA" \
-              --title "ATELIER HOME v1.1.1 — Connected Supabase Backend" \
-              --notes-file RELEASE_NOTES_V1_1_1.md
+              --title "ATELIER HOME v1.1.2 — Browser-Tested Production Demo" \
+              --notes-file RELEASE_NOTES_V1_1_2.md
           fi
 
   pages-check:
