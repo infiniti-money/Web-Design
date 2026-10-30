@@ -46,6 +46,14 @@ async function main() {
     console.log("INTERACTION: category filter and modal keyboard controls passed");
 
     // Exercise the real consultation form without storing synthetic customer PII.
+    // Block all legacy client-side INSERTs, even when Pages serves a stale build.
+    await desktop.route("**/rest/v1/inquiries**", route => {
+      if (route.request().method() === "POST") {
+        return route.fulfill({status:403,contentType:"application/json",
+          body:JSON.stringify({code:"TEST_BLOCKED_LEGACY_WRITE"})});
+      }
+      return route.continue();
+    });
     const intercepted = [];
     await desktop.route("**/functions/v1/submit-inquiry", async route => {
       const payload = route.request().postDataJSON();
