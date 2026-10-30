@@ -1,56 +1,64 @@
-# ATELIER HOME — Cấu hình Supabase thực tế
+# ATELIER HOME — Supabase vận hành và bảo mật
 
-## Đã hoàn tất
+## Trạng thái đã xác minh
 
-- Supabase project **atelier-home-web-design**, ref `mswiegltusllzvuavjdh`, vùng Singapore.
-- Database migration `atelier_home_initial_schema` đã chạy; có `public.projects`, `public.inquiries`, RLS và 6 dự án minh họa.
-- Frontend `app-config.js` đã cấu hình Project URL và **publishable API key**.
-- Theo kiểm tra lúc cấu hình: **0 Auth users, 0 admin users**. Chưa có ai được đăng nhập quản trị.
-- **GitHub Pages đã bật**; các workflow Jekyll và Publish ATELIER HOME đã triển khai thành công. Truy cập https://infiniti-money.github.io/Web-Design/ .
+- Project: `atelier-home-web-design`, ref `mswiegltusllzvuavjdh`, khu vực Singapore.
+- Các bảng `public.projects`, `public.inquiries` đã bật RLS; 6 dự án minh họa đang hiển thị.
+- **Một tài khoản quản trị đã xác minh email và được cấp vai trò `admin` trong `app_metadata`.** Không tạo thêm tài khoản mặc định.
+- Trang chủ: https://infiniti-money.github.io/Web-Design/
+- Trang admin: https://infiniti-money.github.io/Web-Design/admin.html
+- GitHub Pages đang dùng quy trình triển khai Jekyll tự động trên `main`. Quy trình `Publish ATELIER HOME` chỉ tạo GitHub Release, tránh deploy trùng.
+- Không có khóa service-role hoặc mật khẩu trong frontend.
 
-## 1. Tạo tài khoản quản trị
+## 1. Đăng nhập quản trị
 
-1. Mở [Authentication → Users](https://supabase.com/dashboard/project/mswiegltusllzvuavjdh/auth/users).
-2. Dùng **Add user / Send invitation** đến email do chủ dự án sở hữu. Hoàn tất xác nhận email và thiết lập mật khẩu trên Supabase.
-3. Trong [SQL Editor](https://supabase.com/dashboard/project/mswiegltusllzvuavjdh/sql/new) với quyền chủ sở hữu, thay `ADMIN_EMAIL_THAT_YOU_CONTROL` bằng địa chỉ email thực tế, rồi chạy:
+1. Mở `/admin.html` của website.
+2. Sử dụng email đã xác minh và mật khẩu của chính bạn.
+3. **Đăng xuất rồi đăng nhập lại** nếu mới được cấp vai trò, để JWT được làm mới.
+4. Thử tạo dự án nháp, sửa mô tả, xuất bản và ẩn. Thử xem danh sách tư vấn; xác minh người thường không thấy khách hàng.
 
-```sql
-update auth.users
-set raw_app_meta_data =
-  coalesce(raw_app_meta_data, '{}'::jsonb) || '{"role":"admin"}'::jsonb
-where email = 'ADMIN_EMAIL_THAT_YOU_CONTROL'
-  and email_confirmed_at is not null
-returning id, email, raw_app_meta_data ->> 'role' as assigned_role;
+Không chia sẻ mật khẩu trong chat và không đặt mật khẩu trong GitHub. Không sử dụng `user_metadata` để quyết định quyền quản trị.
+
+## 2. Tiếp nhận tư vấn có bảo vệ
+
+Mô hình luồng dữ liệu:
+
+```text
+Visitor form -> Supabase Edge Function submit-inquiry
+             -> validate + honeypot + CORS Origin
+             -> HMAC SHA-256 network/phone time-window keys
+             -> public.submit_inquiry_secure RPC (service_role only)
+             -> rate limit atomic transaction in private.inquiry_rate_limits
+             -> public.inquiries (RLS protected)
 ```
 
-4. Xác minh truy vấn trả về **đúng 1 dòng**. Nếu trả về 0, tài khoản hoặc email chưa tồn tại/chưa xác minh. Không gán quyền theo `user_metadata`; không tạo tài khoản admin mặc định.
-5. Đăng xuất và đăng nhập lại ở `/admin.html` để JWT cập nhật quyền.
+- Limit hiện tại: **3 yêu cầu / giờ theo mạng IP** và **5 yêu cầu / ngày theo điện thoại**. Giới hạn tính theo từng cửa sổ UTC; không phải thuật toán trượt. Một số IP dùng chung có thể bị giới hạn sớm.
+- Chỉ lưu dấu vân tay HMAC của mạng/điện thoại trong bảng private; không lưu trực tiếp IP trong bảng giới hạn.
+- Browser không được `INSERT/SELECT/UPDATE/DELETE` vào `public.inquiries`. Edge Function dùng khóa server-side nằm trong biến môi trường Supabase.
+- SQL logic: `supabase/inquiry-rate-limit.sql`; Edge source: `supabase/functions/submit-inquiry/index.ts`.
+- SQL migration đã áp dụng: `secure_inquiry_rate_limit_and_rpc`, sau đó `block_direct_anonymous_inquiry_inserts`. Không chạy lại migration trên dữ liệu thật mà chưa kiểm tra lịch sử.
+- Khi Edge Function không sẵn sàng, form không tự lưu cục bộ và không báo thành công giả.
 
-## 2. Triển khai / tái triển khai GitHub Pages
+**Giới hạn cần lưu ý:** CORS và header Origin không chứng minh danh tính người gửi; bot có thể giả lập header hoặc thay IP. Rate limiting + honeypot chỉ giảm một số kiểu spam. Nên triển khai **Cloudflare Turnstile/CAPTCHA** phía máy chủ trước chiến dịch tiếp nhận khách hàng lớn. Không dùng dữ liệu thử làm thông tin liên hệ thật.
 
-1. GitHub Pages hiện đã hoạt động. Nếu cần kiểm tra cấu hình, mở [Settings → Pages](https://github.com/infiniti-money/Web-Design/settings/pages).
-2. Chọn **Build and deployment → Source = GitHub Actions**.
-3. Mở [Publish ATELIER HOME](https://github.com/infiniti-money/Web-Design/actions/workflows/publish.yml), chọn **Run workflow**.
-4. Khi deploy thành công, địa chỉ dự kiến: `https://infiniti-money.github.io/Web-Design/`; admin: `https://infiniti-money.github.io/Web-Design/admin.html`.
+## 3. Kiểm thử đã chạy
 
-## 3. Quyền truy cập
+- API chấp nhận yêu cầu thử hợp lệ; dữ liệu thử đã được xóa.
+- API từ chối phương thức không hỗ trợ, JSON sai, Origin lạ và honeypot.
+- Kiểm thử Chromium website thật: danh mục 6 dự án, bộ lọc, modal, trang đăng nhập, điện thoại; gửi form qua Edge API được *giả lập phản hồi thành công* để tránh lưu dữ liệu cá nhân.
+- Supabase đã xác nhận `anon` không có quyền trực tiếp ghi/đọc `inquiries`; chỉ vai trò server có quyền gọi RPC.
+- Chưa có kiểm thử đăng nhập bằng mật khẩu thật hay đầy đủ CRUD admin sau phiên đăng nhập.
 
-| Tài khoản | projects | inquiries |
-| --- | --- | --- |
-| Khách `anon` | Chỉ SELECT bản published | Chỉ INSERT yêu cầu mới |
-| Tài khoản không phải admin | Chỉ đọc dự án published | Không xem/sửa/xóa |
-| `app_metadata.role=admin` | SELECT/INSERT/UPDATE/DELETE | SELECT/UPDATE/DELETE |
+## 4. Các yêu cầu trước khi mở rộng
 
-RLS có hiệu lực ở cả hai bảng. Từ tháng 10/2026, Supabase yêu cầu **GRANT rõ ràng** cho các bảng được dùng trong Data API — schema đã thiết lập các grant tương ứng.
+- Thiết lập và kiểm thử Turnstile server-side.
+- Bật Leaked Password Protection tại [Supabase Auth](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) nếu gói dịch vụ hỗ trợ.
+- Xây dựng trang chính sách quyền riêng tư với địa chỉ/đầu mối pháp lý thực, mục đích, thời hạn lưu và quyền xóa dữ liệu.
+- Bổ sung thông báo email, sao lưu, nhật ký hoạt động và giám sát bất thường.
+- Thay tất cả dữ liệu và ảnh minh họa bằng công trình đã được phép công bố.
 
-## 4. Kiểm thử & bảo mật trước khi sử dụng thực tế
+## 5. Tài liệu
 
-- Sau khi có admin: kiểm tra đăng nhập, CRUD dự án, xuất bản/ẩn dự án, cập nhật trạng thái tư vấn.
-- Thử bằng người dùng không phải admin: không đọc được thông tin cá nhân của khách hàng.
-- Kiểm thử gửi form từ website, xác nhận dữ liệu xuất hiện ở Supabase.
-- Thêm CAPTCHA/Turnstile và kiểm soát tần suất gửi phía máy chủ, chống spam và email thông báo. **Chưa có các chức năng này**.
-- Hoàn thiện chính sách quyền riêng tư, dữ liệu doanh nghiệp, thời gian lưu dữ liệu và xử lý yêu cầu xóa.
-- Chưa có ảnh công trình thực tế: ảnh Unsplash và thống kê là dữ liệu minh họa.
-- Khóa publishable được thiết kế công khai; **không lưu khóa secret/service_role hay mật khẩu trong trình duyệt/GitHub**.
-
-Tài liệu tham khảo: https://supabase.com/docs/guides/database/postgres/row-level-security
+- [Supabase Dashboard](https://supabase.com/dashboard/project/mswiegltusllzvuavjdh)
+- [GitHub repository](https://github.com/infiniti-money/Web-Design)
+- [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security)
