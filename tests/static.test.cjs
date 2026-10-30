@@ -33,10 +33,15 @@ test("All browser scripts and inline scripts are valid JavaScript", () => {
   }
 });
 
-test("Browser configuration contains no privileged keys", () => {
-  const config = read("app-config.js");
-  assert.match(config, /supabasePublishableKey:\s*""/);
-  assert.match(config, /supabaseUrl:\s*""/);
+test("Browser configuration uses only Supabase publishable credentials", () => {
+  const ctx = { window: {} };
+  vm.runInNewContext(read("app-config.js"), ctx);
+  const config = ctx.window.ATELIER_CONFIG;
+  assert.match(config.supabaseUrl, /^https:\/\/[a-z0-9-]+\.supabase\.co$/);
+  assert.match(config.supabasePublishableKey, /^sb_publishable_[a-zA-Z0-9_-]+$/);
+  assert.doesNotMatch(config.supabasePublishableKey, /sb_secret_|eyJhbGci/);
+  assert.match(read("index.html"), /@supabase\/supabase-js@2\.118\.0/);
+  assert.match(read("admin.html"), /@supabase\/supabase-js@2\.118\.0/);
 });
 
 test("Database tables use RLS, limited permissions, and administrator claim", () => {
