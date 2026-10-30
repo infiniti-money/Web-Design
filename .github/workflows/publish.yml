@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: "publish-atelier-home"
@@ -44,49 +42,3 @@ jobs:
               --notes-file RELEASE_NOTES_V1_1_2.md
           fi
 
-  pages-check:
-    name: Check GitHub Pages availability
-    runs-on: ubuntu-latest
-    outputs:
-      enabled: ${{ steps.pages_check.outputs.enabled }}
-    steps:
-      - name: Check Pages site status
-        id: pages_check
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # Avoid competing with GitHub's automatic Jekyll / branch-based Pages build.
-          # Only deploy with this workflow if Pages source is explicitly GitHub Actions.
-          build_type=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.build_type // "legacy"' 2>/dev/null || echo 'unavailable')
-          if [ "$build_type" = "workflow" ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::GitHub Pages uses Actions source; custom deployment enabled."
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::GitHub Pages build_type=$build_type; custom deploy skipped to avoid duplicate deployments."
-          fi
-
-  pages:
-    name: Deploy GitHub Pages (if enabled)
-    needs: pages-check
-    if: needs.pages-check.outputs.enabled == 'true'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-      - name: Prepare public site
-        run: |
-          mkdir -p public-site
-          cp index.html admin.html admin.js app-config.js site-backend.js public-site/
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-      - name: Upload website
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: public-site
-      - name: Deploy website
-        id: deployment
-        uses: actions/deploy-pages@v4
