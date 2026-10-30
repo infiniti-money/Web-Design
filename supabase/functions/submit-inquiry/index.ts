@@ -35,7 +35,7 @@ async function fingerprint(secret: string, value: string) {
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin") || "";
   if (!SITE_ORIGINS.has(origin)) return respond(403, {ok:false,code:"origin_denied"}, "null");
-  if (req.method === "OPTIONS") return respond(204, {}, origin);
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "content-type", "Vary": "Origin" }});
   if (req.method !== "POST") return respond(405, {ok:false,code:"method_not_allowed"}, origin);
   const declaredSize = Number(req.headers.get("content-length") || 0);
   if (declaredSize > 4096) return respond(413, {ok:false,code:"payload_too_large"}, origin);
