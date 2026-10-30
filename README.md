@@ -9,7 +9,7 @@ Website nội thất tiếng Việt, responsive; đã kết nối dự án Supab
 - **RLS:** đã bật. Khách chỉ được đọc dự án published và gửi yêu cầu; không được xem hồ sơ người khác.
 - **Frontend:** `app-config.js` đã chứa URL Supabase và khóa publishable. Không có khóa bí mật.
 - **Admin:** `admin.html` hỗ trợ Supabase Auth và quản lý dự án/yêu cầu, nhưng **chưa có tài khoản admin**. Cần tạo user xác minh và gán `app_metadata.role=admin`.
-- **GitHub Pages:** chưa bật; cần chọn Settings → Pages → Source = GitHub Actions rồi chạy workflow xuất bản.
+- **GitHub Pages:** đã bật và có lần triển khai thành công. Website: https://infiniti-money.github.io/Web-Design/ ; trang quản trị: https://infiniti-money.github.io/Web-Design/admin.html. CI kiểm thử trình duyệt được chạy trên mỗi lần hoàn tất quy trình Publish ATELIER HOME.
 
 Xem **[SUPABASE_SETUP.md](SUPABASE_SETUP.md)** để hoàn tất tạo tài khoản quản trị và kiểm thử.
 
@@ -34,3 +34,7 @@ node --test tests/static.test.cjs
 Có thể dùng VS Code Live Server để thử website tĩnh. Đăng nhập quản trị tại `admin.html` sau khi cấp quyền cho người dùng.
 
 Schema gốc: `supabase/schema.sql`. Tài liệu: `SUPABASE_SETUP.md`.
+
+## Kiểm thử giao diện thực tế
+
+Workflow **Browser smoke test (deployed site)** dùng Chromium kiểm tra tải trang, Supabase, bộ lọc, modal bàn phím, đăng nhập quản trị, giao diện điện thoại và hành vi an toàn khi CDN bị lỗi. Báo cáo còn lưu ảnh chụp màn hình máy tính, điện thoại và quản trị trong GitHub Actions (artifact có thời hạn lưu).
