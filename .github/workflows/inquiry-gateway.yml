@@ -1,0 +1,23 @@
+name: Secure inquiry gateway integration test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tests/inquiry-gateway.test.cjs"
+      - ".github/workflows/inquiry-gateway.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-gateway:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/inquiry-gateway.test.cjs
