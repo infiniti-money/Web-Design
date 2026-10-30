@@ -1,8 +1,7 @@
-// ATELIER HOME v1.1 configuration.
-// Both values below may be visible in browser source code.
-// Use ONLY a Supabase publishable key (sb_publishable_...) here.
-// NEVER paste a service_role, sb_secret_..., JWT signing key or database password.
+// ATELIER HOME v1.1 — Public Supabase frontend configuration.
+// These are browser-safe: Project URL and publishable API key only.
+// NEVER put sb_secret_, service_role, database passwords, or private tokens here.
 window.ATELIER_CONFIG = Object.freeze({
-  supabaseUrl: "",
-  supabasePublishableKey: ""
+  supabaseUrl: "https://mswiegltusllzvuavjdh.supabase.co",
+  supabasePublishableKey: "sb_publishable_TFmKoVDw4iGgvozkAHsPqw_wLOZtzbX"
 });
