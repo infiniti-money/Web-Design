@@ -33,14 +33,14 @@ jobs:
           zip -qr atelier-home-v1.1.0.zip atelier-home-v1.1.0
       - name: Create Release if not yet published
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           if gh release view v1.1.0 >/dev/null 2>&1; then
             echo "Existing v1.1.0 release remains unchanged."
           else
-            gh release create v1.1.0 ./dist/atelier-home-v1.1.0.zip \\
-              --target "$GITHUB_SHA" \\
-              --title "ATELIER HOME v1.1.0 — Admin Foundation" \\
+            gh release create v1.1.0 ./dist/atelier-home-v1.1.0.zip \
+              --target "$GITHUB_SHA" \
+              --title "ATELIER HOME v1.1.0 — Admin Foundation" \
               --notes-file RELEASE_NOTES_V1_1.md
           fi
 
@@ -49,14 +49,14 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: \${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
       - name: Check GitHub Pages configuration
         id: pages_check
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           if gh api "repos/$GITHUB_REPOSITORY/pages" >/dev/null 2>&1; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
