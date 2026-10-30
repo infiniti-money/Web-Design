@@ -16,6 +16,12 @@
     return;
   }
   const client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
+  const modeDesc = document.getElementById("consult-mode-desc");
+  const formFoot = form?.querySelector(".form-foot");
+  if (modeDesc) modeDesc.textContent =
+    "Chia sẻ nhu cầu của bạn. Khi gửi, thông tin sẽ được ghi nhận vào hệ thống để bộ phận tư vấn xử lý.";
+  if (formFoot) formFoot.textContent =
+    "Thông tin được lưu vào cơ sở dữ liệu. Không cung cấp mật khẩu hoặc dữ liệu nhạy cảm trong biểu mẫu.";
   const adminLink = document.getElementById("admin-live-link");
   if (adminLink) adminLink.hidden = false;
   const demoToggle = document.getElementById("admin-toggle");
