@@ -16,51 +16,68 @@ concurrency:
 
 jobs:
   release:
-    name: GitHub Release v1.0.0
+    name: GitHub Release v1.1.0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-      - name: Validate static entry point
+      - name: Verify source
         run: |
-          test -s index.html
-          grep -qi '<!doctype html>' index.html
-          grep -q 'id="project-grid"' index.html
-          grep -q 'id="lead-form"' index.html
-      - name: Package website
+          node --test tests/static.test.cjs
+      - name: Package v1.1.0
         run: |
-          mkdir -p dist/atelier-home-v1.0.0
-          cp index.html README.md dist/atelier-home-v1.0.0/
+          mkdir -p dist/atelier-home-v1.1.0/supabase
+          cp index.html admin.html admin.js app-config.js site-backend.js README.md SUPABASE_SETUP.md RELEASE_NOTES_V1_1.md dist/atelier-home-v1.1.0/
+          cp supabase/schema.sql dist/atelier-home-v1.1.0/supabase/schema.sql
           cd dist
-          zip -qr atelier-home-v1.0.0.zip atelier-home-v1.0.0
-      - name: Publish first version (once)
+          zip -qr atelier-home-v1.1.0.zip atelier-home-v1.1.0
+      - name: Create Release if not yet published
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: \${{ github.token }}
         run: |
-          if gh release view v1.0.0 >/dev/null 2>&1; then
-            echo "Release v1.0.0 already exists; keeping the published version immutable."
+          if gh release view v1.1.0 >/dev/null 2>&1; then
+            echo "Existing v1.1.0 release remains unchanged."
           else
-            gh release create v1.0.0 ./dist/atelier-home-v1.0.0.zip \
-              --target "$GITHUB_SHA" \
-              --title "ATELIER HOME v1.0.0 — First Release" \
-              --notes-file RELEASE_NOTES.md
+            gh release create v1.1.0 ./dist/atelier-home-v1.1.0.zip \\
+              --target "$GITHUB_SHA" \\
+              --title "ATELIER HOME v1.1.0 — Admin Foundation" \\
+              --notes-file RELEASE_NOTES_V1_1.md
           fi
 
   pages:
-    name: Deploy GitHub Pages
+    name: Deploy GitHub Pages (if enabled)
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: \${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+      - name: Check GitHub Pages configuration
+        id: pages_check
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          if gh api "repos/$GITHUB_REPOSITORY/pages" >/dev/null 2>&1; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::GitHub Pages is not enabled. Go to Settings > Pages and select GitHub Actions."
+          fi
+      - name: Prepare public site
+        if: steps.pages_check.outputs.enabled == 'true'
+        run: |
+          mkdir -p public-site
+          cp index.html admin.html admin.js app-config.js site-backend.js public-site/
       - name: Configure GitHub Pages
+        if: steps.pages_check.outputs.enabled == 'true'
         uses: actions/configure-pages@v5
       - name: Upload website
+        if: steps.pages_check.outputs.enabled == 'true'
         uses: actions/upload-pages-artifact@v4
         with:
-          path: .
+          path: public-site
       - name: Deploy website
+        if: steps.pages_check.outputs.enabled == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
