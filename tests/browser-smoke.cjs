@@ -125,6 +125,14 @@ window.supabase={createClient:()=>{
  };
  return {
    rpc(name,args) {
+     if(name==="update_inquiry_status_with_log"){
+       const item=inquiries.find(row=>row.id===args.p_inquiry_id);
+       if(!item)return Promise.resolve({data:false,error:null});
+       item.status=args.p_status;
+       careNotes.push({id:"care-"+careNotes.length,inquiry_id:item.id,note_kind:"note",
+         body:"Đã chuyển trạng thái: "+args.p_status,created_at:new Date().toISOString()});
+       return Promise.resolve({data:true,error:null});
+     }
      if(name==="schedule_inquiry_followup"){
        const item=inquiries.find(row=>row.id===args.p_inquiry_id);
        if(!item)return Promise.resolve({data:false,error:null});
@@ -139,6 +147,8 @@ window.supabase={createClient:()=>{
      if(!item)return Promise.resolve({data:false,error:null});
      item.last_contacted_at=new Date().toISOString();
      if(item.status==="new")item.status="contacted";
+     careNotes.push({id:"care-"+careNotes.length,inquiry_id:item.id,note_kind:"note",
+       body:"Đã ghi nhận liên hệ thực tế",created_at:new Date().toISOString()});
      return Promise.resolve({data:true,error:null});
    },
    auth:{getUser:async()=>({data:{user:{email:"test-admin@example.invalid",app_metadata:{role:"admin"}}},error:null}),
@@ -226,6 +236,8 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#lead-clear-filters").click();
     await adminCRUD.locator("#inquiries-table button").getByText("Ghi nhận liên hệ").click();
     await adminCRUD.locator("#inquiries-table").getByText(/Liên hệ cuối:/).waitFor();
+    await adminCRUD.locator("#inquiries-table").getByRole("combobox").selectOption("quoted");
+    await adminCRUD.locator("#inquiries-table").getByRole("combobox").inputValue().then(v=>assert.equal(v,"quoted"));
     assert.equal(await adminCRUD.locator("#inquiries-table select").inputValue(),"contacted");
     assert.equal(await adminCRUD.locator("#crm-contacted").innerText(),"1");
     assert.equal(await adminCRUD.locator("#lead-page-label").innerText(),"Trang 1 / 1");
