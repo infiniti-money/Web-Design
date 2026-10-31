@@ -21,4 +21,4 @@ jobs:
         with:
           node-version: '22'
       - name: Run syntax and security-structure tests
-        run: node --test tests/static.test.cjs
+        run: node --test tests/static.test.cjs tests/email-notification.test.cjs
