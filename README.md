@@ -28,6 +28,7 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - `supabase/customer-care-v1_6.sql` — hồ sơ chăm sóc, ghi chú riêng tư, lịch nhắc liên hệ và phân quyền Admin.
 - `supabase/customer-care-audit-v1_6.sql` — tự ghi lịch sử khi liên hệ thật/chuyển trạng thái trên máy chủ.
 - `supabase/customer-care-edit-v1_7.sql` — chỉnh sửa ghi chú qua RPC có đối chiếu phiên bản, ghi lịch sử trước/sau, chặn sửa ghi chú hệ thống và hoàn thành nhắc việc.
+- `supabase/customer-care-tasks-v1_8.sql` — phân công chăm sóc, trạng thái, ưu tiên, thời hạn, RLS và lịch sử cập nhật nhiệm vụ.
 - `supabase/functions/submit-inquiry/index.ts` — mã Edge Function đang chạy tại Supabase.
 - `SUPABASE_SETUP.md` — hướng dẫn bảo mật và vận hành.
 - `privacy.html` — chính sách quyền riêng tư: đơn vị Tân Design, địa chỉ chủ website cung cấp và email tiếp nhận `infinitimoney@icloud.com`; chưa có xác minh đăng ký pháp lý, đã cấu hình giữ dữ liệu 12 tháng.
@@ -51,6 +52,14 @@ GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và t
 - Các lần Admin xác nhận đã liên hệ và chuyển trạng thái được lưu thành sự kiện lịch sử theo giờ máy chủ trong cùng một giao dịch.
 - **Spinner** phản hồi trạng thái tải khi truy vấn danh sách, có chế độ giảm chuyển động cho người dùng nhạy cảm với hiệu ứng.
 - Phần email vẫn để sau theo lựa chọn chủ website, không yêu cầu secret mới và không đổi gói Supabase.
+
+## CRM v1.8 — Quản lý giao việc & tiến độ
+
+- Mở **Hồ sơ khách hàng → Phân công chăm sóc** để tạo việc, chỉ định tên người phụ trách, mô tả, hạn, mức ưu tiên; cập nhật tiến độ **Chờ thực hiện / Đang làm / Hoàn thành**.
+- Tab **Công việc chăm sóc** thống kê số việc toàn bộ khách hàng và công việc quá hạn, lọc theo người phụ trách / trạng thái / hạn; danh sách phân trang 25 việc.
+- **Lịch sử giao việc** ghi nhận người phụ trách ban đầu, chuyển người, thay đổi tiến độ bằng trigger SQL; chỉ Admin xem được nhật ký.
+- Người nhận việc **chỉ được ghi bằng tên**, không tự có tài khoản hoặc quyền truy cập dữ liệu khách hàng. Email/đẩy thông báo chưa cấu hình theo yêu cầu chủ website.
+- Giữ nguyên RLS bảo vệ khách hàng và hạn lưu/xóa 12 tháng; nhiệm vụ và lịch sử cũng tự xóa khi xóa hồ sơ khách hàng.
 
 ## Lưu ý quan trọng trước khi kinh doanh
 
