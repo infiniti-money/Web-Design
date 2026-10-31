@@ -38,6 +38,16 @@
 - Ghi chú là dữ liệu cá nhân, phải được sử dụng đúng mục đích tư vấn; không tự động gửi thư hay thông báo hệ thống ngoài Admin.
 - Kiểm thử với bản ghi giả trong `BEGIN...ROLLBACK` cho thêm ghi chú, đặt lịch, cập nhật trạng thái và chặn non-admin; không còn bản ghi giả.
 
+## Phân công và theo dõi công việc v1.8.0
+
+- Đã áp dụng migration `supabase/customer-care-tasks-v1_8.sql` lên dự án Supabase hiện tại.
+- Bảng `public.inquiry_care_tasks` chứa công việc theo hồ sơ khách hàng; `assignee_name` là chuỗi tên người phụ trách, **chưa phải user ID có tài khoản hay quyền đăng nhập**.
+- Bảng `public.inquiry_care_task_events` ghi lịch sử giao việc / chuyển người / thay đổi trạng thái bởi trigger `private.record_care_task_change()`. Client không thể ghi hoặc sửa event trực tiếp.
+- RLS kiểm tra `app_metadata.role = admin`. Quyền ghi nhiệm vụ chỉ dành cho Admin; nhân viên không nhận được thông báo tự động.
+- Nhiệm vụ, sự kiện theo dõi được `ON DELETE CASCADE` khi hồ sơ khách hàng bị xóa sau 12 tháng.
+- Giao diện tab **Công việc chăm sóc** thống kê `count:exact` từ Supabase và lọc phân trang 25 việc; lịch sử chăm sóc trong hồ sơ cũng hiện diễn biến nhiệm vụ.
+- SQL kiểm thử trong `BEGIN...ROLLBACK` đã xác nhận bảo mật, audit và thời điểm hoàn thành; không thay đổi khách hàng thật.
+
 ## 1. Đăng nhập quản trị
 
 1. Mở `/admin.html` của website.
