@@ -53,6 +53,13 @@ GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và t
 - **Spinner** phản hồi trạng thái tải khi truy vấn danh sách, có chế độ giảm chuyển động cho người dùng nhạy cảm với hiệu ứng.
 - Phần email vẫn để sau theo lựa chọn chủ website, không yêu cầu secret mới và không đổi gói Supabase.
 
+## CRM v1.9 — Bảng Kanban
+
+- Tab **Công việc chăm sóc** hỗ trợ **Danh sách** và **Bảng Kanban**. Kanban có 3 cột: Chờ thực hiện / Đang thực hiện / Hoàn thành, nút Bắt đầu / Hoàn thành / Mở lại.
+- Mỗi thẻ có tên công việc, khách hàng, người phụ trách, hạn và mức ưu tiên. Quá hạn được hiển thị nổi bật.
+- Bộ lọc và phân trang giữ nguyên; Kanban chỉ thể hiện tối đa 25 công việc trên **trang hiện tại**. Các KPI tổng tính từ Supabase.
+- Mọi chuyển trạng thái được RLS kiểm soát, đồng thời ghi sự kiện bởi trigger Supabase. Tài khoản người phụ trách vẫn chỉ là tên hiển thị, chưa cấp đăng nhập riêng.
+
 ## CRM v1.8 — Quản lý giao việc & tiến độ
 
 - Mở **Hồ sơ khách hàng → Phân công chăm sóc** để tạo việc, chỉ định tên người phụ trách, mô tả, hạn, mức ưu tiên; cập nhật tiến độ **Chờ thực hiện / Đang làm / Hoàn thành**.
