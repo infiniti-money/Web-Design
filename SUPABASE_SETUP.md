@@ -34,7 +34,8 @@ Visitor form -> Supabase Edge Function submit-inquiry
 
 - Limit hiện tại: **3 yêu cầu / giờ theo mạng IP** và **5 yêu cầu / ngày theo điện thoại**. Giới hạn tính theo từng cửa sổ UTC; không phải thuật toán trượt. Một số IP dùng chung có thể bị giới hạn sớm.
 - Chỉ lưu dấu vân tay HMAC của mạng/điện thoại trong bảng private; không lưu trực tiếp IP trong bảng giới hạn.
-- Biểu mẫu yêu cầu người dùng xác nhận đồng ý trước khi gửi; Edge Function kiểm tra `privacy_consent === true`. Cơ sở dữ liệu ghi `consented_at` và `privacy_policy_version` cho yêu cầu được tiếp nhận, phiên bản hiện tại `2026-10-31`.
+- Biểu mẫu yêu cầu người dùng xác nhận đồng ý trước khi gửi; Edge Function kiểm tra `privacy_consent === true`. Cơ sở dữ liệu ghi `consented_at` và `privacy_policy_version` cho yêu cầu được tiếp nhận, phiên bản hiện tại `2026-10-31-retention-12m`.
+- Hạn lưu dữ liệu khách hàng là **12 tháng từ lần liên hệ cuối cùng được quản trị viên đánh dấu**; nếu chưa có liên hệ, từ thời điểm tạo yêu cầu. Supabase Cron job `atelier-inquiry-retention-12m` chạy 09:35 giờ Việt Nam mỗi ngày để xóa hồ sơ hết hạn, trừ hồ sơ có `legal_hold_until` chưa hết hạn. Admin có thao tác `Ghi nhận liên hệ` trong giao diện. SQL: `supabase/inquiry-retention-12m.sql`.
 - Browser không được `INSERT/SELECT/UPDATE/DELETE` vào `public.inquiries`. Edge Function dùng khóa server-side nằm trong biến môi trường Supabase.
 - SQL logic: `supabase/inquiry-rate-limit.sql`; Edge source: `supabase/functions/submit-inquiry/index.ts`.
 - SQL migration đã áp dụng: `secure_inquiry_rate_limit_and_rpc`, `block_direct_anonymous_inquiry_inserts`, và `record_inquiry_privacy_consent_version`. Không chạy lại migration trên dữ liệu thật mà chưa kiểm tra lịch sử.
@@ -54,7 +55,7 @@ Visitor form -> Supabase Edge Function submit-inquiry
 
 - Turnstile đã được xác minh chặn token giả bằng HTTP 403; kiểm thử thủ công một lượt gửi hợp lệ với token thật.
 - Bật Leaked Password Protection tại [Supabase Auth](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) nếu gói dịch vụ hỗ trợ.
-- Chính sách quyền riêng tư đã hiển thị tên Tân Design, địa chỉ và email tiếp nhận do chủ website cung cấp; cần chủ website xác minh địa chỉ hành chính/tư cách pháp lý và quyết định thời hạn lưu/xóa cụ thể trước khi hoàn thiện.
+- Chính sách quyền riêng tư đã hiển thị tên Tân Design, địa chỉ, email tiếp nhận và thời hạn lưu **12 tháng** đã được chủ website quyết định. Cần chủ website xác minh địa chỉ hành chính/tư cách pháp lý và quy trình yêu cầu xóa trước hạn.
 - Bổ sung thông báo email, sao lưu, nhật ký hoạt động và giám sát bất thường.
 - Thay tất cả dữ liệu và ảnh minh họa bằng công trình đã được phép công bố.
 
