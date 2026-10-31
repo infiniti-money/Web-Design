@@ -39,8 +39,19 @@
     const td=el("td");for(const child of children){td.append(child)}row.append(td);return td;
   }
   function stamp(date) {
-    const time = new Date(date);
+    if(!date)return "—";
+    const time=new Date(date);
     return Number.isNaN(time.getTime()) ? "—" : time.toLocaleString("vi-VN");
+  }
+  function retentionUntil(date){
+    if(!date)return null;
+    const exp=new Date(date);
+    if(Number.isNaN(exp.getTime()))return null;
+    const originalDay=exp.getUTCDate();
+    exp.setUTCDate(1);exp.setUTCMonth(exp.getUTCMonth()+12);
+    const lastDay=new Date(Date.UTC(exp.getUTCFullYear(),exp.getUTCMonth()+1,0)).getUTCDate();
+    exp.setUTCDate(Math.min(originalDay,lastDay));
+    return exp.toISOString();
   }
   function slugify(t) {
     return t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d")
@@ -386,7 +397,7 @@
     profileField("Ngày gửi",stamp(record.created_at));
     profileField("Ngày đồng ý chính sách",stamp(record.consented_at));
     profileField("Liên hệ gần nhất",stamp(record.last_contacted_at));
-    profileField("Ngày dự kiến xóa",stamp(record.last_contacted_at||record.created_at));
+    profileField("Ngày dự kiến xóa",stamp(retentionUntil(record.last_contacted_at||record.created_at)));
     $("profile-reminder-current").textContent=record.follow_up_at
       ? "Lịch hiện tại: "+stamp(record.follow_up_at) : "Chưa đặt lịch liên hệ.";
     $("profile-reminder-at").value="";
