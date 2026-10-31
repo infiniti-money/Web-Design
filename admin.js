@@ -1,4 +1,4 @@
-/* ATELIER HOME v1.11.0 Admin.
+/* ATELIER HOME v1.12.0 Admin.
  * Authentication is Supabase Auth. Authorization is enforced on DB via RLS.
  * No service-role or private credentials are ever used by this browser app. */
 (() => {
@@ -19,7 +19,7 @@
   const PAGE_SIZE = 25;
   const state = { projects:[], inquiries:[], editingId:null, slugTouched:false, busy:false,
     leadSearch:"", leadStatus:"all", leadService:"all", leadPeriod:"all", leadPage:0, leadTotal:0,
-    leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0,customerTaskSeq:0,taskBoardSeq:0,taskBoardPage:0,prioritySeq:0,taskBoardTotal:0,taskView:"table",editingTask:null,taskStatusFilter:"all",taskOwnerFilter:"",taskDueFilter:"all" };
+    leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0,customerTaskSeq:0,taskBoardSeq:0,taskBoardPage:0,prioritySeq:0,taskBoardTotal:0,taskView:"table",reportSeq:0,taskReport:null,editingTask:null,taskStatusFilter:"all",taskOwnerFilter:"",taskDueFilter:"all" };
 
   function message(id, text, error=false) {
     const el = $(id); el.textContent = text;
@@ -59,12 +59,13 @@
       .replace(/^-+|-+$/g,"").slice(0,100);
   }
   function switchTab(name) {
-    for(const kind of ["projects","inquiries","tasks"]) {
+    for(const kind of ["projects","inquiries","tasks","reports"]) {
       const active = kind === name;
       $("panel-"+kind).classList.toggle("hide", !active);
       $("tab-"+kind).setAttribute("aria-selected", String(active));
     }
     if(name==="tasks")refreshTasksBoard();
+    if(name==="reports")loadPerformanceReport();
   }
   function setBusy(b) {
     state.busy=b;
@@ -248,6 +249,104 @@
     switchTab("inquiries");
     loadInquiries();
     $("panel-inquiries").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  // Supabase RPC performs all aggregation under the current Admin JWT and RLS.
+  // No raw customer records leave the database for report calculations.
+  function reportDateStart(days) {
+    const current=new Date();
+    const vietnamToday=new Date(current.getTime()+7*3600000).toISOString().slice(0,10);
+    const midnightUtc=Date.parse(vietnamToday+"T00:00:00Z")-7*3600000;
+    return new Date(midnightUtc-(days-1)*86400000).toISOString();
+  }
+  function reportNumber(value) {
+    const n=Number(value);
+    return Number.isFinite(n)?n:0;
+  }
+  function reportPeriodLabel(period,bucket){
+    if(typeof period!=="string"||!^\d{4}-\d\d-\d\d$/.test(period))return "—";
+    const [y,m,d]=period.split("-");
+    return bucket==="month"?m+"/"+y:d+"/"+m;
+  }
+  function renderReportChart(rows,bucket){
+    const chart=$("report-chart");
+    chart.replaceChildren();
+    const points=Array.isArray(rows)?rows:[];
+    if(!points.length){
+      chart.append(el("p","Chưa có kỳ thống kê.","muted"));return;
+    }
+    const max=Math.max(1,...points.map(p=>reportNumber(p.total)));
+    const summary=[];
+    for(const item of points){
+      const total=reportNumber(item.total),done=reportNumber(item.done);
+      const label=reportPeriodLabel(item.period,bucket);
+      summary.push(label+": "+total+" việc, "+done+" hoàn thành");
+      const column=el("div",undefined,"report-bar-group");
+      column.append(el("span",total+" / "+done,"report-bar-count"));
+      const track=el("div",undefined,"report-bar-track");
+      const outer=el("div",undefined,"report-bar-total");
+      outer.style.height=total?Math.max(4,Math.round(150*total/max))+"px":"0px";
+      const inner=el("div",undefined,"report-bar-completed");
+      inner.style.height=total?Math.min(100,Math.round(100*done/total))+"%":"0%";
+      outer.append(inner);track.append(outer);
+      column.append(track,el("span",label,"report-bar-label"));
+      column.setAttribute("title",label+": "+total+" giao, "+done+" hoàn thành");
+      chart.append(column);
+    }
+    chart.setAttribute("aria-label","Theo "+(bucket==="month"?"tháng":"tuần")+". "+summary.join("; "));
+  }
+  function renderPerformanceReport(data) {
+    const overview=data?.overview||{};
+    for(const [id,key] of [
+      ["report-total","total"],["report-done","done"],
+      ["report-in-progress","in_progress"],["report-overdue","overdue"]
+    ])$(id).textContent=reportNumber(overview[key]);
+    $("report-rate").textContent=reportNumber(overview.completion_rate).toLocaleString("vi-VN",{maximumFractionDigits:1})+"%";
+    $("report-completed-in-period").textContent=reportNumber(data?.completed_in_period);
+    const people=Array.isArray(data?.people)?data.people:[];
+    $("report-assignee-count").textContent=people.length+" người phụ trách có việc giao trong kỳ";
+    const table=$("report-people-table");table.replaceChildren();
+    if(!people.length){
+      const tr=el("tr"),td=el("td","Chưa có công việc nào được giao trong kỳ.","empty");
+      td.colSpan=6;tr.append(td);table.append(tr);
+    }
+    for(const person of people){
+      const tr=el("tr");
+      cell(tr,el("strong",person.assignee||"Chưa phân công"));
+      for(const key of ["total","in_progress","done","overdue"])
+        cell(tr,el("span",reportNumber(person[key])));
+      cell(tr,el("strong",reportNumber(person.completion_rate).toLocaleString("vi-VN",{maximumFractionDigits:1})+"%"));
+      table.append(tr);
+    }
+    renderReportChart(data?.trend,data?.bucket||$("report-bucket").value);
+  }
+  async function loadPerformanceReport(){
+    if($("panel-reports").classList.contains("hide"))return;
+    const seq=++state.reportSeq;
+    const days=Number($("report-range").value);
+    const bucket=$("report-bucket").value;
+    if(![7,30,90,365].includes(days)||!["week","month"].includes(bucket)){
+      message("report-status","Tùy chọn báo cáo không hợp lệ.",true);return;
+    }
+    $("report-refresh").disabled=true;
+    message("report-status","Đang tổng hợp báo cáo từ Supabase...");
+    try{
+      const {data,error}=await client.rpc("care_performance_report",{
+        p_start:reportDateStart(days),p_end:new Date().toISOString(),p_bucket:bucket
+      });
+      if(seq!==state.reportSeq)return;
+      if(error)throw error;
+      if(!data||!Array.isArray(data.people)||!Array.isArray(data.trend))throw new Error("Dữ liệu tổng hợp không hợp lệ.");
+      state.taskReport=data;
+      renderPerformanceReport(data);
+      message("report-status","Đã tổng hợp báo cáo trên toàn bộ công việc thuộc kỳ được chọn.");
+    }catch(error){
+      if(seq===state.reportSeq){
+        message("report-status","Không thể tải báo cáo: "+(error.message||"Lỗi hệ thống"),true);
+        state.taskReport=null;
+      }
+    }finally{
+      if(seq===state.reportSeq)$("report-refresh").disabled=false;
+    }
   }
   async function loadAll() {
     message("dash-status","Đang tải dữ liệu...");
@@ -885,6 +984,10 @@
   $("tab-projects").addEventListener("click",()=>switchTab("projects"));
   $("tab-inquiries").addEventListener("click",()=>switchTab("inquiries"));
   $("tab-tasks").addEventListener("click",()=>switchTab("tasks"));
+  $("tab-reports").addEventListener("click",()=>switchTab("reports"));
+  $("report-refresh").addEventListener("click",loadPerformanceReport);
+  $("report-range").addEventListener("change",loadPerformanceReport);
+  $("report-bucket").addEventListener("change",loadPerformanceReport);
   $("priority-refresh").addEventListener("click",loadPriorityHub);
   $("priority-task-overdue-open").addEventListener("click",()=>showTaskPriority("overdue"));
   $("priority-task-soon-open").addEventListener("click",()=>showTaskPriority("7"));
