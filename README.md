@@ -17,7 +17,7 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 ## Thành phần mã nguồn
 
 - `index.html` — trang chủ, danh mục dự án, bộ lọc, biểu mẫu tư vấn.
-- `admin.html`, `admin.js` — đăng nhập Supabase Auth; quản lý dự án và khách hàng, có phân quyền.
+- `admin.html`, `admin.js` — đăng nhập Supabase Auth, quản lý dự án và khách hàng, bộ lọc trạng thái/dịch vụ/thời gian, tìm kiếm, thống kê và thao tác ghi nhận liên hệ.
 - `app-config.js` — Project URL và publishable key công khai (không chứa secret).
 - `site-backend.js` — lấy dự án từ Supabase, gửi form qua Edge Function.
 - `supabase/schema.sql` — dữ liệu và chính sách RLS.
@@ -29,12 +29,13 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - `SUPABASE_SETUP.md` — hướng dẫn bảo mật và vận hành.
 - `privacy.html` — chính sách quyền riêng tư: đơn vị Tân Design, địa chỉ chủ website cung cấp và email tiếp nhận `infinitimoney@icloud.com`; chưa có xác minh đăng ký pháp lý và thời hạn lưu/xóa.
 - `TURNSTILE_SETUP.md` — cấu hình Cloudflare widget và Supabase Edge secrets.
+- `EMAIL_NOTIFICATIONS_SETUP.md` — hướng dẫn kích hoạt gửi email tự động qua Resend bằng secrets phía máy chủ.
 - `tests/admin-rls-rollback.sql` — kiểm thử phân quyền admin có hoàn tác.
 
 ## Kiểm thử
 
 ```bash
-node --test tests/static.test.cjs
+node --test tests/static.test.cjs tests/email-notification.test.cjs
 ```
 
 GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và thiết bị iPhone giả lập; ảnh kiểm thử được lưu có thời hạn. Không cần gửi mật khẩu quản trị cho hệ thống kiểm thử.
@@ -42,9 +43,11 @@ GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và t
 ## Lưu ý quan trọng trước khi kinh doanh
 
 - Giới hạn tốc độ và honeypot là các biện pháp chống spam cơ bản; **Turnstile đã bật và từ chối token giả**, nhưng vẫn không thể bảo đảm chặn mọi loại bot/tấn công phân tán.
-- Chưa có email thông báo khi nhận khách mới. Đã công bố thông tin liên hệ Tân Design do chủ website cung cấp, nhưng chưa có thông tin xác minh đăng ký pháp lý, đã phê duyệt thời hạn 12 tháng và bật xóa tự động hằng ngày; vẫn cần đánh giá nghĩa vụ lưu giữ theo pháp luật.
+- Mã gửi email thông báo khi nhận khách mới đã triển khai trong Edge Function v6, **chưa xác minh kích hoạt gửi thực tế** do thiếu cấu hình provider được xác nhận. Đã công bố thông tin liên hệ Tân Design do chủ website cung cấp, nhưng chưa có thông tin xác minh đăng ký pháp lý, đã phê duyệt thời hạn 12 tháng và bật xóa tự động hằng ngày; vẫn cần đánh giá nghĩa vụ lưu giữ theo pháp luật.
 - Hình ảnh Unsplash, tên công trình và các mô tả trong dữ liệu mẫu **không phải công trình đã thi công thực tế**.
 - Đã kiểm thử quyền thêm/sửa/xóa dự án và RPC ghi nhận liên hệ theo thời gian máy chủ; non-admin không thể ghi nhận, giao dịch thử được hoàn tác. Kiểm thử UI bằng Supabase mock trong Chromium; chưa thử đăng nhập bằng mật khẩu thật.
 - Không được đưa `sb_secret_`, `service_role`, mật khẩu hoặc token nhạy cảm vào frontend/GitHub.
 
-Chi tiết: [SUPABASE_SETUP.md](SUPABASE_SETUP.md).
+Các số liệu và bộ lọc CRM hiện dựa trên **tối đa 200 yêu cầu tư vấn mới nhất**, không phải toàn bộ lịch sử khi số hồ sơ vượt quá giới hạn. Dữ liệu chỉ hiển thị sau khi đăng nhập tài khoản Admin được xác minh.
+
+Chi tiết: [SUPABASE_SETUP.md](SUPABASE_SETUP.md) và [EMAIL_NOTIFICATIONS_SETUP.md](EMAIL_NOTIFICATIONS_SETUP.md).
