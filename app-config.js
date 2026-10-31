@@ -3,5 +3,6 @@
 // NEVER put sb_secret_, service_role, database passwords, or private tokens here.
 window.ATELIER_CONFIG = Object.freeze({
   supabaseUrl: "https://mswiegltusllzvuavjdh.supabase.co",
+  turnstileSiteKey: "", // Fill only after TURNSTILE_SECRET_KEY is saved securely in Supabase
   supabasePublishableKey: "sb_publishable_TFmKoVDw4iGgvozkAHsPqw_wLOZtzbX"
 });
