@@ -116,6 +116,27 @@ test("Public and admin pages include key functional sections", () => {
   assert.match(adminJs,/count:"exact"/);
   assert.match(adminJs,/priority-refresh/);
   assert.match(adminJs,/priority-task-soon-open/);
+  const reportSql=read("supabase/customer-care-performance-v1_12.sql");
+  assert.match(reportSql,/security invoker set search_path=''/);
+  assert.match(reportSql,/ADMIN_REQUIRED/);
+  assert.match(reportSql,/INVALID_REPORT_RANGE/);
+  assert.match(reportSql,/auth\.jwt\(\)/);
+  assert.match(reportSql,/from public\.inquiry_care_tasks/);
+  assert.match(reportSql,/generate_series/);
+  assert.match(reportSql,/grant execute on function public\.care_performance_report/);
+  assert.match(reportSql,/revoke all on function public\.care_performance_report/);
+  for(const id of ["tab-reports","panel-reports","report-range","report-bucket",
+    "report-refresh","report-status","report-total","report-done","report-rate",
+    "report-in-progress","report-overdue","report-completed-in-period",
+    "report-chart","report-assignee-count","report-people-table"]){
+    assert.match(admin,new RegExp('id="'+id+'"'));
+  }
+  assert.match(adminJs,/function loadPerformanceReport\(\)/);
+  assert.match(adminJs,/function renderPerformanceReport\(data\)/);
+  assert.match(adminJs,/function renderReportChart\(rows,bucket\)/);
+  assert.match(adminJs,/client\.rpc\("care_performance_report"/);
+  assert.match(adminJs,/reportDateStart\(days\)/);
+
 
 
 });
