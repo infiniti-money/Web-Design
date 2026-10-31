@@ -71,6 +71,13 @@ async function main() {
     assert.equal(intercepted[0].full_name,"Người kiểm thử");
     console.log("CONSULTATION: Edge Function request sent; mocked success without writing customer data");
 
+    // Privacy notice must be published and linked by the consultation form.
+    const privacyResponse = await desktop.request.get(new URL("privacy.html",origin).toString());
+    assert.equal(privacyResponse.status(),200,"Privacy page must be accessible");
+    assert.match(await privacyResponse.text(), /Chính sách quyền riêng tư/);
+    assert.equal(await desktop.locator('#lead-form a[href="./privacy.html"]').count(),1);
+    console.log("PRIVACY: published policy HTTP 200 and form link verified");
+
     const admin = await browser.newPage({ viewport: { width: 1280, height: 850 }, locale: "vi-VN" });
     admin.on("pageerror", error => consoleErrors.push("admin: " + error.message));
     const ar = await admin.goto(new URL("admin.html", origin).toString(), { waitUntil: "domcontentloaded", timeout: 45000 });
