@@ -83,7 +83,12 @@ async function main() {
     // Privacy notice must be published and linked by the consultation form.
     const privacyResponse = await desktop.request.get(new URL("privacy.html",origin).toString());
     assert.equal(privacyResponse.status(),200,"Privacy page must be accessible");
-    assert.match(await privacyResponse.text(), /Chính sách quyền riêng tư/);
+    const privacyHtml = await privacyResponse.text();
+    assert.match(privacyHtml, /Chính sách quyền riêng tư/);
+    assert.match(privacyHtml, /Tân Design/);
+    assert.match(privacyHtml, /Tân Phú, Việt Yên, Hưng Yên/);
+    assert.match(privacyHtml, /infinitimoney@icloud\.com/);
+    assert.equal(await desktop.locator('footer a[href="mailto:infinitimoney@icloud.com"]').count(),1);
     assert.equal(await desktop.locator('#lead-form a[href="./privacy.html"]').count(),1);
     console.log("PRIVACY: published policy HTTP 200 and form link verified");
 
