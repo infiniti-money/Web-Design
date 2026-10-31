@@ -66,6 +66,36 @@ Deno.serve(async (req: Request) => {
     return respond(400,{ok:false,code:"invalid_request"},origin);
   }
 
+  // Optional Cloudflare Turnstile. Kept inactive while no Cloudflare widget exists.
+  // Once TURNSTILE_SECRET_KEY is set, ALL submissions require a valid one-time token.
+  // If a browser supplies a token before the server is configured, fail closed.
+  const token = payload.turnstile_token;
+  const turnstileSecret = Deno.env.get("TURNSTILE_SECRET_KEY") || "";
+  if (turnstileSecret) {
+    if (typeof token !== "string" || token.length < 5 || token.length > 2048) {
+      return respond(403,{ok:false,code:"captcha_required"},origin);
+    }
+    try {
+      const verify = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: {"Content-Type":"application/x-www-form-urlencoded"},
+        body: new URLSearchParams({ secret:turnstileSecret, response:token }),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!verify.ok) return respond(503,{ok:false,code:"captcha_unavailable"},origin);
+      const result = await verify.json();
+      if (result?.success !== true ||
+          result?.hostname !== "infiniti-money.github.io" ||
+          result?.action !== "consultation") {
+        return respond(403,{ok:false,code:"captcha_failed"},origin);
+      }
+    } catch {
+      return respond(503,{ok:false,code:"captcha_unavailable"},origin);
+    }
+  } else if (token !== undefined) {
+    return respond(503,{ok:false,code:"captcha_unavailable"},origin);
+  }
+
   const apiUrl = Deno.env.get("SUPABASE_URL");
   const legacyKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   let secretKey = "";
