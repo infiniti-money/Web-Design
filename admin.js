@@ -16,7 +16,7 @@
   const client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
   const categories = { apartment:"Căn hộ", villa:"Biệt thự", house:"Nhà phố", commercial:"Thương mại" };
   const inquiryStates = { "new":"Mới", "contacted":"Đã liên hệ", "quoted":"Đã báo giá", "closed":"Hoàn thành" };
-  const state = { projects:[], inquiries:[], editingId:null, slugTouched:false, busy:false };
+  const state = { projects:[], inquiries:[], editingId:null, slugTouched:false, busy:false, leadSearch:"", leadStatus:"all", leadService:"all", leadPeriod:"all" };
   function message(id, text, error=false) {
     const el = $(id); el.textContent = text;
     el.classList.toggle("error", !!error);
@@ -95,10 +95,48 @@
     if(!$("dash-status").classList.contains("error"))
       message("dash-status","Đã tải dữ liệu. Hiển thị tối đa 200 bản ghi mới nhất mỗi danh mục.");
   }
+  // Privacy: all customer searching occurs only after a verified Admin loads
+  // up to 200 RLS-authorized records. No customer search is sent to third parties.
+  const normalized = value => String(value || "").normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase();
+  const vnDate = value => {
+    const parsed=new Date(value);
+    if(Number.isNaN(parsed.getTime()))return "";
+    const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Ho_Chi_Minh",
+      day:"2-digit",month:"2-digit",year:"numeric"}).formatToParts(parsed);
+    const get=key=>parts.find(p=>p.type===key)?.value || "";
+    return get("year")+"-"+get("month")+"-"+get("day");
+  };
+  function filteredInquiries() {
+    const search=normalized(state.leadSearch).trim();
+    const now=Date.now();
+    return state.inquiries.filter(i=>{
+      if(state.leadStatus!=="all" && i.status!==state.leadStatus)return false;
+      if(state.leadService!=="all" && i.service!==state.leadService)return false;
+      if(state.leadPeriod==="today" && vnDate(i.created_at)!==vnDate(now))return false;
+      if(["7","30","90"].includes(state.leadPeriod)) {
+        const created=new Date(i.created_at).getTime();
+        if(!Number.isFinite(created)||created<now-Number(state.leadPeriod)*86400000)return false;
+      }
+      if(search) {
+        const haystack=normalized([i.full_name,i.phone,i.service,i.space,i.details].join(" "));
+        if(!haystack.includes(search))return false;
+      }
+      return true;
+    });
+  }
+  function renderLeadStats() {
+    const today=vnDate(Date.now());
+    $("crm-total").textContent=state.inquiries.length;
+    $("crm-today").textContent=state.inquiries.filter(i=>vnDate(i.created_at)===today).length;
+    $("crm-contacted").textContent=state.inquiries.filter(i=>i.status==="contacted").length;
+    $("crm-quoted").textContent=state.inquiries.filter(i=>i.status==="quoted").length;
+  }
   function renderMetrics() {
     $("metric-projects").textContent=state.projects.length;
     $("metric-published").textContent=state.projects.filter(p=>p.published).length;
     $("metric-inquiries").textContent=state.inquiries.filter(p=>p.status==="new").length;
+    renderLeadStats();
   }
   function renderProjects() {
     const body=$("projects-table");body.replaceChildren();
@@ -121,11 +159,13 @@
   }
   function renderInquiries() {
     const body=$("inquiries-table");body.replaceChildren();
-    if(!state.inquiries.length) {
-      const tr=el("tr"),td=el("td","Chưa có yêu cầu tư vấn.","empty");
+    const visible=filteredInquiries();
+    $("lead-match-count").textContent="Hiển thị "+visible.length+" / "+state.inquiries.length+" hồ sơ đã tải";
+    if(!visible.length) {
+      const tr=el("tr"),td=el("td",state.inquiries.length ? "Không có hồ sơ phù hợp bộ lọc." : "Chưa có yêu cầu tư vấn.","empty");
       td.colSpan=5;tr.append(td);body.append(tr);return;
     }
-    state.inquiries.forEach(i=>{
+    visible.forEach(i=>{
       const tr=el("tr");
       const name=el("div");name.append(el("strong",i.full_name),el("small",stamp(i.created_at)));
       cell(tr,name);cell(tr,el("span",i.phone));
@@ -233,7 +273,7 @@
     const {error}=await client.from("inquiries").update({status:next}).eq("id",record.id);
     select.disabled=false;
     if(error){select.value=old;message("dash-status","Không đổi được trạng thái: "+error.message,true);return}
-    record.status=next;renderMetrics();message("dash-status","Đã cập nhật trạng thái yêu cầu.");
+    record.status=next;renderMetrics();renderInquiries();message("dash-status","Đã cập nhật trạng thái yêu cầu.");
   }
   async function deleteInquiry(i) {
     if(!confirm('Xóa yêu cầu tư vấn của "'+i.full_name+'"?'))return;
@@ -251,6 +291,24 @@
   $("tab-inquiries").addEventListener("click",()=>switchTab("inquiries"));
   $("reload-projects").addEventListener("click",loadProjects);
   $("reload-inquiries").addEventListener("click",loadInquiries);
+  const leadFilters=[
+    ["lead-search","leadSearch","input"],
+    ["lead-filter-status","leadStatus","change"],
+    ["lead-filter-service","leadService","change"],
+    ["lead-filter-period","leadPeriod","change"]
+  ];
+  for(const [id,key,event] of leadFilters) {
+    $(id).addEventListener(event,()=>{
+      state[key]=$(id).value;
+      renderInquiries();
+    });
+  }
+  $("lead-clear-filters").addEventListener("click",()=>{
+    state.leadSearch=""; state.leadStatus="all"; state.leadService="all";state.leadPeriod="all";
+    for(const [id,key] of leadFilters) $(id).value=state[key];
+    renderInquiries();
+    $("lead-search").focus();
+  });
   $("logout").addEventListener("click",async()=>{await client.auth.signOut();loginVisible();});
   $("login-form").addEventListener("submit",async(event)=>{
     event.preventDefault();
