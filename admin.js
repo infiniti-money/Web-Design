@@ -1,4 +1,4 @@
-/* ATELIER HOME v1.6.0 Admin.
+/* ATELIER HOME v1.7.0 Admin.
  * Authentication is Supabase Auth. Authorization is enforced on DB via RLS.
  * No service-role or private credentials are ever used by this browser app. */
 (() => {
@@ -67,7 +67,7 @@
   }
   function setBusy(b) {
     state.busy=b;
-    for(const id of ["project-save","login-button","reload-projects","reload-inquiries","profile-note-save","profile-reminder-save","profile-reminder-clear"]) $(id).disabled=b;
+    for(const id of ["project-save","login-button","reload-projects","reload-inquiries","profile-note-save","profile-reminder-save","profile-reminder-clear","profile-reminder-done"]) $(id).disabled=b;
   }
   function loginVisible() {
     state.activeProfile=null;
@@ -361,6 +361,7 @@
     state.activeProfile=null;
     $("lead-profile").classList.add("hide");
     $("profile-history").replaceChildren();
+    $("profile-revisions").replaceChildren();
     $("profile-note-input").value="";
     $("profile-reminder-at").value="";
     message("profile-status","");
@@ -370,29 +371,95 @@
     wrap.append(label,el("strong",value||"—"));
     $("profile-fields").append(wrap);
   }
+  async function editCareNote(item) {
+    if(state.busy || !state.activeProfile || item.editable !== true || item.note_kind !== "note") return;
+    const rows=Array.from($("profile-history").children);
+    const row=rows.find(li=>li.dataset.noteId===item.id);
+    if(!row)return;
+    row.querySelector(".care-note-edit")?.remove();
+    const editor=el("div",undefined,"care-note-edit");
+    const input=el("textarea");
+    input.value=item.body;
+    input.maxLength=1500;
+    input.setAttribute("aria-label","Nội dung chỉnh sửa ghi chú");
+    const actions=el("div",undefined,"actions");
+    const save=btn("Lưu chỉnh sửa",async()=>{
+      if(state.busy || !state.activeProfile)return;
+      const value=input.value.trim();
+      if(!value || value.length>1500){
+        message("profile-status","Nội dung ghi chú phải từ 1 đến 1500 ký tự.",true);return;
+      }
+      if(value===item.body){editor.remove();return;}
+      setBusy(true);
+      try {
+        const {data,error}=await client.rpc("edit_inquiry_care_note",{
+          p_note_id:item.id,p_body:value,p_expected_updated_at:item.updated_at
+        });
+        if(error)throw error;
+        if(data!==true)throw new Error("Chỉ chỉnh sửa được ghi chú thường do Admin tạo.");
+        await loadProfileNotes();
+        message("profile-status","Đã cập nhật ghi chú. Phiên bản cũ được giữ trong nhật ký.");
+      } catch(error) {
+        const stale=(error.message||"").includes("STALE_NOTE");
+        message("profile-status",stale
+          ? "Ghi chú đã được thay đổi ở phiên khác. Hãy đóng/mở hồ sơ để tải phiên bản mới."
+          : "Không thể sửa ghi chú: "+(error.message||"Lỗi hệ thống"),true);
+      } finally {setBusy(false);}
+    });
+    save.classList.add("note-edit-save");
+    const cancel=btn("Hủy",()=>editor.remove());
+    actions.append(save,cancel);
+    editor.append(input,actions);
+    row.append(editor);
+    input.focus();
+  }
   async function loadProfileNotes() {
     const record=state.activeProfile;
     if(!record)return;
     const seq=++state.profileSeq;
-    const list=$("profile-history");
+    const list=$("profile-history"),history=$("profile-revisions");
     list.replaceChildren(el("li","Đang tải lịch sử..."));
-    try{
-      const {data,error}=await client.from("inquiry_care_notes")
-        .select("id,note_kind,body,scheduled_for,created_at")
-        .eq("inquiry_id",record.id).order("created_at",{ascending:false}).range(0,99);
+    history.replaceChildren(el("li","Đang tải nhật ký chỉnh sửa..."));
+    try {
+      const [notes,revisions]=await Promise.all([
+        client.from("inquiry_care_notes")
+          .select("id,note_kind,body,scheduled_for,created_at,updated_at,editable")
+          .eq("inquiry_id",record.id).order("created_at",{ascending:false}).range(0,99),
+        client.from("inquiry_care_note_revisions")
+          .select("id,note_id,previous_body,revised_body,edited_at")
+          .eq("inquiry_id",record.id).order("edited_at",{ascending:false}).range(0,99)
+      ]);
       if(seq!==state.profileSeq)return;
-      if(error)throw error;
+      if(notes.error)throw notes.error;
+      if(revisions.error)throw revisions.error;
       list.replaceChildren();
-      if(!data?.length){list.append(el("li","Chưa có ghi chú hoặc lịch nhắc."));return;}
-      for(const item of data){
+      history.replaceChildren();
+      if(!notes.data?.length)list.append(el("li","Chưa có ghi chú hoặc lịch nhắc."));
+      for(const item of notes.data||[]) {
         const li=el("li");
-        li.append(el("strong",item.note_kind==="reminder"?"Lịch nhắc":"Ghi chú"),
+        li.dataset.noteId=item.id;
+        li.append(el("strong",item.note_kind==="reminder"?"Lịch nhắc":item.editable===true?"Ghi chú":"Nhật ký hệ thống"),
           el("div",item.body),el("span",stamp(item.created_at)+(item.scheduled_for?" · Hẹn: "+stamp(item.scheduled_for):"")));
+        if(item.updated_at && item.updated_at!==item.created_at)
+          li.append(el("small","Đã cập nhật: "+stamp(item.updated_at),"note-edit-badge"));
+        if(item.editable===true && item.note_kind==="note") {
+          const tools=el("div",undefined,"care-note-tools");
+          tools.append(btn("Sửa ghi chú",()=>editCareNote(item)));
+          li.append(tools);
+        }
         list.append(li);
       }
-    }catch(error){
+      if(!revisions.data?.length)history.append(el("li","Chưa có chỉnh sửa nào."));
+      for(const rev of revisions.data||[]) {
+        const li=el("li");
+        li.append(el("strong","Đã sửa ghi chú lúc "+stamp(rev.edited_at)),
+          el("small","Trước: "+rev.previous_body),el("div","Sau: "+rev.revised_body));
+        history.append(li);
+      }
+    } catch(error) {
       if(seq===state.profileSeq) {
         list.replaceChildren(el("li","Không tải được lịch sử: "+(error.message||"Lỗi truy vấn")));
+        history.replaceChildren(el("li","Không tải được nhật ký."));
       }
     }
   }
@@ -413,6 +480,7 @@
     $("profile-reminder-current").textContent=record.follow_up_at
       ? "Lịch hiện tại: "+stamp(record.follow_up_at) : "Chưa đặt lịch liên hệ.";
     $("profile-reminder-at").value="";
+    $("profile-reminder-done").disabled=!record.follow_up_at;
     $("lead-profile").classList.remove("hide");
     message("profile-status","");
     $("lead-profile").scrollIntoView({behavior:"smooth",block:"start"});
@@ -452,10 +520,30 @@
       record.follow_up_at=due?due.toISOString():null;
       $("profile-reminder-current").textContent=due?"Lịch hiện tại: "+stamp(due):"Chưa đặt lịch liên hệ.";
       $("profile-reminder-at").value="";
+      $("profile-reminder-done").disabled=!record.follow_up_at;
       await loadProfileNotes();
       await refreshInquiries();
       message("profile-status",due?"Đã đặt lịch nhắc, hiển thị trong Admin.":"Đã hủy lịch nhắc.");
     }catch(error){message("profile-status","Không cập nhật được lịch nhắc: "+(error.message||"Lỗi"),true)}
+    finally{setBusy(false)}
+  }
+  async function completeFollowup() {
+    if(state.busy||!state.activeProfile?.follow_up_at)return;
+    const record=state.activeProfile;
+    if(!confirm("Đánh dấu lịch nhắc này đã hoàn thành? Thao tác không tự xác nhận đã liên hệ khách hàng."))return;
+    setBusy(true);
+    try {
+      const {data,error}=await client.rpc("complete_inquiry_followup",{p_inquiry_id:record.id});
+      if(error)throw error;
+      if(data!==true)throw new Error("Lịch nhắc đã được hoàn thành hoặc hồ sơ không tồn tại.");
+      record.follow_up_at=null;
+      $("profile-reminder-current").textContent="Chưa đặt lịch liên hệ.";
+      $("profile-reminder-done").disabled=true;
+      $("profile-reminder-at").value="";
+      await loadProfileNotes();
+      await refreshInquiries();
+      message("profile-status","Đã đánh dấu hoàn thành công việc, lưu lịch sử và cập nhật danh sách nhắc.");
+    }catch(error){message("profile-status","Không hoàn thành được công việc: "+(error.message||"Lỗi"),true)}
     finally{setBusy(false)}
   }
   $("p-title").addEventListener("input",()=>{
@@ -534,6 +622,7 @@
     if(!date){message("profile-status","Vui lòng chọn ngày giờ nhắc.",true);return}
     saveFollowup(date);
   });
+  $("profile-reminder-done").addEventListener("click",completeFollowup);
   $("profile-reminder-clear").addEventListener("click",()=>{
     if(state.activeProfile && confirm("Hủy lịch nhắc liên hệ hiện tại?"))saveFollowup(null);
   });
