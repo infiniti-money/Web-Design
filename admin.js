@@ -444,6 +444,47 @@
       if(seq===state.reportSeq)$("report-refresh").disabled=false;
     }
   }
+  async function loadMyTasks(){
+    if(!state.currentUser?.id)return;
+    const seq=++state.myTaskSeq;
+    message("my-tasks-status","Đang tải công việc cá nhân...");
+    const query=client.from("inquiry_care_tasks")
+      .select("id,inquiry_id,title,assignee_name,assignee_user_id,status,priority,due_at,inquiries(id,full_name,follow_up_at)")
+      .eq("assignee_user_id",state.currentUser.id).order("due_at",{ascending:true}).range(0,99);
+    try{
+      const {data,error}=await query;
+      if(seq!==state.myTaskSeq)return;
+      if(error)throw error;
+      const list=$("my-tasks-table"),reminders=$("my-reminders");
+      list.replaceChildren();reminders.replaceChildren();
+      const times=new Map();
+      for(const task of data||[]){
+        const tr=el("tr");
+        cell(tr,el("strong",task.title));
+        cell(tr,el("span",task.inquiries?.full_name||"—"));
+        cell(tr,el("span",stamp(task.due_at)+(isOverdue(task)?" · QUÁ HẠN":"")+
+          " · "+(taskPriorities[task.priority]||task.priority)));
+        cell(tr,statusSelector(task));list.append(tr);
+        const inquiry=task.inquiries;
+        if(inquiry?.follow_up_at&&inquiry.id&&!times.has(inquiry.id))
+          times.set(inquiry.id,inquiry);
+      }
+      if(!data?.length){
+        const tr=el("tr"),td=el("td","Bạn chưa có công việc được giao theo tài khoản.","empty");
+        td.colSpan=4;tr.append(td);list.append(tr);
+      }
+      const remind=[...times.values()].sort((a,b)=>new Date(a.follow_up_at)-new Date(b.follow_up_at));
+      for(const lead of remind.slice(0,15)){
+        const box=el("div");
+        box.append(el("strong",lead.full_name),el("small","Nhắc liên hệ: "+stamp(lead.follow_up_at)));
+        reminders.append(box);
+      }
+      if(!remind.length)reminders.append(el("p","Không có lịch liên hệ đang chờ.","muted"));
+      message("my-tasks-status","Đang hiển thị "+(data||[]).length+" công việc của tài khoản hiện tại (tối đa 100).");
+    }catch(error){
+      if(seq===state.myTaskSeq)message("my-tasks-status","Không tải được công việc cá nhân: "+error.message,true);
+    }
+  }
   async function loadAll() {
     message("dash-status","Đang tải dữ liệu...");
     await Promise.all([loadProjects(),refreshInquiries()]);
@@ -530,7 +571,7 @@
   const taskStatuses={todo:"Chờ thực hiện",in_progress:"Đang thực hiện",done:"Hoàn thành"};
   const taskPriorities={normal:"Bình thường",high:"Cao",urgent:"Khẩn cấp"};
   const taskPageSize=25;
-  const taskColumns="id,inquiry_id,title,details,assignee_name,status,priority,due_at,completed_at,created_at,inquiries(full_name)";
+  const taskColumns="id,inquiry_id,title,details,assignee_name,assignee_user_id,status,priority,due_at,completed_at,created_at,inquiries(full_name)";
   const isOverdue=t=>t.status!=="done"&&t.due_at&&new Date(t.due_at)<new Date();
   function statusSelector(task) {
     const control=el("select",undefined,"lead-status");
@@ -544,7 +585,7 @@
       try{
         const {error}=await client.from("inquiry_care_tasks").update({status:control.value}).eq("id",task.id);
         if(error)throw error;
-        await Promise.all([refreshTasksBoard(),loadCustomerTasks()]);
+        await Promise.all([refreshTasksBoard(),loadCustomerTasks(),loadMyTasks()]);
         message("dash-status","Đã cập nhật tiến độ công việc và ghi nhật ký.");
       }catch(error){
         control.value=old;message("dash-status","Không đổi được tiến độ: "+(error.message||"Lỗi hệ thống"),true);
@@ -613,14 +654,15 @@
     }
   }
   async function reassignCareTask(task){
-    const name=prompt("Nhập tên người phụ trách mới:",task.assignee_name);
-    if(name===null)return;
-    const next=name.trim();
-    if(next.length<2||next.length>100){
-      message("care-task-status","Tên người phụ trách phải từ 2 đến 100 ký tự.",true);return;
-    }
-    if(next===task.assignee_name)return;
-    const {error}=await client.from("inquiry_care_tasks").update({assignee_name:next}).eq("id",task.id);
+    if(!state.staff.length)await loadStaff();
+    const email=prompt("Nhập email của tài khoản nhân viên nhận việc:");
+    if(email===null)return;
+    const person=state.staff.find(p=>p.active&&p.email.toLowerCase()===email.trim().toLowerCase());
+    if(!person){message("care-task-status","Không tìm thấy tài khoản đang hoạt động.",true);return;}
+    if(person.user_id===task.assignee_user_id)return;
+    const {error}=await client.from("inquiry_care_tasks").update({
+      assignee_name:person.full_name,assignee_user_id:person.user_id
+    }).eq("id",task.id);
     if(error){message("care-task-status","Không thể chuyển việc: "+error.message,true);return}
     await Promise.all([loadCustomerTasks(),refreshTasksBoard()]);
     message("care-task-status","Đã chuyển người phụ trách và lưu lịch sử.");
@@ -629,6 +671,7 @@
     state.editingTask=null;
     $("care-task-form").reset();
     $("care-task-create").textContent="Giao công việc";
+    $("care-task-account").value="";
     $("care-task-cancel").classList.add("hide");
   }
   function editCareTask(task){
@@ -636,6 +679,7 @@
     state.editingTask={id:task.id, inquiry_id:task.inquiry_id};
     $("care-task-title").value=task.title;
     $("care-task-assignee").value=task.assignee_name;
+    $("care-task-account").value=task.assignee_user_id||"";
     $("care-task-details").value=task.details||"";
     $("care-task-priority").value=task.priority;
     const date=task.due_at?new Date(task.due_at):null;
@@ -657,7 +701,7 @@
     history.replaceChildren(el("li","Đang tải lịch sử giao việc..."));
     const [tasks,events]=await Promise.all([
       client.from("inquiry_care_tasks")
-        .select("id,inquiry_id,title,details,assignee_name,status,priority,due_at,created_at,completed_at")
+        .select("id,inquiry_id,title,details,assignee_name,assignee_user_id,status,priority,due_at,created_at,completed_at")
         .eq("inquiry_id",record.id).order("created_at",{ascending:false}).range(0,99),
       client.from("inquiry_care_task_events")
         .select("id,task_id,event_type,previous_value,current_value,created_at")
@@ -699,17 +743,19 @@
     const edit=state.editingTask;
     if(edit && edit.inquiry_id!==record.id)return;
     const title=$("care-task-title").value.trim();
-    const assignee=$("care-task-assignee").value.trim();
+    const account=$("care-task-account").value;
+    const person=state.staff.find(u=>u.user_id===account&&u.active);
+    const assignee=person?.full_name||(edit && !account ? $("care-task-assignee").value.trim():"");
     const details=$("care-task-details").value.trim();
     const priority=$("care-task-priority").value;
     const dateValue=$("care-task-due").value;
     const due=dateValue?new Date(dateValue):null;
-    if(title.length<3||title.length>180||assignee.length<2||assignee.length>100||
+    if((!edit&&!person)||(account&&!person)||title.length<3||title.length>180||assignee.length<2||assignee.length>100||
       details.length>1500||!Object.hasOwn(taskPriorities,priority)||
       (due&&(Number.isNaN(due.getTime()) || due.getTime()>Date.now()+366*86400000))){
       message("care-task-status","Tên việc, người phụ trách hoặc hạn xử lý không hợp lệ (tối đa 12 tháng tới).",true);return;
     }
-    const payload={title,assignee_name:assignee,details,priority,due_at:due?due.toISOString():null};
+    const payload={title,assignee_name:assignee,assignee_user_id:account||null,details,priority,due_at:due?due.toISOString():null};
     setBusy(true);
     $("care-task-create").disabled=true;
     try{
@@ -752,7 +798,11 @@
         const tr=el("tr");
         cell(tr,el("strong",task.inquiries?.full_name||"Khách hàng"));
         cell(tr,el("strong",task.title));
-        cell(tr,el("span",task.assignee_name));
+        const staffCell=el("div");
+        staffCell.append(el("span",task.assignee_name));
+        if(state.currentRole==="manager"||state.currentRole==="admin")
+          staffCell.append(btn("Chuyển tài khoản",()=>reassignCareTask(task)));
+        cell(tr,staffCell);
         const due=el("div");
         due.append(el("strong",taskPriorities[task.priority]||task.priority),
           el("small",stamp(task.due_at)+(isOverdue(task)?" · Quá hạn":"")));
@@ -1081,6 +1131,16 @@
   $("tab-inquiries").addEventListener("click",()=>switchTab("inquiries"));
   $("tab-tasks").addEventListener("click",()=>switchTab("tasks"));
   $("tab-reports").addEventListener("click",()=>switchTab("reports"));
+  $("tab-my-tasks").addEventListener("click",()=>switchTab("my-tasks"));
+  $("tab-staff").addEventListener("click",()=>switchTab("staff"));
+  $("staff-refresh").addEventListener("click",loadStaff);
+  $("staff-invite-form").addEventListener("submit",inviteStaff);
+  $("my-tasks-refresh").addEventListener("click",loadMyTasks);
+  $("care-task-account").addEventListener("change",()=>{
+    const person=state.staff.find(u=>u.user_id===$("care-task-account").value&&u.active);
+    if(person)$("care-task-assignee").value=person.full_name;
+    else if(!state.editingTask)$("care-task-assignee").value="";
+  });
   $("report-refresh").addEventListener("click",loadPerformanceReport);
   $("report-range").addEventListener("change",loadPerformanceReport);
   $("report-bucket").addEventListener("change",loadPerformanceReport);
