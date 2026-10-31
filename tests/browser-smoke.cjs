@@ -232,6 +232,14 @@ window.supabase={createClient:()=>{
              event_type:"reassigned",previous_value:item.assignee_name,current_value:value.assignee_name,
              created_at:new Date().toISOString()
            });
+           for(const [key,type] of [["title","title_changed"],["details","details_changed"],
+             ["priority","priority_changed"],["due_at","due_changed"]]){
+             if(Object.hasOwn(value,key)&&value[key]!==item[key])taskEvents.push({
+               id:"event-"+taskEvents.length,inquiry_id:item.inquiry_id,task_id:item.id,
+               event_type:type,previous_value:item[key],current_value:value[key],
+               created_at:new Date().toISOString()
+             });
+           }
          }
          if(item)Object.assign(item,value);
          return Promise.resolve({error:null})}}},
@@ -292,12 +300,25 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#care-task-create").click();
     await adminCRUD.locator("#care-task-list").getByText("Gửi báo giá nội thất").waitFor();
     await adminCRUD.locator("#care-task-events").getByText("Giao công việc").waitFor();
+    await adminCRUD.locator("#care-task-list").getByRole("button",{name:"Sửa công việc"}).click();
+    await adminCRUD.locator("#care-task-title").fill("Gửi báo giá nội thất cập nhật");
+    await adminCRUD.locator("#care-task-details").fill("Bổ sung phương án 3D.");
+    await adminCRUD.locator("#care-task-priority").selectOption("urgent");
+    await adminCRUD.locator("#care-task-create").getByText("Lưu thay đổi").waitFor();
+    await adminCRUD.locator("#care-task-create").click();
+    await adminCRUD.locator("#care-task-list").getByText("Gửi báo giá nội thất cập nhật").waitFor();
+    await adminCRUD.locator("#care-task-events").getByText(/Sửa tên việc/).waitFor();
+    await adminCRUD.locator("#care-task-events").getByText(/Sửa mô tả/).waitFor();
+    await adminCRUD.locator("#care-task-events").getByText(/Đổi mức ưu tiên/).waitFor();
+    await adminCRUD.locator("#care-task-list").getByRole("button",{name:"Sửa công việc"}).click();
+    await adminCRUD.locator("#care-task-cancel").click();
+    assert.equal(await adminCRUD.locator("#care-task-cancel").isVisible(),false);
     await adminCRUD.locator("#care-task-list").getByRole("combobox",{name:/Tiến độ/}).selectOption("in_progress");
     await adminCRUD.locator("#care-task-events").getByText("Chuyển tiến độ").waitFor();
     await adminCRUD.locator("#profile-close").click();
     assert.equal(await adminCRUD.locator("#lead-profile").isVisible(),false);
     await adminCRUD.locator("#tab-tasks").click();
-    await adminCRUD.locator("#tasks-board-table").getByText("Gửi báo giá nội thất").waitFor();
+    await adminCRUD.locator("#tasks-board-table").getByText("Gửi báo giá nội thất cập nhật").waitFor();
     assert.equal(await adminCRUD.locator("#tasks-total").innerText(),"1");
     assert.equal(await adminCRUD.locator("#tasks-progress").innerText(),"1");
     await adminCRUD.locator("#tasks-board-table").getByRole("combobox",{name:/Tiến độ/}).selectOption("done");
@@ -305,21 +326,21 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#task-view-kanban").click();
     assert.equal(await adminCRUD.locator("#tasks-kanban").isVisible(),true);
     assert.equal(await adminCRUD.locator("#tasks-table-wrap").isVisible(),false);
-    await adminCRUD.locator("#kanban-done").getByText("Gửi báo giá nội thất").waitFor();
+    await adminCRUD.locator("#kanban-done").getByText("Gửi báo giá nội thất cập nhật").waitFor();
     assert.equal(await adminCRUD.locator("#kanban-done-count").innerText(),"1");
     await adminCRUD.locator("#kanban-done").getByRole("button",{name:/Mở lại công việc/}).click();
-    await adminCRUD.locator("#kanban-todo").getByText("Gửi báo giá nội thất").waitFor();
+    await adminCRUD.locator("#kanban-todo").getByText("Gửi báo giá nội thất cập nhật").waitFor();
     await adminCRUD.locator("#kanban-todo").getByRole("button",{name:/Bắt đầu công việc/}).click();
-    await adminCRUD.locator("#kanban-progress").getByText("Gửi báo giá nội thất").waitFor();
+    await adminCRUD.locator("#kanban-progress").getByText("Gửi báo giá nội thất cập nhật").waitFor();
     await adminCRUD.locator("#kanban-progress").getByRole("button",{name:/Hoàn thành công việc/}).click();
-    await adminCRUD.locator("#kanban-done").getByText("Gửi báo giá nội thất").waitFor();
+    await adminCRUD.locator("#kanban-done").getByText("Gửi báo giá nội thất cập nhật").waitFor();
     await adminCRUD.locator("#task-view-table").click();
     assert.equal(await adminCRUD.locator("#tasks-kanban").isVisible(),false);
     assert.equal(await adminCRUD.locator("#tasks-table-wrap").isVisible(),true);
     await adminCRUD.locator("#tasks-status-filter").selectOption("todo");
     await adminCRUD.locator("#tasks-board-table").getByText("Chưa có công việc phù hợp.").waitFor();
     await adminCRUD.locator("#tasks-status-filter").selectOption("all");
-    await adminCRUD.locator("#tasks-board-table").getByText("Gửi báo giá nội thất").waitFor();
+    await adminCRUD.locator("#tasks-board-table").getByText("Gửi báo giá nội thất cập nhật").waitFor();
     await adminCRUD.locator("#tab-inquiries").click();
 
     assert.equal(await adminCRUD.locator("#crm-contacted").innerText(),"0");
