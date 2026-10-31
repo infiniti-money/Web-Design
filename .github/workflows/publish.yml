@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   release:
-    name: GitHub Release v1.13.0
+    name: GitHub Release v1.13.1
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
@@ -22,25 +22,25 @@ jobs:
       - name: Verify source
         run: |
           node --test tests/static.test.cjs tests/email-notification.test.cjs
-      - name: Package v1.13.0
+      - name: Package v1.13.1
         run: |
-          mkdir -p dist/atelier-home-v1.13.0/supabase/functions/submit-inquiry dist/atelier-home-v1.13.0/supabase/functions/staff-management
-          cp index.html admin.html admin.js app-config.js site-backend.js privacy.html README.md SUPABASE_SETUP.md TURNSTILE_SETUP.md EMAIL_NOTIFICATIONS_SETUP.md RELEASE_NOTES_V1_13_0.md dist/atelier-home-v1.13.0/
-          cp supabase/schema.sql supabase/inquiry-rate-limit.sql supabase/privacy-consent.sql supabase/inquiry-retention-12m.sql supabase/admin-contact-rpc.sql supabase/customer-care-v1_6.sql supabase/customer-care-audit-v1_6.sql supabase/customer-care-edit-v1_7.sql supabase/customer-care-tasks-v1_8.sql supabase/customer-care-task-edit-v1_10.sql supabase/customer-care-performance-v1_12.sql supabase/staff-roles-v1_13.sql supabase/staff-manager-report-v1_13.sql dist/atelier-home-v1.13.0/supabase/
-          cp supabase/functions/submit-inquiry/index.ts dist/atelier-home-v1.13.0/supabase/functions/submit-inquiry/
-          cp supabase/functions/staff-management/index.ts dist/atelier-home-v1.13.0/supabase/functions/staff-management/
+          mkdir -p dist/atelier-home-v1.13.1/supabase/functions/submit-inquiry dist/atelier-home-v1.13.1/supabase/functions/staff-management
+          cp index.html admin.html admin.js app-config.js site-backend.js privacy.html README.md SUPABASE_SETUP.md TURNSTILE_SETUP.md EMAIL_NOTIFICATIONS_SETUP.md RELEASE_NOTES_V1_13_1.md dist/atelier-home-v1.13.1/
+          cp supabase/schema.sql supabase/inquiry-rate-limit.sql supabase/privacy-consent.sql supabase/inquiry-retention-12m.sql supabase/admin-contact-rpc.sql supabase/customer-care-v1_6.sql supabase/customer-care-audit-v1_6.sql supabase/customer-care-edit-v1_7.sql supabase/customer-care-tasks-v1_8.sql supabase/customer-care-task-edit-v1_10.sql supabase/customer-care-performance-v1_12.sql supabase/staff-roles-v1_13.sql supabase/staff-manager-report-v1_13.sql supabase/staff-role-hardening-v1_13_1.sql supabase/staff-report-hardening-v1_13_1.sql dist/atelier-home-v1.13.1/supabase/
+          cp supabase/functions/submit-inquiry/index.ts dist/atelier-home-v1.13.1/supabase/functions/submit-inquiry/
+          cp supabase/functions/staff-management/index.ts dist/atelier-home-v1.13.1/supabase/functions/staff-management/
           cd dist
-          zip -qr atelier-home-v1.13.0.zip atelier-home-v1.13.0
+          zip -qr atelier-home-v1.13.1.zip atelier-home-v1.13.1
       - name: Create Release if not yet published
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v1.13.0 >/dev/null 2>&1; then
-            echo "Existing v1.13.0 release remains unchanged."
+          if gh release view v1.13.1 >/dev/null 2>&1; then
+            echo "Existing v1.13.1 release remains unchanged."
           else
-            gh release create v1.13.0 ./dist/atelier-home-v1.13.0.zip \
+            gh release create v1.13.1 ./dist/atelier-home-v1.13.1.zip \
               --target "$GITHUB_SHA" \
-              --title "ATELIER HOME v1.13.0 — Staff Roles, Secure Invitations and Assigned Work" \
-              --notes-file RELEASE_NOTES_V1_13_0.md
+              --title "ATELIER HOME v1.13.1 — Hardened Staff Roles and Secure Work Access" \
+              --notes-file RELEASE_NOTES_V1_13_1.md
           fi
 
