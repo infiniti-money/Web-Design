@@ -27,6 +27,7 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - `supabase/admin-contact-rpc.sql` — RPC theo giờ máy chủ để ghi nhận liên hệ, tuân thủ RLS Admin.
 - `supabase/customer-care-v1_6.sql` — hồ sơ chăm sóc, ghi chú riêng tư, lịch nhắc liên hệ và phân quyền Admin.
 - `supabase/customer-care-audit-v1_6.sql` — tự ghi lịch sử khi liên hệ thật/chuyển trạng thái trên máy chủ.
+- `supabase/customer-care-edit-v1_7.sql` — chỉnh sửa ghi chú qua RPC có đối chiếu phiên bản, ghi lịch sử trước/sau, chặn sửa ghi chú hệ thống và hoàn thành nhắc việc.
 - `supabase/functions/submit-inquiry/index.ts` — mã Edge Function đang chạy tại Supabase.
 - `SUPABASE_SETUP.md` — hướng dẫn bảo mật và vận hành.
 - `privacy.html` — chính sách quyền riêng tư: đơn vị Tân Design, địa chỉ chủ website cung cấp và email tiếp nhận `infinitimoney@icloud.com`; chưa có xác minh đăng ký pháp lý, đã cấu hình giữ dữ liệu 12 tháng.
@@ -42,11 +43,11 @@ node --test tests/static.test.cjs tests/email-notification.test.cjs
 
 GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và thiết bị iPhone giả lập; ảnh kiểm thử được lưu có thời hạn. Không cần gửi mật khẩu quản trị cho hệ thống kiểm thử.
 
-## CRM v1.6 — Hồ sơ và lịch nhắc liên hệ
+## CRM v1.7 — Hồ sơ, lịch sử chỉnh sửa và hoàn thành lịch nhắc
 
 - Admin mở hồ sơ bằng nút **Hồ sơ** bên cạnh yêu cầu tư vấn, xem thông tin, trạng thái, ngày đồng ý và hạn xóa.
-- **Ghi chú chăm sóc** lưu lịch sử dạng chỉ thêm, không tự động chỉnh sửa hoặc xóa từng ghi chú; khi xóa khách hàng hoặc hết thời hạn 12 tháng, ghi chú cũng bị xóa.
-- **Nhắc liên hệ** chọn ngày giờ, có thể hủy/đặt lại lịch; KPI **Đến lịch liên hệ** và bộ lọc **Đến hạn / 7 ngày tới** hiển thị ngay trong trang Admin. Đây là thông báo *trong ứng dụng*, không tự gửi email/thông báo đẩy.
+- **Ghi chú chăm sóc (v1.7)** hỗ trợ nút **Sửa ghi chú** cho nội dung do Admin nhập. Nội dung cũ được giữ trong nhật ký chỉnh sửa cùng thời điểm và người sửa; ghi chú hệ thống không cho sửa. Khi xóa hồ sơ hoặc hết thời hạn 12 tháng, ghi chú và lịch sử chỉnh sửa đều bị xóa.
+- **Nhắc liên hệ** chọn ngày giờ, có thể hủy/đặt lại hoặc **Hoàn thành công việc** mà không tự ghi nhận đã liên hệ; KPI **Đến lịch liên hệ** và bộ lọc **Đến hạn / 7 ngày tới** hiển thị ngay trong trang Admin. Đây là thông báo *trong ứng dụng*, không tự gửi email/thông báo đẩy.
 - Các lần Admin xác nhận đã liên hệ và chuyển trạng thái được lưu thành sự kiện lịch sử theo giờ máy chủ trong cùng một giao dịch.
 - **Spinner** phản hồi trạng thái tải khi truy vấn danh sách, có chế độ giảm chuyển động cho người dùng nhạy cảm với hiệu ứng.
 - Phần email vẫn để sau theo lựa chọn chủ website, không yêu cầu secret mới và không đổi gói Supabase.
