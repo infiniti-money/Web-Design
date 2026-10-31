@@ -102,6 +102,20 @@ test("Public and admin pages include key functional sections", () => {
   assert.match(adminJs,/function editCareTask\(task\)/);
   assert.match(adminJs,/function resetCareTaskEditor\(\)/);
   assert.match(adminJs,/Đã cập nhật công việc và ghi nhật ký thay đổi/);
+  for(const id of ["priority-hub-title","priority-refresh","priority-status",
+    "priority-task-overdue","priority-task-soon","priority-lead-overdue","priority-lead-soon",
+    "priority-task-overdue-list","priority-task-soon-list","priority-lead-overdue-list",
+    "priority-lead-soon-list","priority-task-overdue-open","priority-task-soon-open",
+    "priority-lead-overdue-open","priority-lead-soon-open"]){
+    assert.match(admin,new RegExp('id="'+id+'"'));
+  }
+  assert.match(adminJs,/async function loadPriorityHub\(\)/);
+  assert.match(adminJs,/function showTaskPriority\(filter\)/);
+  assert.match(adminJs,/function showLeadPriority\(filter\)/);
+  assert.match(adminJs,/range\(0,4\)/);
+  assert.match(adminJs,/count:"exact"/);
+  assert.match(adminJs,/priority-refresh/);
+  assert.match(adminJs,/priority-task-soon-open/);
 
 
 });
