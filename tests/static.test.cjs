@@ -17,6 +17,13 @@ test("Public and admin pages include key functional sections", () => {
   }
   assert.match(index, /<meta name="viewport"/);
   assert.match(admin, /<meta name="robots" content="noindex,nofollow">/);
+  for (const id of ["lead-search","lead-filter-status","lead-filter-service","lead-filter-period",
+    "lead-clear-filters","lead-match-count","crm-total","crm-today","crm-contacted","crm-quoted"]) {
+    assert.match(admin, new RegExp('id="'+id+'"'));
+  }
+  assert.match(read("admin.js"), /function filteredInquiries\(\)/);
+  assert.match(read("admin.js"), /function renderLeadStats\(\)/);
+  assert.match(read("admin.js"), /Asia\/Ho_Chi_Minh/);
 });
 
 test("All browser scripts and inline scripts are valid JavaScript", () => {
@@ -83,6 +90,12 @@ test("Privacy notice and Turnstile integration are present and secrets stay serv
   assert.match(frontend, /turnstile_token/);
   assert.match(frontend, /privacy_consent/);
   assert.match(edge, /privacy_consent !== true/);
+  assert.match(edge, /Deno\.env\.get\("RESEND_API_KEY"\)/);
+  assert.match(edge, /Deno\.env\.get\("NOTIFY_FROM_EMAIL"\)/);
+  assert.match(edge, /infinitimoney@icloud\.com/);
+  assert.match(edge, /api\.resend\.com\/emails/);
+  assert.match(edge, /Idempotency-Key/);
+  assert.doesNotMatch(edge, /body:\s*JSON\.stringify\(\{[\s\S]*?phone:\s*phone/);
   assert.match(schema, /consented_at timestamptz/);
   assert.match(schema, /privacy_policy_version text/);
   assert.match(read("supabase/privacy-consent.sql"), /privacy_policy_version/);
