@@ -1,4 +1,4 @@
-/* ATELIER HOME v1.5.0 Admin.
+/* ATELIER HOME v1.6.0 Admin.
  * Authentication is Supabase Auth. Authorization is enforced on DB via RLS.
  * No service-role or private credentials are ever used by this browser app. */
 (() => {
@@ -19,7 +19,7 @@
   const PAGE_SIZE = 25;
   const state = { projects:[], inquiries:[], editingId:null, slugTouched:false, busy:false,
     leadSearch:"", leadStatus:"all", leadService:"all", leadPeriod:"all", leadPage:0, leadTotal:0,
-    leadQuerySeq:0, leadStatsSeq:0 };
+    leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0 };
 
   function message(id, text, error=false) {
     const el = $(id); el.textContent = text;
@@ -56,9 +56,13 @@
   }
   function setBusy(b) {
     state.busy=b;
-    for(const id of ["project-save","login-button","reload-projects","reload-inquiries"]) $(id).disabled=b;
+    for(const id of ["project-save","login-button","reload-projects","reload-inquiries","profile-note-save","profile-reminder-save","profile-reminder-clear"]) $(id).disabled=b;
   }
   function loginVisible() {
+    state.activeProfile=null;
+    ++state.profileSeq;
+    $("lead-profile").classList.add("hide");
+    $("profile-note-input").value="";
     $("login-panel").classList.remove("hide");$("dashboard").classList.add("hide");
   }
   async function verify() {
@@ -88,7 +92,7 @@
   }
   // All customer data is fetched only after verifying Admin authentication.
   // RLS is the final authorization boundary for every query.
-  const inquiryColumns="id,full_name,phone,service,space,details,status,created_at,consented_at,privacy_policy_version,last_contacted_at,legal_hold_until";
+  const inquiryColumns="id,full_name,phone,service,space,details,status,created_at,consented_at,privacy_policy_version,last_contacted_at,legal_hold_until,follow_up_at";
   const vietnamDayStartUTC=() => {
     const date = new Date(Date.now() + 7 * 3600000).toISOString().slice(0,10);
     return new Date(Date.parse(date+"T00:00:00Z") - 7 * 3600000).toISOString();
@@ -96,6 +100,11 @@
   function applyInquiryQuery(query) {
     if(state.leadStatus!=="all") query=query.eq("status",state.leadStatus);
     if(state.leadService!=="all") query=query.eq("service",state.leadService);
+    if(state.leadReminder==="due")query=query.lte("follow_up_at",new Date().toISOString());
+    if(state.leadReminder==="upcoming"){
+      query=query.gt("follow_up_at",new Date().toISOString())
+        .lte("follow_up_at",new Date(Date.now()+7*86400000).toISOString());
+    }
     if(state.leadPeriod==="today") query=query.gte("created_at",vietnamDayStartUTC());
     else if(["7","30","90"].includes(state.leadPeriod))
       query=query.gte("created_at",new Date(Date.now()-Number(state.leadPeriod)*86400000).toISOString());
@@ -107,25 +116,32 @@
   }
   async function loadInquiries() {
     const seq=++state.leadQuerySeq;
+    $("crm-loading").classList.remove("hide");
+    $("lead-prev-page").disabled=true;
+    $("lead-next-page").disabled=true;
     const from=state.leadPage*PAGE_SIZE;
-    let query=client.from("inquiries").select(inquiryColumns,{count:"exact"})
-      .order("created_at",{ascending:false}).order("id",{ascending:false});
-    query=applyInquiryQuery(query);
-    const {data,error,count}=await query.range(from,from+PAGE_SIZE-1);
-    if(seq!==state.leadQuerySeq)return;
-    if(error){
-      message("dash-status","Không đọc được yêu cầu tư vấn: "+(error.message||"Lỗi truy vấn"),true);
-      $("lead-match-count").textContent="Không tải được hồ sơ.";
-      return;
+    try {
+      let query=client.from("inquiries").select(inquiryColumns,{count:"exact"})
+        .order("created_at",{ascending:false}).order("id",{ascending:false});
+      query=applyInquiryQuery(query);
+      const {data,error,count}=await query.range(from,from+PAGE_SIZE-1);
+      if(seq!==state.leadQuerySeq)return;
+      if(error)throw error;
+      state.leadTotal=typeof count==="number" ? count : (data||[]).length;
+      if(!data?.length && state.leadPage>0 && state.leadTotal>0){
+        state.leadPage=Math.ceil(state.leadTotal/PAGE_SIZE)-1;
+        return loadInquiries();
+      }
+      state.inquiries=data||[];
+      renderInquiries();
+    } catch(error) {
+      if(seq===state.leadQuerySeq) {
+        message("dash-status","Không đọc được yêu cầu tư vấn: "+(error.message||"Lỗi truy vấn"),true);
+        $("lead-match-count").textContent="Không tải được hồ sơ. Nhấn Làm mới để thử lại.";
+      }
+    } finally {
+      if(seq===state.leadQuerySeq)$("crm-loading").classList.add("hide");
     }
-    state.leadTotal=typeof count==="number" ? count : (data||[]).length;
-    // When a record is deleted or filters change, move to the last existing page.
-    if(!data?.length && state.leadPage>0 && state.leadTotal>0){
-      state.leadPage=Math.ceil(state.leadTotal/PAGE_SIZE)-1;
-      return loadInquiries();
-    }
-    state.inquiries=data||[];
-    renderInquiries();
   }
   async function loadLeadStats() {
     const seq=++state.leadStatsSeq;
@@ -133,7 +149,8 @@
     const requests=[
       head(),head().gte("created_at",vietnamDayStartUTC()),
       head().eq("status","contacted"),head().eq("status","quoted"),
-      head().eq("status","new")
+      head().eq("status","new"),
+      head().lte("follow_up_at",new Date().toISOString())
     ];
     const results=await Promise.all(requests);
     if(seq!==state.leadStatsSeq)return;
@@ -141,12 +158,13 @@
       message("dash-status","Không tải được thống kê tư vấn.",true);
       return;
     }
-    const [total,today,contacted,quoted,newCount]=results.map(x=>Number(x.count)||0);
+    const [total,today,contacted,quoted,newCount,due]=results.map(x=>Number(x.count)||0);
     $("crm-total").textContent=total;
     $("crm-today").textContent=today;
     $("crm-contacted").textContent=contacted;
     $("crm-quoted").textContent=quoted;
     $("metric-inquiries").textContent=newCount;
+    $("crm-due").textContent=due;
   }
   async function refreshInquiries() {
     await Promise.all([loadInquiries(),loadLeadStats()]);
@@ -216,6 +234,7 @@
         }
       }
       if (i.legal_hold_until) purpose.append(el("small","Giữ theo nghĩa vụ pháp lý đến: "+stamp(i.legal_hold_until)));
+      if(i.follow_up_at)purpose.append(el("small","Nhắc liên hệ: "+stamp(i.follow_up_at)+(new Date(i.follow_up_at)<=new Date()?" · ĐẾN HẠN":""),new Date(i.follow_up_at)<=new Date()?"due-soon":""));
 
       cell(tr,purpose);
       const status=el("select",undefined,"lead-status");
@@ -227,7 +246,7 @@
       status.addEventListener("change",()=>updateInquiry(i,status));
       cell(tr,status);
       const inquiryTools=el("div",undefined,"actions");
-      inquiryTools.append(btn("Ghi nhận liên hệ",()=>markInquiryContacted(i)),
+      inquiryTools.append(btn("Hồ sơ",()=>openCustomerProfile(i)),btn("Ghi nhận liên hệ",()=>markInquiryContacted(i)),
                           btn("Xóa",()=>deleteInquiry(i),"danger"));
       cell(tr,inquiryTools);
       body.append(tr);
@@ -311,7 +330,110 @@
     if(!confirm('Xóa yêu cầu tư vấn của "'+i.full_name+'"?'))return;
     const {error}=await client.from("inquiries").delete().eq("id",i.id);
     if(error){message("dash-status","Không xóa được yêu cầu: "+error.message,true);return}
+    if(state.activeProfile?.id===i.id)closeCustomerProfile();
     await refreshInquiries();message("dash-status","Đã xóa yêu cầu.");
+  }
+  function closeCustomerProfile() {
+    ++state.profileSeq;
+    state.activeProfile=null;
+    $("lead-profile").classList.add("hide");
+    $("profile-history").replaceChildren();
+    $("profile-note-input").value="";
+    $("profile-reminder-at").value="";
+    message("profile-status","");
+  }
+  function profileField(key,value) {
+    const wrap=el("div"),label=el("small",key);
+    wrap.append(label,el("strong",value||"—"));
+    $("profile-fields").append(wrap);
+  }
+  async function loadProfileNotes() {
+    const record=state.activeProfile;
+    if(!record)return;
+    const seq=++state.profileSeq;
+    const list=$("profile-history");
+    list.replaceChildren(el("li","Đang tải lịch sử..."));
+    try{
+      const {data,error}=await client.from("inquiry_care_notes")
+        .select("id,note_kind,body,scheduled_for,created_at")
+        .eq("inquiry_id",record.id).order("created_at",{ascending:false}).range(0,99);
+      if(seq!==state.profileSeq)return;
+      if(error)throw error;
+      list.replaceChildren();
+      if(!data?.length){list.append(el("li","Chưa có ghi chú hoặc lịch nhắc."));return;}
+      for(const item of data){
+        const li=el("li");
+        li.append(el("strong",item.note_kind==="reminder"?"Lịch nhắc":"Ghi chú"),
+          el("div",item.body),el("span",stamp(item.created_at)+(item.scheduled_for?" · Hẹn: "+stamp(item.scheduled_for):"")));
+        list.append(li);
+      }
+    }catch(error){
+      if(seq===state.profileSeq) {
+        list.replaceChildren(el("li","Không tải được lịch sử: "+(error.message||"Lỗi truy vấn")));
+      }
+    }
+  }
+  async function openCustomerProfile(record) {
+    state.activeProfile=record;
+    const fields=$("profile-fields");
+    fields.replaceChildren();
+    $("profile-name").textContent=record.full_name;
+    profileField("Số điện thoại",record.phone);
+    profileField("Dịch vụ",record.service);
+    profileField("Không gian",record.space);
+    profileField("Nhu cầu",record.details);
+    profileField("Trạng thái",inquiryStates[record.status]||record.status);
+    profileField("Ngày gửi",stamp(record.created_at));
+    profileField("Ngày đồng ý chính sách",stamp(record.consented_at));
+    profileField("Liên hệ gần nhất",stamp(record.last_contacted_at));
+    profileField("Ngày dự kiến xóa",stamp(record.last_contacted_at||record.created_at));
+    $("profile-reminder-current").textContent=record.follow_up_at
+      ? "Lịch hiện tại: "+stamp(record.follow_up_at) : "Chưa đặt lịch liên hệ.";
+    $("profile-reminder-at").value="";
+    $("lead-profile").classList.remove("hide");
+    message("profile-status","");
+    $("lead-profile").scrollIntoView({behavior:"smooth",block:"start"});
+    await loadProfileNotes();
+  }
+  async function saveCareNote(event) {
+    event.preventDefault();
+    if(state.busy||!state.activeProfile)return;
+    const record=state.activeProfile;
+    const body=$("profile-note-input").value.trim();
+    if(!body||body.length>1500){message("profile-status","Ghi chú phải từ 1 đến 1500 ký tự.",true);return;}
+    setBusy(true);
+    try {
+      const {error}=await client.from("inquiry_care_notes").insert({inquiry_id:record.id,body});
+      if(error)throw error;
+      $("profile-note-input").value="";
+      await loadProfileNotes();
+      message("profile-status","Đã lưu ghi chú vào lịch sử.");
+    }catch(error){message("profile-status","Không lưu được ghi chú: "+(error.message||"Lỗi"),true)}
+    finally {setBusy(false)}
+  }
+  async function saveFollowup(dateValue) {
+    if(state.busy||!state.activeProfile)return;
+    const record=state.activeProfile;
+    const due=dateValue===null?null:new Date(dateValue);
+    if(due && (Number.isNaN(due.getTime()) || due.getTime()<Date.now()-86400000 ||
+      due.getTime()>Date.now()+366*86400000)){
+      message("profile-status","Vui lòng chọn thời gian hợp lệ trong vòng 12 tháng tới.",true);return;
+    }
+    setBusy(true);
+    try{
+      const {data,error}=await client.rpc("schedule_inquiry_followup",{
+        p_inquiry_id:record.id,p_due_at:due?due.toISOString():null
+      });
+      if(error)throw error;
+      if(data!==true)throw new Error("Hồ sơ không tồn tại hoặc tài khoản không có quyền.");
+      record.follow_up_at=due?due.toISOString():null;
+      $("profile-reminder-current").textContent=due?"Lịch hiện tại: "+stamp(due):"Chưa đặt lịch liên hệ.";
+      $("profile-reminder-at").value="";
+      await loadProfileNotes();
+      await refreshInquiries();
+      message("profile-status",due?"Đã đặt lịch nhắc, hiển thị trong Admin.":"Đã hủy lịch nhắc.");
+    }catch(error){message("profile-status","Không cập nhật được lịch nhắc: "+(error.message||"Lỗi"),true)}
+    finally{setBusy(false)}
   }
   $("p-title").addEventListener("input",()=>{
     if(!state.slugTouched)$("p-slug").value=slugify($("p-title").value);
@@ -328,7 +450,8 @@
     ["lead-search","leadSearch","input"],
     ["lead-filter-status","leadStatus","change"],
     ["lead-filter-service","leadService","change"],
-    ["lead-filter-period","leadPeriod","change"]
+    ["lead-filter-period","leadPeriod","change"],
+    ["lead-filter-reminder","leadReminder","change"]
   ];
   for(const [id,key,event] of leadFilters) {
     $(id).addEventListener(event,()=>{
@@ -341,7 +464,7 @@
   }
   $("lead-clear-filters").addEventListener("click",()=>{
     clearTimeout(searchTimer);
-    state.leadSearch=""; state.leadStatus="all"; state.leadService="all";state.leadPeriod="all";
+    state.leadSearch=""; state.leadStatus="all"; state.leadService="all";state.leadPeriod="all";state.leadReminder="all";
     state.leadPage=0;
     for(const [id,key] of leadFilters) $(id).value=state[key];
     loadInquiries();
@@ -380,6 +503,23 @@
     setTimeout(()=>URL.revokeObjectURL(uri),10000);
   }
   $("lead-export-csv").addEventListener("click",exportLeadCsv);
+  $("profile-close").addEventListener("click",closeCustomerProfile);
+  $("profile-note-form").addEventListener("submit",saveCareNote);
+  $("profile-reminder-form").addEventListener("submit",e=>{
+    e.preventDefault();
+    const date=$("profile-reminder-at").value;
+    if(!date){message("profile-status","Vui lòng chọn ngày giờ nhắc.",true);return}
+    saveFollowup(date);
+  });
+  $("profile-reminder-clear").addEventListener("click",()=>{
+    if(state.activeProfile && confirm("Hủy lịch nhắc liên hệ hiện tại?"))saveFollowup(null);
+  });
+  $("crm-open-due").addEventListener("click",()=>{
+    switchTab("inquiries");
+    $("lead-filter-reminder").value="due";
+    state.leadReminder="due";state.leadPage=0;
+    loadInquiries();
+  });
   $("logout").addEventListener("click",async()=>{await client.auth.signOut();loginVisible();});
   $("login-form").addEventListener("submit",async(event)=>{
     event.preventDefault();
