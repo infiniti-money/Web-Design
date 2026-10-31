@@ -253,6 +253,8 @@ window.supabase={createClient:()=>{
 }};`}));
     await adminCRUD.goto(new URL("admin.html",origin).toString(),{waitUntil:"domcontentloaded",timeout:45000});
     await adminCRUD.locator("#dashboard:not(.hide)").waitFor({timeout:15000});
+    await adminCRUD.waitForFunction(()=>document.querySelector("#priority-task-overdue")?.textContent==="0");
+    assert.equal(await adminCRUD.locator("#priority-lead-soon").innerText(),"0");
     await adminCRUD.locator("#p-title").fill("Thử nghiệm giao diện");
     await adminCRUD.locator("#p-slug").fill("thu-nghiem-giao-dien");
     await adminCRUD.locator("#p-image").fill("https://example.com/test.jpg");
@@ -284,8 +286,10 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#profile-reminder-at").fill(followupValue);
     await adminCRUD.locator("#profile-reminder-save").click();
     await adminCRUD.locator("#profile-history").getByText("Đặt lịch nhắc liên hệ").waitFor();
+    await adminCRUD.waitForFunction(()=>document.querySelector("#priority-lead-soon")?.textContent==="1");
     await adminCRUD.locator("#profile-reminder-done").click();
     await adminCRUD.locator("#profile-history").getByText("Đã hoàn thành công việc nhắc liên hệ").waitFor();
+    await adminCRUD.waitForFunction(()=>document.querySelector("#priority-lead-soon")?.textContent==="0");
     assert.equal(await adminCRUD.locator("#profile-reminder-done").isDisabled(),true);
     assert.equal(await adminCRUD.locator("#crm-due").innerText(),"0");
     await adminCRUD.locator("#profile-reminder-at").fill(followupValue);
@@ -297,7 +301,9 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#care-task-assignee").fill("Nhân viên A");
     await adminCRUD.locator("#care-task-details").fill("Liên hệ xác nhận và gửi dự toán.");
     await adminCRUD.locator("#care-task-priority").selectOption("high");
+    await adminCRUD.locator("#care-task-due").fill(new Date(Date.now()+3*86400000).toISOString().slice(0,16));
     await adminCRUD.locator("#care-task-create").click();
+    await adminCRUD.waitForFunction(()=>document.querySelector("#priority-task-soon")?.textContent==="1");
     await adminCRUD.locator("#care-task-list").getByText("Gửi báo giá nội thất").waitFor();
     await adminCRUD.locator("#care-task-events").getByText("Giao công việc").waitFor();
     await adminCRUD.locator("#care-task-list").getByRole("button",{name:"Sửa công việc"}).click();
@@ -317,7 +323,8 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#care-task-events").getByText("Chuyển tiến độ").waitFor();
     await adminCRUD.locator("#profile-close").click();
     assert.equal(await adminCRUD.locator("#lead-profile").isVisible(),false);
-    await adminCRUD.locator("#tab-tasks").click();
+    await adminCRUD.locator("#priority-task-soon-open").click();
+    assert.equal(await adminCRUD.locator("#tasks-due-filter").inputValue(),"7");
     await adminCRUD.locator("#tasks-board-table").getByText("Gửi báo giá nội thất cập nhật").waitFor();
     assert.equal(await adminCRUD.locator("#tasks-total").innerText(),"1");
     assert.equal(await adminCRUD.locator("#tasks-progress").innerText(),"1");
@@ -334,6 +341,7 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#kanban-progress").getByText("Gửi báo giá nội thất cập nhật").waitFor();
     await adminCRUD.locator("#kanban-progress").getByRole("button",{name:/Hoàn thành công việc/}).click();
     await adminCRUD.locator("#kanban-done").getByText("Gửi báo giá nội thất cập nhật").waitFor();
+    await adminCRUD.waitForFunction(()=>document.querySelector("#priority-task-soon")?.textContent==="0");
     await adminCRUD.locator("#task-view-table").click();
     assert.equal(await adminCRUD.locator("#tasks-kanban").isVisible(),false);
     assert.equal(await adminCRUD.locator("#tasks-table-wrap").isVisible(),true);
