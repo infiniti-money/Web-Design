@@ -38,6 +38,14 @@
 - Ghi chú là dữ liệu cá nhân, phải được sử dụng đúng mục đích tư vấn; không tự động gửi thư hay thông báo hệ thống ngoài Admin.
 - Kiểm thử với bản ghi giả trong `BEGIN...ROLLBACK` cho thêm ghi chú, đặt lịch, cập nhật trạng thái và chặn non-admin; không còn bản ghi giả.
 
+## Sửa và kiểm toán nhiệm vụ v1.10.0
+
+- `supabase/customer-care-task-edit-v1_10.sql` đã áp dụng trên Supabase thật.
+- Function trigger `private.record_care_task_change()` ghi thêm sự kiện `title_changed`, `details_changed`, `priority_changed`, `due_changed`. Event cũ `created`, `reassigned`, `status_changed` vẫn giữ nguyên.
+- Trong `BEFORE UPDATE`, trigger cấm thay đổi `id`, `inquiry_id`, `created_by`, `created_at`. Hạn xử lý không được cách thời gian hiện tại quá 12 tháng.
+- Giao diện dùng Supabase RLS `admin` để cập nhật nhiệm vụ; lỗi không làm mất nội dung biểu mẫu đang chỉnh.
+- Kiểm thử giao dịch `ROLLBACK` xác minh các event và dữ liệu thật không đổi. Chưa triển khai nhân viên đăng nhập riêng hay thông báo ngoài hệ thống.
+
 ## Phân công và theo dõi công việc v1.8.0
 
 - Đã áp dụng migration `supabase/customer-care-tasks-v1_8.sql` lên dự án Supabase hiện tại.
