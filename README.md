@@ -11,7 +11,7 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - **Cơ sở dữ liệu:** `public.projects` với 6 dự án minh họa, `public.inquiries` chứa yêu cầu tư vấn riêng tư.
 - **Quyền dữ liệu:** RLS bật; khách chỉ được xem dự án published, **không được đọc hoặc ghi trực tiếp vào bảng khách hàng**.
 - **Turnstile:** mã widget và Siteverify đã tích hợp, **chưa kích hoạt** vì chưa có sitekey/secret thực từ Cloudflare; xem [TURNSTILE_SETUP.md](TURNSTILE_SETUP.md).
-- **Biểu mẫu:** gọi Supabase Edge Function `submit-inquiry`; API kiểm tra đầu vào, trường honeypot, nguồn gọi, hạn chế tần suất (3 lần/giờ theo IP, 5 lần/ngày theo số điện thoại). Chỉ mã máy chủ giữ khóa đặc quyền.
+- **Biểu mẫu:** gọi Supabase Edge Function `submit-inquiry`; API yêu cầu `privacy_consent=true`, ghi nhận thời điểm và phiên bản chính sách `2026-10-31`, kiểm tra đầu vào, honeypot, nguồn gọi và hạn chế tần suất (3 lần/giờ theo IP, 5 lần/ngày theo số điện thoại). Chỉ mã máy chủ giữ khóa đặc quyền.
 - **Triển khai:** GitHub Pages được xuất bản bằng quy trình Jekyll tự động từ nhánh chính. Release GitHub riêng đóng gói phiên bản tải xuống.
 
 ## Thành phần mã nguồn
@@ -22,6 +22,7 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - `site-backend.js` — lấy dự án từ Supabase, gửi form qua Edge Function.
 - `supabase/schema.sql` — dữ liệu và chính sách RLS.
 - `supabase/inquiry-rate-limit.sql` — RPC atomic và cơ chế hạn chế gửi.
+- `supabase/privacy-consent.sql` — migration bổ sung dấu thời gian đồng ý.
 - `supabase/functions/submit-inquiry/index.ts` — mã Edge Function đang chạy tại Supabase.
 - `SUPABASE_SETUP.md` — hướng dẫn bảo mật và vận hành.
 - `privacy.html` — chính sách quyền riêng tư (còn thiếu thông tin pháp lý chủ website và đầu mối dữ liệu).
