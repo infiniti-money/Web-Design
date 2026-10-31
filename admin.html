@@ -29,6 +29,11 @@
 .care-revisions li{padding:10px 5px;border-bottom:1px solid #e7ebe5;overflow-wrap:anywhere}
 .care-revisions small{display:block;color:var(--muted)}
 .note-edit-badge{color:#4d6c51!important;font-size:11px}
+.staff-active{color:#3f7850;font-weight:600}.staff-disabled{color:#a44836;font-weight:600}
+#staff-table select{padding:8px;min-width:115px;border:1px solid #cbd5cb;background:#fff}
+#staff-table button{min-height:34px}.role-employee .tabs{margin-bottom:14px}
+#my-reminders>div{border:1px solid var(--line);background:#fff;padding:13px;overflow-wrap:anywhere}
+@media(max-width:700px){#staff-table{min-width:600px}}
 .task-form{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px}
 .task-form .field{margin:0}.task-form .field label{font-size:11px}
 .task-form textarea{min-height:70px}.task-taskline{margin:12px 0;padding:13px;border:1px solid var(--line);background:#f9fbf8}
@@ -78,8 +83,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <section id="setup-panel" class="card auth hide"><h1>Chưa kết nối cơ sở dữ liệu</h1><p>Trang quản trị đã được chuẩn bị, nhưng chưa cấu hình Supabase. Cần tạo dự án Supabase, áp dụng <code>supabase/schema.sql</code>, gán quyền quản trị và khai báo URL cùng publishable key trong <code>app-config.js</code>.</p><p class="hint">Không được đưa service_role hoặc secret key lên GitHub.</p><a class="btn" href="./index.html">Về trang chủ</a></section>
 <section id="login-panel" class="auth card hide"><p class="muted" style="font-size:11px;letter-spacing:.16em">SECURE ADMIN LOGIN</p><h1>Đăng nhập quản trị</h1><p>Chỉ tài khoản có quyền quản trị được cấp bởi hệ thống mới có thể xem hồ sơ khách hàng và chỉnh sửa dự án.</p><form id="login-form"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required maxlength="254"></div><div class="field"><label for="password">Mật khẩu</label><input id="password" type="password" autocomplete="current-password" required></div><button class="btn" id="login-button" type="submit">Đăng nhập</button><p class="status" id="login-status" role="status" aria-live="polite"></p></form><p class="hint">Không hỗ trợ tự đăng ký quản trị từ website công khai.</p></section>
 <section id="dashboard" class="hide">
-<div class="toolbar"><div><p class="muted" style="font-size:11px;letter-spacing:.14em;margin-bottom:8px">ATELIER HOME · DASHBOARD v1.12</p><h1>Không gian quản trị</h1><p class="muted" id="signed-in-email"></p></div><button id="logout" class="btn ghost" type="button">Đăng xuất ↗</button></div>
-<div class="metrics"><div class="metric"><strong id="metric-projects">–</strong><span>Tổng dự án</span></div><div class="metric"><strong id="metric-published">–</strong><span>Dự án xuất bản</span></div><div class="metric"><strong id="metric-inquiries">–</strong><span>Yêu cầu tư vấn mới</span></div></div><section class="priority-hub" aria-labelledby="priority-hub-title">
+<div class="toolbar"><div><p class="muted" style="font-size:11px;letter-spacing:.14em;margin-bottom:8px">ATELIER HOME · DASHBOARD v1.13</p><h1>Không gian quản trị</h1><p class="muted" id="signed-in-email"></p><p class="muted" id="signed-in-role"></p></div><button id="logout" class="btn ghost" type="button">Đăng xuất ↗</button></div>
+<div class="metrics" id="admin-overview-metrics"><div class="metric"><strong id="metric-projects">–</strong><span>Tổng dự án</span></div><div class="metric"><strong id="metric-published">–</strong><span>Dự án xuất bản</span></div><div class="metric"><strong id="metric-inquiries">–</strong><span>Yêu cầu tư vấn mới</span></div></div><section class="priority-hub" id="admin-priority-hub" aria-labelledby="priority-hub-title">
 <div class="toolbar"><div><p class="muted" style="font-size:11px;letter-spacing:.1em;margin-bottom:5px">TRUNG TÂM ĐIỀU PHỐI</p><h2 id="priority-hub-title">Việc cần ưu tiên xử lý</h2><p class="hint">Công việc và lịch liên hệ cần chú ý trong 7 ngày tới. Dữ liệu chỉ được tải sau khi Admin xác thực.</p></div>
 <button type="button" id="priority-refresh" class="btn ghost">Làm mới ưu tiên</button></div>
 <p id="priority-status" role="status" aria-live="polite" class="status">Đang tải danh sách ưu tiên...</p>
@@ -91,7 +96,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 </div>
 <p class="hint">Mỗi ô hiển thị tối đa 5 mục gần nhất theo hạn xử lý, nhưng số đếm phản ánh toàn bộ dữ liệu được phép xem. Không gửi email hoặc thông báo đẩy tự động.</p>
 </section>
-<div class="tabs" role="tablist" aria-label="Mục quản trị"><button class="tab" id="tab-projects" role="tab" aria-selected="true" aria-controls="panel-projects">Quản lý dự án</button><button class="tab" id="tab-inquiries" role="tab" aria-selected="false" aria-controls="panel-inquiries">Yêu cầu tư vấn</button><button class="tab" id="tab-tasks" role="tab" aria-selected="false" aria-controls="panel-tasks">Công việc chăm sóc</button><button class="tab" id="tab-reports" role="tab" aria-selected="false" aria-controls="panel-reports">Báo cáo hiệu suất</button></div>
+<div class="tabs" role="tablist" aria-label="Mục quản trị"><button class="tab" id="tab-projects" role="tab" aria-selected="true" aria-controls="panel-projects">Quản lý dự án</button><button class="tab" id="tab-inquiries" role="tab" aria-selected="false" aria-controls="panel-inquiries">Yêu cầu tư vấn</button><button class="tab" id="tab-tasks" role="tab" aria-selected="false" aria-controls="panel-tasks">Công việc chăm sóc</button><button class="tab" id="tab-reports" role="tab" aria-selected="false" aria-controls="panel-reports">Báo cáo hiệu suất</button><button class="tab" id="tab-my-tasks" role="tab" aria-selected="false" aria-controls="panel-my-tasks">Công việc của tôi</button><button class="tab" id="tab-staff" role="tab" aria-selected="false" aria-controls="panel-staff">Nhân viên và phân quyền</button></div>
 <p id="dash-status" class="status" role="status" aria-live="polite"></p>
 <section id="panel-projects" role="tabpanel" aria-labelledby="tab-projects">
 <div class="split"><div><div class="toolbar"><h2>Danh sách dự án</h2><button type="button" id="reload-projects" class="btn ghost">Làm mới</button></div><div class="table-wrap"><table><thead><tr><th>Dự án</th><th>Loại</th><th>Hiển thị</th><th>Thao tác</th></tr></thead><tbody id="projects-table"></tbody></table></div></div>
@@ -130,7 +135,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <form id="care-task-form">
 <div class="task-form">
 <div class="field"><label for="care-task-title">Tên công việc *</label><input id="care-task-title" maxlength="180" required placeholder="Ví dụ: Gửi báo giá thiết kế"></div>
-<div class="field"><label for="care-task-assignee">Người phụ trách *</label><input id="care-task-assignee" maxlength="100" required placeholder="Tên nhân viên"></div>
+<div class="field"><label for="care-task-assignee">Tên người phụ trách</label><input id="care-task-assignee" maxlength="100" required readonly placeholder="Chọn tài khoản ở dưới"></div>
+<div class="field"><label for="care-task-account">Giao cho tài khoản *</label><select id="care-task-account"><option value="">Chọn tài khoản đang hoạt động</option></select></div>
 <div class="field"><label for="care-task-priority">Ưu tiên</label><select id="care-task-priority"><option value="normal">Bình thường</option><option value="high">Cao</option><option value="urgent">Khẩn cấp</option></select></div>
 <div class="field"><label for="care-task-due">Hạn hoàn thành</label><input type="datetime-local" id="care-task-due"></div>
 </div>
@@ -204,6 +210,27 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="toolbar"><h3>Hiệu suất theo người phụ trách</h3><span id="report-assignee-count" class="hint"></span></div>
 <div class="table-wrap"><table><thead><tr><th>Người phụ trách</th><th>Được giao</th><th>Đang làm</th><th>Hoàn thành</th><th>Quá hạn</th><th>Tỷ lệ hoàn thành</th></tr></thead><tbody id="report-people-table"></tbody></table></div>
 <p class="privacy-note">Báo cáo tính theo <strong>ngày tạo công việc</strong> trong kỳ đã chọn, trạng thái hiện tại và <strong>người phụ trách hiện tại</strong>. Tỷ lệ = số việc trong kỳ hiện hoàn thành / tổng việc tạo trong kỳ. “Thực sự hoàn tất trong kỳ” đếm theo thời điểm hoàn thành, có thể gồm cả việc giao từ kỳ trước. Đây không phải nhật ký trạng thái tại thời điểm lịch sử. Tên người phụ trách chưa phải tài khoản nhân viên riêng; dữ liệu chỉ Admin xem được.</p>
+</section>
+<section id="panel-my-tasks" role="tabpanel" aria-labelledby="tab-my-tasks" class="hide">
+<div class="toolbar"><div><h2>Công việc của tôi</h2><p class="hint">Chỉ hiện công việc được giao cho tài khoản đang đăng nhập, theo phân quyền Supabase.</p></div><button type="button" id="my-tasks-refresh" class="btn ghost">Làm mới</button></div>
+<p id="my-tasks-status" role="status" class="status" aria-live="polite">Đang tải công việc...</p>
+<div class="table-wrap"><table><thead><tr><th>Công việc</th><th>Khách hàng</th><th>Hạn xử lý / Ưu tiên</th><th>Tiến độ</th></tr></thead><tbody id="my-tasks-table"></tbody></table></div>
+<h3 style="margin-top:23px">Lịch liên hệ khách hàng được giao</h3>
+<div id="my-reminders" class="customer-profile-grid"><p class="muted">Chưa có lịch nhắc.</p></div>
+<p class="privacy-note">Nhân viên chỉ được cập nhật trạng thái công việc của chính mình, không được thay đổi khách hàng, người phụ trách hoặc thời hạn. Lịch nhắc này hiển thị trong Admin, không gửi email hay thông báo đẩy.</p>
+</section>
+<section id="panel-staff" role="tabpanel" aria-labelledby="tab-staff" class="hide">
+<div class="toolbar"><div><h2>Nhân viên và phân quyền</h2><p class="hint">Chỉ Admin được mời tài khoản, thay đổi vai trò hoặc vô hiệu hóa nhân viên.</p></div><button type="button" id="staff-refresh" class="btn ghost">Làm mới danh sách</button></div>
+<div class="card"><h3>Mời tài khoản mới</h3>
+<form id="staff-invite-form"><div class="grid2">
+<div class="field"><label for="staff-name">Họ tên *</label><input id="staff-name" maxlength="100" required placeholder="Tên nhân viên"></div>
+<div class="field"><label for="staff-email">Email đăng nhập *</label><input id="staff-email" type="email" autocomplete="off" maxlength="254" required placeholder="email@congty.vn"></div>
+<div class="field"><label for="staff-role">Vai trò</label><select id="staff-role"><option value="employee">Nhân viên</option><option value="manager">Quản lý</option><option value="admin">Admin</option></select></div>
+</div><button class="btn" type="submit" id="staff-invite-submit">Gửi lời mời qua Supabase Auth</button></form>
+<p class="hint">Supabase Auth gửi email mời thiết lập mật khẩu. Đây là email xác thực tài khoản, không phải email thông báo CRM tự động. Cần cấu hình URL chuyển hướng của Auth trùng với trang Admin.</p></div>
+<p id="staff-status" role="status" aria-live="polite" class="status"></p>
+<div class="table-wrap"><table><thead><tr><th>Nhân viên</th><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="staff-table"></tbody></table></div>
+<p class="privacy-note">Nhân viên được giao việc theo tài khoản. Công việc gán tên cũ vẫn giữ nguyên cho đến khi Admin gắn tài khoản thủ công. Các thay đổi quyền có thể cần đăng xuất/đăng nhập lại để làm mới phiên làm việc.</p>
 </section>
 </section>
 </main>
