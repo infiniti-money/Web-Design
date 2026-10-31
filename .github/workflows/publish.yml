@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   release:
-    name: GitHub Release v1.8.0
+    name: GitHub Release v1.9.0
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
@@ -22,24 +22,24 @@ jobs:
       - name: Verify source
         run: |
           node --test tests/static.test.cjs tests/email-notification.test.cjs
-      - name: Package v1.8.0
+      - name: Package v1.9.0
         run: |
-          mkdir -p dist/atelier-home-v1.8.0/supabase/functions/submit-inquiry
-          cp index.html admin.html admin.js app-config.js site-backend.js privacy.html README.md SUPABASE_SETUP.md TURNSTILE_SETUP.md EMAIL_NOTIFICATIONS_SETUP.md RELEASE_NOTES_V1_8_0.md dist/atelier-home-v1.8.0/
-          cp supabase/schema.sql supabase/inquiry-rate-limit.sql supabase/privacy-consent.sql supabase/inquiry-retention-12m.sql supabase/admin-contact-rpc.sql supabase/customer-care-v1_6.sql supabase/customer-care-audit-v1_6.sql supabase/customer-care-edit-v1_7.sql supabase/customer-care-tasks-v1_8.sql dist/atelier-home-v1.8.0/supabase/
-          cp supabase/functions/submit-inquiry/index.ts dist/atelier-home-v1.8.0/supabase/functions/submit-inquiry/
+          mkdir -p dist/atelier-home-v1.9.0/supabase/functions/submit-inquiry
+          cp index.html admin.html admin.js app-config.js site-backend.js privacy.html README.md SUPABASE_SETUP.md TURNSTILE_SETUP.md EMAIL_NOTIFICATIONS_SETUP.md RELEASE_NOTES_V1_9_0.md dist/atelier-home-v1.9.0/
+          cp supabase/schema.sql supabase/inquiry-rate-limit.sql supabase/privacy-consent.sql supabase/inquiry-retention-12m.sql supabase/admin-contact-rpc.sql supabase/customer-care-v1_6.sql supabase/customer-care-audit-v1_6.sql supabase/customer-care-edit-v1_7.sql supabase/customer-care-tasks-v1_8.sql dist/atelier-home-v1.9.0/supabase/
+          cp supabase/functions/submit-inquiry/index.ts dist/atelier-home-v1.9.0/supabase/functions/submit-inquiry/
           cd dist
-          zip -qr atelier-home-v1.8.0.zip atelier-home-v1.8.0
+          zip -qr atelier-home-v1.9.0.zip atelier-home-v1.9.0
       - name: Create Release if not yet published
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v1.8.0 >/dev/null 2>&1; then
-            echo "Existing v1.8.0 release remains unchanged."
+          if gh release view v1.9.0 >/dev/null 2>&1; then
+            echo "Existing v1.9.0 release remains unchanged."
           else
-            gh release create v1.8.0 ./dist/atelier-home-v1.8.0.zip \
+            gh release create v1.9.0 ./dist/atelier-home-v1.9.0.zip \
               --target "$GITHUB_SHA" \
-              --title "ATELIER HOME v1.8.0 — Customer Care Task Assignments and Progress" \
-              --notes-file RELEASE_NOTES_V1_8_0.md
+              --title "ATELIER HOME v1.9.0 — Kanban Customer Care Workflows" \
+              --notes-file RELEASE_NOTES_V1_9_0.md
           fi
 
