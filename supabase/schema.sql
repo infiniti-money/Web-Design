@@ -32,11 +32,14 @@ create table if not exists public.inquiries (
   status text not null default 'new' check (status in ('new','contacted','quoted','closed')),
   consented_at timestamptz,
   privacy_policy_version text,
+  last_contacted_at timestamptz,
+  legal_hold_until timestamptz,
   created_at timestamptz not null default now()
 );
 
 create index if not exists idx_projects_public on public.projects (published, sort_order, created_at desc);
 create index if not exists idx_inquiries_created on public.inquiries (created_at desc);
+create index if not exists idx_inquiries_contacted_at on public.inquiries (last_contacted_at);
 
 alter table public.projects enable row level security;
 alter table public.inquiries enable row level security;
