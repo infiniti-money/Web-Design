@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="index,follow">
+<meta name="description" content="Thông báo bảo vệ dữ liệu cá nhân trên website ATELIER HOME: mục đích, loại dữ liệu, nơi lưu trữ, quyền và biện pháp an toàn.">
+<title>Chính sách quyền riêng tư — ATELIER HOME</title>
+<style>
+:root{--ink:#273a30;--muted:#627269;--border:#dee5dd;--paper:#fbfbf7}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.75 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}header{padding:18px max(5%,calc((100% - 920px)/2));background:#203228;color:#fff}header a{color:inherit;text-decoration:none;font-weight:700;letter-spacing:.12em}
+main{max-width:920px;margin:auto;padding:55px 26px 90px}h1{font:normal clamp(32px,4vw,50px)/1.2 Georgia,serif;margin:4px 0 15px}h2{font:normal 27px Georgia,serif;margin:42px 0 12px}p,li{color:#42564a}a{color:#236d4a}ul{padding-left:24px}small,.muted{color:var(--muted)}.note{border-left:3px solid #9d865d;padding:12px 18px;background:#f6f1e8;margin:28px 0}.back{display:inline-block;margin-top:25px}footer{border-top:1px solid var(--border);padding:25px;text-align:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<header><a href="./index.html" aria-label="Trở về ATELIER HOME">ATELIER HOME</a></header>
+<main>
+<small>Thông tin xử lý dữ liệu cá nhân · Cập nhật 31/10/2026</small>
+<h1>Chính sách quyền riêng tư</h1>
+<p>ATELIER HOME tôn trọng quyền riêng tư của người truy cập. Trang này giải thích cách website mẫu tiếp nhận và bảo vệ dữ liệu khi bạn chủ động gửi yêu cầu tư vấn nội thất.</p>
+<div class="note"><strong>Thông tin cần hoàn thiện trước vận hành thương mại:</strong> ATELIER HOME hiện là website giới thiệu mẫu. Tên pháp lý, địa chỉ và đầu mối tiếp nhận yêu cầu về dữ liệu cá nhân của tổ chức vận hành chưa được xác minh/công bố. Chủ website phải bổ sung các thông tin này trước khi chính thức sử dụng website để thu thập dữ liệu khách hàng.</div>
+<h2>1. Những dữ liệu được thu thập</h2>
+<ul>
+<li>Khi gửi tư vấn: họ tên, số điện thoại, loại dịch vụ, loại không gian, nội dung và nhu cầu do bạn nhập.</li>
+<li>Hệ thống lưu thời điểm tạo yêu cầu và trạng thái xử lý để quản lý quá trình tư vấn.</li>
+<li>Để hạn chế spam, máy chủ xử lý địa chỉ IP và số điện thoại thành dấu vân tay HMAC theo từng khoảng thời gian; bảng giới hạn không lưu IP gốc.</li>
+<li>Nếu Cloudflare Turnstile được kích hoạt, dịch vụ có thể xử lý các tín hiệu trình duyệt và mạng nhằm xác minh tương tác của con người.</li>
+</ul>
+<p>Không đề nghị cung cấp CCCD, tài khoản ngân hàng, mật khẩu hoặc thông tin nhạy cảm qua biểu mẫu.</p>
+<h2>2. Mục đích và căn cứ xử lý</h2>
+<p>Thông tin được xử lý nhằm ghi nhận yêu cầu bạn chủ động gửi, liên hệ và tư vấn dịch vụ nội thất, sắp xếp công việc chăm sóc khách hàng, phòng chống gửi biểu mẫu tự động và bảo vệ hệ thống. Biểu mẫu yêu cầu bạn xác nhận đồng ý trước khi gửi. Việc không đồng ý có nghĩa bạn không sử dụng biểu mẫu này.</p>
+<h2>3. Nơi lưu trữ và đơn vị hỗ trợ xử lý</h2>
+<p>Dữ liệu yêu cầu tư vấn được lưu trong cơ sở dữ liệu Supabase tại khu vực Singapore. Website được xuất bản bằng GitHub Pages. Các nội dung và tài nguyên công khai có thể được tải từ GitHub, Google Fonts, jsDelivr và Unsplash. Khi Turnstile được kích hoạt, việc kiểm tra chống bot thực hiện thông qua Cloudflare. Những đơn vị cung cấp hạ tầng này có thể nhận thông tin kỹ thuật kết nối cần thiết để cung cấp dịch vụ.</p>
+<h2>4. Ai có quyền truy cập dữ liệu?</h2>
+<p>Chỉ tài khoản được cấp vai trò quản trị trong hệ thống Supabase mới có thể xem và quản lý thông tin yêu cầu tư vấn. Khách truy cập không được đọc hồ sơ của người khác hoặc ghi trực tiếp vào bảng dữ liệu. Biểu mẫu được gửi qua API máy chủ có kiểm tra dữ liệu và giới hạn tần suất.</p>
+<h2>5. Thời hạn lưu và xóa dữ liệu</h2>
+<p>Thông tin được lưu để phục vụ quá trình tiếp nhận và xử lý yêu cầu, cho đến khi không còn cần thiết hoặc khi có yêu cầu xóa hợp lệ, trừ trường hợp pháp luật quy định phải lưu lâu hơn. <strong>Chưa có thời hạn lưu cụ thể hoặc quy trình tự động xóa định kỳ được thiết lập;</strong> chủ website phải xác định lịch lưu/xóa trước vận hành chính thức.</p>
+<h2>6. Quyền của bạn</h2>
+<p>Bạn có thể yêu cầu biết thông tin đang được xử lý, xem, chỉnh sửa, rút lại sự đồng ý hoặc xóa dữ liệu trong phạm vi pháp luật cho phép. Khi gửi yêu cầu, cần cung cấp thông tin đủ để xác minh quyền sở hữu dữ liệu; không gửi thêm thông tin nhạy cảm không cần thiết.</p>
+<p><strong>Kênh tiếp nhận yêu cầu quyền riêng tư:</strong> đang chờ chủ website công bố thông tin liên hệ chính thức. Đây là điểm chưa hoàn thiện và cần được bổ sung trước khi tiếp nhận khách hàng thương mại.</p>
+<h2>7. An toàn và giới hạn kỹ thuật</h2>
+<p>Website áp dụng Supabase Auth, phân quyền RLS, HTTPS, giới hạn tần suất gửi và bộ kiểm tra chống spam phía máy chủ. Việc truyền dữ liệu qua Internet không thể được bảo đảm an toàn tuyệt đối. Trình duyệt của quản trị viên có thể lưu phiên đăng nhập để duy trì xác thực; nên đăng xuất trên thiết bị dùng chung.</p>
+<h2>8. Cập nhật</h2>
+<p>Chính sách có thể được cập nhật khi thay đổi tính năng, nhà cung cấp dịch vụ, quy trình lưu trữ hay thông tin đơn vị vận hành. Phiên bản mới sẽ được công bố tại đường dẫn này.</p>
+<a class="back" href="./index.html">← Quay lại trang chủ</a>
+</main>
+<footer>© ATELIER HOME · Tài liệu minh bạch dữ liệu cho website mẫu</footer>
+</body>
+</html>
