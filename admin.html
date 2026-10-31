@@ -20,6 +20,14 @@
 .customer-panel textarea{min-height:85px;resize:vertical}.customer-panel label{display:block;margin-bottom:7px;font-weight:600;font-size:12px}
 .care-history{padding-left:18px;max-height:320px;overflow:auto}.care-history li{padding:11px 5px;border-bottom:1px solid #e7ebe5}
 .care-history span{display:block;font-size:11px;color:var(--muted)}
+.care-history li{overflow-wrap:anywhere}
+.care-note-tools{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px}
+.care-note-edit{margin-top:9px;padding:11px;background:#f1f5ef;border:1px solid #dce4d9}
+.care-note-edit textarea{width:100%;min-height:86px;margin-bottom:10px}
+.care-revisions{padding-left:20px;margin-top:12px;max-height:230px;overflow-y:auto}
+.care-revisions li{padding:10px 5px;border-bottom:1px solid #e7ebe5;overflow-wrap:anywhere}
+.care-revisions small{display:block;color:var(--muted)}
+.note-edit-badge{color:#4d6c51!important;font-size:11px}
 .due-soon{color:#a25223;font-weight:bold}.crm-kpis button{border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:0}
 @media(max-width:700px){.customer-care-grid,.customer-profile-grid{grid-template-columns:1fr}.customer-panel{padding:15px}}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #9bb4a0;outline-offset:2px}
@@ -31,7 +39,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <section id="setup-panel" class="card auth hide"><h1>Chưa kết nối cơ sở dữ liệu</h1><p>Trang quản trị đã được chuẩn bị, nhưng chưa cấu hình Supabase. Cần tạo dự án Supabase, áp dụng <code>supabase/schema.sql</code>, gán quyền quản trị và khai báo URL cùng publishable key trong <code>app-config.js</code>.</p><p class="hint">Không được đưa service_role hoặc secret key lên GitHub.</p><a class="btn" href="./index.html">Về trang chủ</a></section>
 <section id="login-panel" class="auth card hide"><p class="muted" style="font-size:11px;letter-spacing:.16em">SECURE ADMIN LOGIN</p><h1>Đăng nhập quản trị</h1><p>Chỉ tài khoản có quyền quản trị được cấp bởi hệ thống mới có thể xem hồ sơ khách hàng và chỉnh sửa dự án.</p><form id="login-form"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required maxlength="254"></div><div class="field"><label for="password">Mật khẩu</label><input id="password" type="password" autocomplete="current-password" required></div><button class="btn" id="login-button" type="submit">Đăng nhập</button><p class="status" id="login-status" role="status" aria-live="polite"></p></form><p class="hint">Không hỗ trợ tự đăng ký quản trị từ website công khai.</p></section>
 <section id="dashboard" class="hide">
-<div class="toolbar"><div><p class="muted" style="font-size:11px;letter-spacing:.14em;margin-bottom:8px">ATELIER HOME · DASHBOARD v1.6</p><h1>Không gian quản trị</h1><p class="muted" id="signed-in-email"></p></div><button id="logout" class="btn ghost" type="button">Đăng xuất ↗</button></div>
+<div class="toolbar"><div><p class="muted" style="font-size:11px;letter-spacing:.14em;margin-bottom:8px">ATELIER HOME · DASHBOARD v1.7</p><h1>Không gian quản trị</h1><p class="muted" id="signed-in-email"></p></div><button id="logout" class="btn ghost" type="button">Đăng xuất ↗</button></div>
 <div class="metrics"><div class="metric"><strong id="metric-projects">–</strong><span>Tổng dự án</span></div><div class="metric"><strong id="metric-published">–</strong><span>Dự án xuất bản</span></div><div class="metric"><strong id="metric-inquiries">–</strong><span>Yêu cầu tư vấn mới</span></div></div>
 <div class="tabs" role="tablist" aria-label="Mục quản trị"><button class="tab" id="tab-projects" role="tab" aria-selected="true" aria-controls="panel-projects">Quản lý dự án</button><button class="tab" id="tab-inquiries" role="tab" aria-selected="false" aria-controls="panel-inquiries">Yêu cầu tư vấn</button></div>
 <p id="dash-status" class="status" role="status" aria-live="polite"></p>
@@ -63,11 +71,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <p class="hint" id="profile-reminder-current">Chưa đặt lịch</p>
 <label for="profile-reminder-at">Ngày giờ nhắc (theo thời gian máy của bạn)</label>
 <input type="datetime-local" id="profile-reminder-at">
-<div class="actions" style="margin-top:13px"><button type="submit" class="btn" id="profile-reminder-save">Đặt lịch</button><button type="button" class="btn ghost" id="profile-reminder-clear">Hủy lịch</button></div>
+<div class="actions" style="margin-top:13px"><button type="submit" class="btn" id="profile-reminder-save">Đặt lịch</button><button type="button" class="btn ghost" id="profile-reminder-clear">Hủy lịch</button><button type="button" class="btn ghost" id="profile-reminder-done">Hoàn thành công việc</button></div>
 <p class="hint">Lịch nhắc hiển thị trong Admin. Chưa gửi email hoặc thông báo đẩy tự động.</p></form>
 </div>
-<h3>Lịch sử chăm sóc</h3><ol id="profile-history" class="care-history"><li>Đang tải ghi chú...</li></ol>
-<p class="hint">Lịch sử hiển thị tối đa 100 sự kiện gần nhất; khi hết 12 tháng, ghi chú cũng được xóa theo hồ sơ.</p>
+<h3>Lịch sử chăm sóc</h3>
+<p class="hint">Nhấn Sửa ghi chú để cập nhật nội dung. Nội dung cũ được giữ trong nhật ký chỉnh sửa, không sửa được bản ghi hệ thống.</p>
+<ol id="profile-history" class="care-history"><li>Đang tải ghi chú...</li></ol>
+<h3>Nhật ký chỉnh sửa ghi chú</h3>
+<ol id="profile-revisions" class="care-revisions"><li>Chưa có chỉnh sửa.</li></ol>
+<p class="hint">Lịch sử và nhật ký chỉnh sửa hiển thị tối đa 100 bản ghi gần nhất cho mỗi nhóm; khi hết 12 tháng, ghi chú và các phiên bản cũ được xóa cùng hồ sơ.</p>
 <p id="profile-status" class="status" role="status" aria-live="polite"></p>
 </section><div class="privacy-note">Dữ liệu khách hàng là thông tin cá nhân. Bộ lọc và tổng số hồ sơ được truy vấn trực tiếp từ Supabase. Mỗi trang hiển thị tối đa 25 hồ sơ. Tệp CSV chỉ xuất trang hiện tại; bảo quản tệp vì có dữ liệu cá nhân. Chỉ chia sẻ với người được phân quyền. Hồ sơ được lưu tối đa 12 tháng kể từ lần liên hệ thực tế cuối cùng; nếu chưa liên hệ, tính từ ngày nhận. Nhấn “Ghi nhận liên hệ” sau khi đã trao đổi với khách. Hệ thống tự kiểm tra và xóa hồ sơ hết hạn hằng ngày, trừ trường hợp có nghĩa vụ lưu trữ pháp lý.</div></section>
 </section>
