@@ -17,6 +17,11 @@ async function main() {
   try {
     const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 }, locale: "vi-VN" });
     desktop.on("pageerror", error => consoleErrors.push("home: " + error.message));
+    // The deployed website has a real Turnstile sitekey. Mock ONLY the browser
+    // challenge in this read-only smoke test; never bypass server Siteverify.
+    await desktop.route("**/challenges.cloudflare.com/turnstile/v0/api.js**", route =>
+      route.fulfill({status:200,contentType:"application/javascript",body:
+        'window.turnstile={render:function(el,opts){opts.callback("ci-browser-challenge");return "widget";},reset:function(){}};'}));
     const projectsResponse = desktop.waitForResponse(
       r => r.url().includes("/rest/v1/projects?") && r.request().method() === "GET",
       { timeout: 45000 }
@@ -65,11 +70,14 @@ async function main() {
     await desktop.locator("#phone").fill("0900000000");
     await desktop.locator("#service").selectOption({label:"Thiết kế nội thất"});
     await desktop.locator("#consent").check();
+    await desktop.locator("#lead-form [type=submit]:not([disabled])").waitFor({timeout:15000});
     await desktop.locator("#lead-form [type=submit]").click();
     await desktop.locator("#form-feedback").getByText("Yêu cầu đã được hệ thống ghi nhận").waitFor();
     assert.equal(intercepted.length,1,"Form must use Edge Function exactly once");
     assert.equal(intercepted[0].full_name,"Người kiểm thử");
     assert.equal(intercepted[0].privacy_consent,true,"Website must forward affirmative consent");
+    assert.equal(intercepted[0].turnstile_token,"ci-browser-challenge",
+      "Real-sitekey client must forward challenge after client-side verification");
     console.log("CONSULTATION: Edge Function request sent; mocked success without writing customer data");
 
     // Privacy notice must be published and linked by the consultation form.
@@ -138,7 +146,7 @@ window.supabase={createClient:()=>{
     // Simulate Cloudflare Turnstile in browser without a real widget or a customer record.
     const turnstileTest = await browser.newPage({ viewport: { width: 1080, height: 800 }, locale: "vi-VN" });
     const configured = fs.readFileSync("app-config.js","utf8")
-      .replace('turnstileSiteKey: ""', 'turnstileSiteKey: "1x00000000000000000000AA"');
+      .replace(/turnstileSiteKey:\s*"[^"]*"/, 'turnstileSiteKey: "1x00000000000000000000AA"');
     assert.match(configured, /turnstileSiteKey: "1x00000000000000000000AA"/);
     await turnstileTest.route("**/app-config.js", route =>
       route.fulfill({status:200,contentType:"application/javascript",body:configured}));
