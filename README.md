@@ -10,14 +10,14 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - **Tài khoản quản trị:** 1 tài khoản email đã xác minh, được cấp `app_metadata.role = admin`. Không có mật khẩu trong mã nguồn.
 - **Cơ sở dữ liệu:** `public.projects` với 6 dự án minh họa, `public.inquiries` chứa yêu cầu tư vấn riêng tư.
 - **Quyền dữ liệu:** RLS bật; khách chỉ được xem dự án published, **không được đọc hoặc ghi trực tiếp vào bảng khách hàng**.
-- **Turnstile:** mã widget và Siteverify đã tích hợp, **đã kích hoạt bằng Sitekey công khai** và xác minh token ở máy chủ; thử token giả trả HTTP 403. Cần một lần gửi biểu mẫu hợp lệ thủ công để nghiệm thu cuối cùng; xem [TURNSTILE_SETUP.md](TURNSTILE_SETUP.md).
+- **Turnstile:** mã widget và Siteverify đã tích hợp, **đã kích hoạt bằng Sitekey công khai** và xác minh token ở máy chủ; thử token giả trả HTTP 403. Đã kiểm thử một lần gửi biểu mẫu thực tế và xác nhận xuất hiện trong Admin ngày 31/10/2026; xem [TURNSTILE_SETUP.md](TURNSTILE_SETUP.md).
 - **Biểu mẫu:** gọi Supabase Edge Function `submit-inquiry`; API yêu cầu `privacy_consent=true`, ghi nhận thời điểm và phiên bản chính sách `2026-10-31-retention-12m`, kiểm tra đầu vào, honeypot, nguồn gọi và hạn chế tần suất (3 lần/giờ theo IP, 5 lần/ngày theo số điện thoại). Chỉ mã máy chủ giữ khóa đặc quyền.
 - **Triển khai:** GitHub Pages được xuất bản bằng quy trình Jekyll tự động từ nhánh chính. Release GitHub riêng đóng gói phiên bản tải xuống.
 
 ## Thành phần mã nguồn
 
 - `index.html` — trang chủ, danh mục dự án, bộ lọc, biểu mẫu tư vấn.
-- `admin.html`, `admin.js` — đăng nhập Supabase Auth, quản lý dự án và khách hàng, bộ lọc trạng thái/dịch vụ/thời gian, tìm kiếm, thống kê và thao tác ghi nhận liên hệ.
+- `admin.html`, `admin.js` — đăng nhập Supabase Auth, quản lý dự án/khách hàng, tìm kiếm và lọc phía Supabase, thống kê toàn hệ thống, phân trang 25 hồ sơ và xuất CSV trang hiện tại.
 - `app-config.js` — Project URL và publishable key công khai (không chứa secret).
 - `site-backend.js` — lấy dự án từ Supabase, gửi form qua Edge Function.
 - `supabase/schema.sql` — dữ liệu và chính sách RLS.
@@ -27,7 +27,7 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - `supabase/admin-contact-rpc.sql` — RPC theo giờ máy chủ để ghi nhận liên hệ, tuân thủ RLS Admin.
 - `supabase/functions/submit-inquiry/index.ts` — mã Edge Function đang chạy tại Supabase.
 - `SUPABASE_SETUP.md` — hướng dẫn bảo mật và vận hành.
-- `privacy.html` — chính sách quyền riêng tư: đơn vị Tân Design, địa chỉ chủ website cung cấp và email tiếp nhận `infinitimoney@icloud.com`; chưa có xác minh đăng ký pháp lý và thời hạn lưu/xóa.
+- `privacy.html` — chính sách quyền riêng tư: đơn vị Tân Design, địa chỉ chủ website cung cấp và email tiếp nhận `infinitimoney@icloud.com`; chưa có xác minh đăng ký pháp lý, đã cấu hình giữ dữ liệu 12 tháng.
 - `TURNSTILE_SETUP.md` — cấu hình Cloudflare widget và Supabase Edge secrets.
 - `EMAIL_NOTIFICATIONS_SETUP.md` — hướng dẫn kích hoạt gửi email tự động qua Resend bằng secrets phía máy chủ.
 - `tests/admin-rls-rollback.sql` — kiểm thử phân quyền admin có hoàn tác.
@@ -48,6 +48,6 @@ GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và t
 - Đã kiểm thử quyền thêm/sửa/xóa dự án và RPC ghi nhận liên hệ theo thời gian máy chủ; non-admin không thể ghi nhận, giao dịch thử được hoàn tác. Kiểm thử UI bằng Supabase mock trong Chromium; chưa thử đăng nhập bằng mật khẩu thật.
 - Không được đưa `sb_secret_`, `service_role`, mật khẩu hoặc token nhạy cảm vào frontend/GitHub.
 
-Các số liệu và bộ lọc CRM hiện dựa trên **tối đa 200 yêu cầu tư vấn mới nhất**, không phải toàn bộ lịch sử khi số hồ sơ vượt quá giới hạn. Dữ liệu chỉ hiển thị sau khi đăng nhập tài khoản Admin được xác minh.
+CRM v1.5.0 truy vấn **phân trang 25 hồ sơ/lần** sau khi Admin xác thực. Tìm kiếm và bộ lọc chạy trong Supabase; thống kê tổng khách, số yêu cầu mới, đã liên hệ và đã báo giá dùng `count: exact` từ dữ liệu đầy đủ, không còn dựa trên 200 hồ sơ đã tải. Nút **Xuất CSV trang này** chỉ xuất tối đa 25 hồ sơ đang hiện và yêu cầu xác nhận; CSV có bảo vệ khỏi công thức bảng tính. Không gửi tệp ra máy chủ bên thứ ba; file chỉ được tạo trong trình duyệt Admin. Khi tìm kiếm bằng tên tiếng Việt ở máy chủ, nên nhập chữ có dấu phù hợp. Dữ liệu chỉ hiển thị sau khi đăng nhập tài khoản Admin được xác minh.
 
 Chi tiết: [SUPABASE_SETUP.md](SUPABASE_SETUP.md) và [EMAIL_NOTIFICATIONS_SETUP.md](EMAIL_NOTIFICATIONS_SETUP.md).
