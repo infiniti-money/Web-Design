@@ -51,6 +51,21 @@ test("Public and admin pages include key functional sections", () => {
   assert.match(adminJs,/from\("inquiry_care_notes"\)/);
   assert.match(adminJs,/classList\.remove\("hide"\)/);
   assert.match(adminJs,/prefers-reduced-motion|loadProfileNotes/);
+  for(const id of ["profile-revisions","profile-reminder-done"]){
+    assert.match(admin,new RegExp('id="'+id+'"'));
+  }
+  assert.match(adminJs,/edit_inquiry_care_note/);
+  assert.match(adminJs,/p_expected_updated_at/);
+  assert.match(adminJs,/complete_inquiry_followup/);
+  assert.match(adminJs,/inquiry_care_note_revisions/);
+  const migrationV17=read("supabase/customer-care-edit-v1_7.sql");
+  assert.match(migrationV17,/security definer set search_path=''/);
+  assert.match(migrationV17,/security invoker set search_path=''/);
+  assert.match(migrationV17,/STALE_NOTE/);
+  assert.match(migrationV17,/previous_body,revised_body,edited_by/);
+  assert.match(migrationV17,/from public,anon,authenticated/);
+  assert.match(migrationV17,/on delete cascade/);
+  assert.match(migrationV17,/admin view note revisions/);
 
 });
 
