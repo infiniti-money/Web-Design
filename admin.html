@@ -28,6 +28,17 @@
 .care-revisions li{padding:10px 5px;border-bottom:1px solid #e7ebe5;overflow-wrap:anywhere}
 .care-revisions small{display:block;color:var(--muted)}
 .note-edit-badge{color:#4d6c51!important;font-size:11px}
+.task-form{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.task-form .field{margin:0}.task-form .field label{font-size:11px}
+.task-form textarea{min-height:70px}.task-taskline{margin:12px 0;padding:13px;border:1px solid var(--line);background:#f9fbf8}
+.task-taskline p{margin:2px 0}.task-taskline small{display:block;color:var(--muted)}
+.task-taskline .actions{margin-top:10px}.task-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.task-board article{border:1px solid var(--line);background:#fff;padding:15px}.task-board strong{display:block;font:28px Georgia,serif}
+.task-board span{font-size:12px;color:var(--muted)}.task-filters{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:15px}
+.task-filters .field{min-width:155px;margin:0}.task-filters select,.task-filters input{width:100%;min-height:44px;padding:10px;border:1px solid var(--line);background:#fff}
+@media(max-width:850px){.task-form{grid-template-columns:repeat(2,minmax(0,1fr))}.task-board{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.task-form{grid-template-columns:1fr}.task-filters .field{width:100%}}
+
 .due-soon{color:#a25223;font-weight:bold}.crm-kpis button{border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:0}
 @media(max-width:700px){.customer-care-grid,.customer-profile-grid{grid-template-columns:1fr}.customer-panel{padding:15px}}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #9bb4a0;outline-offset:2px}
@@ -39,9 +50,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <section id="setup-panel" class="card auth hide"><h1>Chưa kết nối cơ sở dữ liệu</h1><p>Trang quản trị đã được chuẩn bị, nhưng chưa cấu hình Supabase. Cần tạo dự án Supabase, áp dụng <code>supabase/schema.sql</code>, gán quyền quản trị và khai báo URL cùng publishable key trong <code>app-config.js</code>.</p><p class="hint">Không được đưa service_role hoặc secret key lên GitHub.</p><a class="btn" href="./index.html">Về trang chủ</a></section>
 <section id="login-panel" class="auth card hide"><p class="muted" style="font-size:11px;letter-spacing:.16em">SECURE ADMIN LOGIN</p><h1>Đăng nhập quản trị</h1><p>Chỉ tài khoản có quyền quản trị được cấp bởi hệ thống mới có thể xem hồ sơ khách hàng và chỉnh sửa dự án.</p><form id="login-form"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required maxlength="254"></div><div class="field"><label for="password">Mật khẩu</label><input id="password" type="password" autocomplete="current-password" required></div><button class="btn" id="login-button" type="submit">Đăng nhập</button><p class="status" id="login-status" role="status" aria-live="polite"></p></form><p class="hint">Không hỗ trợ tự đăng ký quản trị từ website công khai.</p></section>
 <section id="dashboard" class="hide">
-<div class="toolbar"><div><p class="muted" style="font-size:11px;letter-spacing:.14em;margin-bottom:8px">ATELIER HOME · DASHBOARD v1.7</p><h1>Không gian quản trị</h1><p class="muted" id="signed-in-email"></p></div><button id="logout" class="btn ghost" type="button">Đăng xuất ↗</button></div>
+<div class="toolbar"><div><p class="muted" style="font-size:11px;letter-spacing:.14em;margin-bottom:8px">ATELIER HOME · DASHBOARD v1.8</p><h1>Không gian quản trị</h1><p class="muted" id="signed-in-email"></p></div><button id="logout" class="btn ghost" type="button">Đăng xuất ↗</button></div>
 <div class="metrics"><div class="metric"><strong id="metric-projects">–</strong><span>Tổng dự án</span></div><div class="metric"><strong id="metric-published">–</strong><span>Dự án xuất bản</span></div><div class="metric"><strong id="metric-inquiries">–</strong><span>Yêu cầu tư vấn mới</span></div></div>
-<div class="tabs" role="tablist" aria-label="Mục quản trị"><button class="tab" id="tab-projects" role="tab" aria-selected="true" aria-controls="panel-projects">Quản lý dự án</button><button class="tab" id="tab-inquiries" role="tab" aria-selected="false" aria-controls="panel-inquiries">Yêu cầu tư vấn</button></div>
+<div class="tabs" role="tablist" aria-label="Mục quản trị"><button class="tab" id="tab-projects" role="tab" aria-selected="true" aria-controls="panel-projects">Quản lý dự án</button><button class="tab" id="tab-inquiries" role="tab" aria-selected="false" aria-controls="panel-inquiries">Yêu cầu tư vấn</button><button class="tab" id="tab-tasks" role="tab" aria-selected="false" aria-controls="panel-tasks">Công việc chăm sóc</button></div>
 <p id="dash-status" class="status" role="status" aria-live="polite"></p>
 <section id="panel-projects" role="tabpanel" aria-labelledby="tab-projects">
 <div class="split"><div><div class="toolbar"><h2>Danh sách dự án</h2><button type="button" id="reload-projects" class="btn ghost">Làm mới</button></div><div class="table-wrap"><table><thead><tr><th>Dự án</th><th>Loại</th><th>Hiển thị</th><th>Thao tác</th></tr></thead><tbody id="projects-table"></tbody></table></div></div>
@@ -74,6 +85,25 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="actions" style="margin-top:13px"><button type="submit" class="btn" id="profile-reminder-save">Đặt lịch</button><button type="button" class="btn ghost" id="profile-reminder-clear">Hủy lịch</button><button type="button" class="btn ghost" id="profile-reminder-done">Hoàn thành công việc</button></div>
 <p class="hint">Lịch nhắc hiển thị trong Admin. Chưa gửi email hoặc thông báo đẩy tự động.</p></form>
 </div>
+<section aria-label="Phân công và tiến độ chăm sóc" style="margin-top:24px">
+<h3>Phân công chăm sóc khách hàng</h3>
+<p class="hint">Giao công việc cho người phụ trách theo tên. Chỉ Admin có quyền đăng nhập và cập nhật tiến độ; người được ghi tên chưa tự nhận thông báo.</p>
+<form id="care-task-form">
+<div class="task-form">
+<div class="field"><label for="care-task-title">Tên công việc *</label><input id="care-task-title" maxlength="180" required placeholder="Ví dụ: Gửi báo giá thiết kế"></div>
+<div class="field"><label for="care-task-assignee">Người phụ trách *</label><input id="care-task-assignee" maxlength="100" required placeholder="Tên nhân viên"></div>
+<div class="field"><label for="care-task-priority">Ưu tiên</label><select id="care-task-priority"><option value="normal">Bình thường</option><option value="high">Cao</option><option value="urgent">Khẩn cấp</option></select></div>
+<div class="field"><label for="care-task-due">Hạn hoàn thành</label><input type="datetime-local" id="care-task-due"></div>
+</div>
+<div class="field"><label for="care-task-details">Mô tả công việc</label><textarea id="care-task-details" maxlength="1500" placeholder="Mục tiêu, kết quả cần bàn giao..."></textarea></div>
+<button type="submit" class="btn" id="care-task-create">Giao công việc</button>
+</form>
+<p id="care-task-status" class="status" role="status" aria-live="polite"></p>
+<h3>Tiến độ công việc của khách hàng</h3>
+<div id="care-task-list" aria-live="polite"><p class="muted">Chưa có công việc.</p></div>
+<h3>Lịch sử giao việc và cập nhật tiến độ</h3>
+<ol id="care-task-events" class="care-revisions"><li>Chưa có hoạt động.</li></ol>
+</section>
 <h3>Lịch sử chăm sóc</h3>
 <p class="hint">Nhấn Sửa ghi chú để cập nhật nội dung. Nội dung cũ được giữ trong nhật ký chỉnh sửa, không sửa được bản ghi hệ thống.</p>
 <ol id="profile-history" class="care-history"><li>Đang tải ghi chú...</li></ol>
@@ -82,6 +112,23 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <p class="hint">Lịch sử và nhật ký chỉnh sửa hiển thị tối đa 100 bản ghi gần nhất cho mỗi nhóm; khi hết 12 tháng, ghi chú và các phiên bản cũ được xóa cùng hồ sơ.</p>
 <p id="profile-status" class="status" role="status" aria-live="polite"></p>
 </section><div class="privacy-note">Dữ liệu khách hàng là thông tin cá nhân. Bộ lọc và tổng số hồ sơ được truy vấn trực tiếp từ Supabase. Mỗi trang hiển thị tối đa 25 hồ sơ. Tệp CSV chỉ xuất trang hiện tại; bảo quản tệp vì có dữ liệu cá nhân. Chỉ chia sẻ với người được phân quyền. Hồ sơ được lưu tối đa 12 tháng kể từ lần liên hệ thực tế cuối cùng; nếu chưa liên hệ, tính từ ngày nhận. Nhấn “Ghi nhận liên hệ” sau khi đã trao đổi với khách. Hệ thống tự kiểm tra và xóa hồ sơ hết hạn hằng ngày, trừ trường hợp có nghĩa vụ lưu trữ pháp lý.</div></section>
+<section id="panel-tasks" role="tabpanel" aria-labelledby="tab-tasks" class="hide">
+<div class="toolbar"><div><h2>Tiến độ chăm sóc khách hàng</h2><p class="hint">Theo dõi việc đã giao, người phụ trách và hạn xử lý. Chỉ Admin có quyền thao tác.</p></div>
+<button type="button" class="btn ghost" id="reload-tasks">Làm mới</button></div>
+<div class="task-board" aria-label="Thống kê công việc">
+<article><strong id="tasks-total">0</strong><span>Tổng công việc</span></article>
+<article><strong id="tasks-todo">0</strong><span>Chờ thực hiện</span></article>
+<article><strong id="tasks-progress">0</strong><span>Đang thực hiện</span></article>
+<article><strong id="tasks-overdue">0</strong><span>Quá hạn chưa hoàn thành</span></article></div>
+<div class="task-filters">
+<div class="field"><label for="tasks-status-filter">Trạng thái</label><select id="tasks-status-filter"><option value="all">Tất cả</option><option value="todo">Chờ làm</option><option value="in_progress">Đang làm</option><option value="done">Hoàn thành</option></select></div>
+<div class="field"><label for="tasks-owner-filter">Người phụ trách</label><input id="tasks-owner-filter" maxlength="100" placeholder="Tìm người phụ trách"></div>
+<div class="field"><label for="tasks-due-filter">Thời hạn</label><select id="tasks-due-filter"><option value="all">Tất cả thời hạn</option><option value="overdue">Quá hạn</option><option value="7">Trong 7 ngày tới</option></select></div></div>
+<p id="tasks-board-status" class="status" role="status" aria-live="polite">Đang tải công việc...</p>
+<div class="table-wrap"><table><thead><tr><th>Khách hàng</th><th>Công việc</th><th>Người phụ trách</th><th>Ưu tiên / Hạn</th><th>Trạng thái</th></tr></thead><tbody id="tasks-board-table"></tbody></table></div>
+<nav class="crm-pagination" aria-label="Phân trang công việc"><button class="btn ghost" type="button" id="tasks-prev">Trang trước</button><span id="tasks-page-label">Trang 1</span><button class="btn ghost" type="button" id="tasks-next">Trang sau</button></nav>
+<p class="privacy-note">Công việc được phân công bằng tên người phụ trách, không tự cấp quyền đăng nhập. Các thay đổi trạng thái có nhật ký kiểm tra; dữ liệu công việc và lịch sử được xóa cùng hồ sơ khách hàng khi hết hạn lưu.</p>
+</section>
 </section>
 </main>
 <script defer src="./app-config.js"></script>
