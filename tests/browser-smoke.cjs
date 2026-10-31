@@ -110,6 +110,8 @@ window.supabase={createClient:()=>{
  let records=[];
  let careNotes=[];
  let noteRevisions=[];
+ let careTasks=[];
+ let taskEvents=[];
  let inquiries=[{id:"inquiry-mock-1",full_name:"KHÁCH KIỂM THỬ GIẢ",phone:"0900000000",
    service:"Thiết kế nội thất",space:"Căn hộ",details:"CI ONLY",status:"new",
    created_at:"2026-10-31T00:00:00.000Z",consented_at:"2026-10-31T00:00:00.000Z",
@@ -178,7 +180,10 @@ window.supabase={createClient:()=>{
      const q={
        conditions:[],head:false,countRequested:false,term:"",
        filtered(){
-         let items=table==="projects"?[...records]:table==="inquiries"?[...inquiries]:table==="inquiry_care_notes"?[...careNotes]:table==="inquiry_care_note_revisions"?[...noteRevisions]:[];
+         let items=table==="projects"?[...records]:table==="inquiries"?[...inquiries]:
+           table==="inquiry_care_notes"?[...careNotes]:table==="inquiry_care_note_revisions"?[...noteRevisions]:
+           table==="inquiry_care_tasks"?careTasks.map(x=>({...x,inquiries:{full_name:inquiries.find(i=>i.id===x.inquiry_id)?.full_name||""}})):
+           table==="inquiry_care_task_events"?[...taskEvents]:[];
          for(const fn of q.conditions)items=items.filter(fn);
          if(q.term)items=items.filter(row=>[row.full_name,row.phone,row.service,row.space,row.details]
            .some(value=>String(value||"").toLowerCase().includes(q.term)));
@@ -189,6 +194,12 @@ window.supabase={createClient:()=>{
        eq(key,value){q.conditions.push(row=>row[key]===value);return q},
        gte(key,value){q.conditions.push(row=>row[key]>=value);return q},
        gt(key,value){q.conditions.push(row=>row[key]>value);return q},
+       lt(key,value){q.conditions.push(row=>row[key]!=null && row[key]<value);return q},
+       neq(key,value){q.conditions.push(row=>row[key]!==value);return q},
+       ilike(key,value){
+         const term=String(value).replace(/%/g,"").toLowerCase();
+         q.conditions.push(row=>String(row[key]||"").toLowerCase().includes(term));return q;
+       },
        lte(key,value){q.conditions.push(row=>row[key] && row[key]<=value);return q},
        or(expression){const match=/full_name\.ilike\.%([^%]*)%/.exec(expression);q.term=(match?.[1]||"").toLowerCase();return q},
        range(start,end){const items=q.filtered();return Promise.resolve({data:items.slice(start,end+1),count:q.countRequested?items.length:null,error:null})},
@@ -198,12 +209,30 @@ window.supabase={createClient:()=>{
            const ts=new Date().toISOString();
            careNotes.push({id:"care-"+careNotes.length,created_at:ts,updated_at:ts,editable:true,note_kind:"note",...value});
          }
-         else records.push({id:"project-"+(records.length+1),...value});
+         else if(table==="inquiry_care_tasks"){
+           const ts=new Date().toISOString();
+           const record={id:"task-"+careTasks.length,created_at:ts,status:"todo",completed_at:null,...value};
+           careTasks.push(record);
+           taskEvents.push({id:"event-"+taskEvents.length,inquiry_id:record.inquiry_id,task_id:record.id,
+             event_type:"created",current_value:record.assignee_name,created_at:ts});
+         } else records.push({id:"project-"+(records.length+1),...value});
          return Promise.resolve({error:null});
        },
        update(value){return{eq(key,id){
-         const items=table==="inquiries"?inquiries:records;
+         const items=table==="inquiries"?inquiries:table==="inquiry_care_tasks"?careTasks:records;
          const item=items.find(r=>r[key]===id);
+         if(item&&table==="inquiry_care_tasks"){
+           if(value.status && value.status!==item.status)taskEvents.push({
+             id:"event-"+taskEvents.length,inquiry_id:item.inquiry_id,task_id:item.id,
+             event_type:"status_changed",previous_value:item.status,current_value:value.status,
+             created_at:new Date().toISOString()
+           });
+           if(value.assignee_name && value.assignee_name!==item.assignee_name)taskEvents.push({
+             id:"event-"+taskEvents.length,inquiry_id:item.inquiry_id,task_id:item.id,
+             event_type:"reassigned",previous_value:item.assignee_name,current_value:value.assignee_name,
+             created_at:new Date().toISOString()
+           });
+         }
          if(item)Object.assign(item,value);
          return Promise.resolve({error:null})}}},
        delete(){return{eq(key,id){
@@ -256,8 +285,28 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#profile-history").getByText("Đặt lịch nhắc liên hệ").first().waitFor();
     await adminCRUD.locator("#profile-reminder-clear").click();
     await adminCRUD.locator("#profile-history").getByText("Hủy lịch nhắc liên hệ").waitFor();
+    await adminCRUD.locator("#care-task-title").fill("Gửi báo giá nội thất");
+    await adminCRUD.locator("#care-task-assignee").fill("Nhân viên A");
+    await adminCRUD.locator("#care-task-details").fill("Liên hệ xác nhận và gửi dự toán.");
+    await adminCRUD.locator("#care-task-priority").selectOption("high");
+    await adminCRUD.locator("#care-task-create").click();
+    await adminCRUD.locator("#care-task-list").getByText("Gửi báo giá nội thất").waitFor();
+    await adminCRUD.locator("#care-task-events").getByText("Giao công việc").waitFor();
+    await adminCRUD.locator("#care-task-list").getByRole("combobox",{name:/Tiến độ/}).selectOption("in_progress");
+    await adminCRUD.locator("#care-task-events").getByText("Chuyển tiến độ").waitFor();
     await adminCRUD.locator("#profile-close").click();
     assert.equal(await adminCRUD.locator("#lead-profile").isVisible(),false);
+    await adminCRUD.locator("#tab-tasks").click();
+    await adminCRUD.locator("#tasks-board-table").getByText("Gửi báo giá nội thất").waitFor();
+    assert.equal(await adminCRUD.locator("#tasks-total").innerText(),"1");
+    assert.equal(await adminCRUD.locator("#tasks-progress").innerText(),"1");
+    await adminCRUD.locator("#tasks-board-table").getByRole("combobox",{name:/Tiến độ/}).selectOption("done");
+    await adminCRUD.locator("#tasks-board-table").getByRole("combobox",{name:/Tiến độ/}).inputValue().then(v=>assert.equal(v,"done"));
+    await adminCRUD.locator("#tasks-status-filter").selectOption("todo");
+    await adminCRUD.locator("#tasks-board-table").getByText("Chưa có công việc phù hợp.").waitFor();
+    await adminCRUD.locator("#tasks-status-filter").selectOption("all");
+    await adminCRUD.locator("#tasks-board-table").getByText("Gửi báo giá nội thất").waitFor();
+    await adminCRUD.locator("#tab-inquiries").click();
 
     assert.equal(await adminCRUD.locator("#crm-contacted").innerText(),"0");
     await adminCRUD.locator("#lead-search").fill("0900000000");
