@@ -25,6 +25,8 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - `supabase/privacy-consent.sql` — migration bổ sung dấu thời gian đồng ý.
 - `supabase/inquiry-retention-12m.sql` — hạn lưu 12 tháng, ghi nhận liên hệ, tác vụ xóa tự động hằng ngày; có ngoại lệ nghĩa vụ pháp lý.
 - `supabase/admin-contact-rpc.sql` — RPC theo giờ máy chủ để ghi nhận liên hệ, tuân thủ RLS Admin.
+- `supabase/customer-care-v1_6.sql` — hồ sơ chăm sóc, ghi chú riêng tư, lịch nhắc liên hệ và phân quyền Admin.
+- `supabase/customer-care-audit-v1_6.sql` — tự ghi lịch sử khi liên hệ thật/chuyển trạng thái trên máy chủ.
 - `supabase/functions/submit-inquiry/index.ts` — mã Edge Function đang chạy tại Supabase.
 - `SUPABASE_SETUP.md` — hướng dẫn bảo mật và vận hành.
 - `privacy.html` — chính sách quyền riêng tư: đơn vị Tân Design, địa chỉ chủ website cung cấp và email tiếp nhận `infinitimoney@icloud.com`; chưa có xác minh đăng ký pháp lý, đã cấu hình giữ dữ liệu 12 tháng.
@@ -39,6 +41,15 @@ node --test tests/static.test.cjs tests/email-notification.test.cjs
 ```
 
 GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và thiết bị iPhone giả lập; ảnh kiểm thử được lưu có thời hạn. Không cần gửi mật khẩu quản trị cho hệ thống kiểm thử.
+
+## CRM v1.6 — Hồ sơ và lịch nhắc liên hệ
+
+- Admin mở hồ sơ bằng nút **Hồ sơ** bên cạnh yêu cầu tư vấn, xem thông tin, trạng thái, ngày đồng ý và hạn xóa.
+- **Ghi chú chăm sóc** lưu lịch sử dạng chỉ thêm, không tự động chỉnh sửa hoặc xóa từng ghi chú; khi xóa khách hàng hoặc hết thời hạn 12 tháng, ghi chú cũng bị xóa.
+- **Nhắc liên hệ** chọn ngày giờ, có thể hủy/đặt lại lịch; KPI **Đến lịch liên hệ** và bộ lọc **Đến hạn / 7 ngày tới** hiển thị ngay trong trang Admin. Đây là thông báo *trong ứng dụng*, không tự gửi email/thông báo đẩy.
+- Các lần Admin xác nhận đã liên hệ và chuyển trạng thái được lưu thành sự kiện lịch sử theo giờ máy chủ trong cùng một giao dịch.
+- **Spinner** phản hồi trạng thái tải khi truy vấn danh sách, có chế độ giảm chuyển động cho người dùng nhạy cảm với hiệu ứng.
+- Phần email vẫn để sau theo lựa chọn chủ website, không yêu cầu secret mới và không đổi gói Supabase.
 
 ## Lưu ý quan trọng trước khi kinh doanh
 
