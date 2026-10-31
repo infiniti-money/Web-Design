@@ -100,7 +100,7 @@
     else if(["7","30","90"].includes(state.leadPeriod))
       query=query.gte("created_at",new Date(Date.now()-Number(state.leadPeriod)*86400000).toISOString());
     // Escape PostgREST filter grammar: user text cannot add extra OR clauses.
-    const term=state.leadSearch.slice(0,90).replace(/[^\\p{L}\\p{N}\\s-]/gu,"").trim();
+    const term=state.leadSearch.slice(0,90).replace(/[^\p{L}\p{N}\s-]/gu,"").trim();
     if(term) query=query.or(["full_name","phone","details","service","space"]
       .map(column=>column+".ilike.%"+term+"%").join(","));
     return query;
@@ -361,7 +361,7 @@
     if(!state.inquiries.length)return;
     if(!confirm("Xuất "+state.inquiries.length+" hồ sơ của trang đang hiển thị? Tệp chứa dữ liệu cá nhân: chỉ tải trên thiết bị riêng, không chia sẻ công khai."))return;
     const quote=value=>{
-      let text=String(value??"").replace(/[\\u0000-\\u001f\\u007f]/g," ").trim();
+      let text=String(value??"").replace(/[\u0000-\u001f\u007f]/g," ").trim();
       // Neutralize CSV/Excel formula injection for customer-supplied fields.
       if(/^[=+@-]/.test(text))text="'"+text;
       return '"'+text.replace(/"/g,'""')+'"';
@@ -371,7 +371,7 @@
       i.full_name,i.phone,i.service,i.space,i.details,inquiryStates[i.status]||i.status,
       i.created_at,i.last_contacted_at,i.consented_at,i.privacy_policy_version
     ]);
-    const csv="\\uFEFF"+[head,...rows].map(row=>row.map(quote).join(",")).join("\\r\\n");
+    const csv="\uFEFF"+[head,...rows].map(row=>row.map(quote).join(",")).join("\r\n");
     const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
     const link=document.createElement("a");
     const uri=URL.createObjectURL(blob);
