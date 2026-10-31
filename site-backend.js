@@ -41,6 +41,58 @@
     console.error("Supabase consultation form is unavailable:", configIsValid ? "sdk_unavailable" : "invalid_config");
   }
 
+  // Turnstile is activated ONLY once a real Cloudflare sitekey is configured.
+  // The secret belongs in Supabase Edge Function secrets, never app-config.js.
+  const captchaSiteKey = String(cfg.turnstileSiteKey || "").trim();
+  const captchaActive = captchaSiteKey.length > 0;
+  const captchaHost = document.getElementById("turnstile-container");
+  let captchaWidget = null;
+  let captchaToken = "";
+  const informCaptcha = (message) => {
+    if (feedback) feedback.textContent = message;
+  };
+  if (captchaActive) {
+    if (submit) submit.disabled = true;
+    if (captchaHost) captchaHost.hidden = false;
+    informCaptcha("Đang tải xác minh chống bot...");
+    if (!/^[a-zA-Z0-9_-]{8,100}$/.test(captchaSiteKey) || !captchaHost) {
+      informCaptcha("Cấu hình xác minh chống bot chưa hợp lệ. Chưa thể gửi yêu cầu.");
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      script.onerror = () => informCaptcha(
+        "Không thể tải xác minh chống bot. Vui lòng tải lại trang khi kết nối ổn định.");
+      script.onload = () => {
+        try {
+          captchaWidget = window.turnstile.render(captchaHost, {
+            sitekey: captchaSiteKey,
+            action: "consultation",
+            theme: "light",
+            callback: token => {
+              captchaToken = token;
+              if (submit && client && !pending) submit.disabled = false;
+              informCaptcha("");
+            },
+            "expired-callback": () => {
+              captchaToken = "";
+              if (submit) submit.disabled = true;
+              informCaptcha("Xác minh đã hết hạn. Vui lòng xác minh lại.");
+            },
+            "error-callback": () => {
+              captchaToken = "";
+              if (submit) submit.disabled = true;
+              informCaptcha("Không xác minh được. Vui lòng tải lại trang.");
+            }
+          });
+        } catch {
+          informCaptcha("Không thể khởi tạo xác minh chống bot.");
+        }
+      };
+      document.head.appendChild(script);
+    }
+  }
+
   async function loadProjects() {
     if (!client) return;
     const { data, error } = await client.from("projects")
@@ -80,6 +132,10 @@
       return;
     }
     if (pending || !form.reportValidity()) return;
+    if (captchaActive && !captchaToken) {
+      informCaptcha("Vui lòng hoàn tất xác minh chống bot trước khi gửi.");
+      return;
+    }
     const values = new FormData(form);
     if (String(values.get("website") || "").trim()) {
       if (feedback) feedback.textContent = "Yêu cầu không hợp lệ.";
@@ -106,12 +162,16 @@
       const response = await fetch(cfg.supabaseUrl.replace(/\/$/,"") + "/functions/v1/submit-inquiry", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({...inquiry, website: String(values.get("website") || "")}),
+        body: JSON.stringify({...inquiry, website: String(values.get("website") || ""), ...(captchaActive ? {turnstile_token: captchaToken} : {})}),
       });
       if (!response.ok) {
         if (response.status === 429) {
           if (feedback) feedback.textContent =
             "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.";
+          return;
+        }
+        if (response.status === 403) {
+          informCaptcha("Xác minh chống bot không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.");
           return;
         }
         throw new Error("gateway_http_" + response.status);
@@ -127,7 +187,11 @@
         "Gửi yêu cầu chưa thành công. Dữ liệu chưa được lưu. Vui lòng thử lại sau.";
     } finally {
       pending = false;
-      if (submit) submit.disabled = false;
+      if (captchaActive) {
+        captchaToken = "";
+        try { if (captchaWidget !== null) window.turnstile.reset(captchaWidget); } catch {}
+      }
+      if (submit) submit.disabled = captchaActive || !client;
     }
   }, true);
 
