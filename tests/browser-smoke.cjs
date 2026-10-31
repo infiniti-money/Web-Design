@@ -80,6 +80,41 @@ async function main() {
     await admin.screenshot({ path: out + "/atelier-admin-login.png", fullPage: true });
     console.log("ADMIN: HTTP", ar.status(), "| login form visible; no credentials submitted");
 
+    // UI CRUD with a mocked *authorized* Supabase client; never use admin passwords in CI.
+    const adminCRUD = await browser.newPage({viewport:{width:1440,height:900}});
+    await adminCRUD.route("**/cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0",route=>
+      route.fulfill({status:200,contentType:"application/javascript",body:`
+window.supabase={createClient:()=>{
+ let records=[];
+ return {
+   auth:{getUser:async()=>({data:{user:{email:"test-admin@example.invalid",app_metadata:{role:"admin"}}},error:null}),
+         signOut:async()=>({error:null})},
+   from(table) {
+     const q={
+       select(){return q},order(){return q},range(){return Promise.resolve({data:table==="projects"?[...records]:[],error:null})},
+       insert(value){records.push({id:"project-"+(records.length+1),...value});return Promise.resolve({error:null})},
+       update(value){return{eq(key,id){const item=records.find(r=>r[key]===id);if(item)Object.assign(item,value);return Promise.resolve({error:null})}}},
+       delete(){return{eq(key,id){records=records.filter(r=>r[key]!==id);return Promise.resolve({error:null})}}}
+     };return q;
+   }
+ };
+}};`}));
+    await adminCRUD.goto(new URL("admin.html",origin).toString(),{waitUntil:"domcontentloaded",timeout:45000});
+    await adminCRUD.locator("#dashboard:not(.hide)").waitFor({timeout:15000});
+    await adminCRUD.locator("#p-title").fill("Thử nghiệm giao diện");
+    await adminCRUD.locator("#p-slug").fill("thu-nghiem-giao-dien");
+    await adminCRUD.locator("#p-image").fill("https://example.com/test.jpg");
+    await adminCRUD.locator("#project-save").click();
+    await adminCRUD.locator("#projects-table").getByText("Thử nghiệm giao diện").waitFor();
+    await adminCRUD.locator("#projects-table button").getByText("Sửa").click();
+    await adminCRUD.locator("#p-title").fill("Đã chỉnh sửa dự án");
+    await adminCRUD.locator("#project-save").click();
+    await adminCRUD.locator("#projects-table").getByText("Đã chỉnh sửa dự án").waitFor();
+    adminCRUD.on("dialog",dialog=>dialog.accept());
+    await adminCRUD.locator("#projects-table button").getByText("Xóa").click();
+    await adminCRUD.locator("#projects-table").getByText("Chưa có dự án").waitFor();
+    console.log("ADMIN-UI: insert, update, delete passed with mocked admin client; no live writes");
+
     const mobile = await browser.newPage({ ...devices["iPhone 13"], locale: "vi-VN" });
     mobile.on("pageerror", error => consoleErrors.push("mobile: " + error.message));
     const mr = await mobile.goto(origin, { waitUntil: "domcontentloaded", timeout: 45000 });
