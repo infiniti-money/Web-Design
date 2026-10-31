@@ -30,6 +30,8 @@ create table if not exists public.inquiries (
   space text not null default 'Khác' check (char_length(space) <= 100),
   details text not null default '' check (char_length(details) <= 1000),
   status text not null default 'new' check (status in ('new','contacted','quoted','closed')),
+  consented_at timestamptz,
+  privacy_policy_version text,
   created_at timestamptz not null default now()
 );
 
