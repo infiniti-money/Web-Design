@@ -108,10 +108,11 @@ async function main() {
       route.fulfill({status:200,contentType:"application/javascript",body:`
 window.supabase={createClient:()=>{
  let records=[];
+ let careNotes=[];
  let inquiries=[{id:"inquiry-mock-1",full_name:"KHÁCH KIỂM THỬ GIẢ",phone:"0900000000",
    service:"Thiết kế nội thất",space:"Căn hộ",details:"CI ONLY",status:"new",
    created_at:"2026-10-31T00:00:00.000Z",consented_at:"2026-10-31T00:00:00.000Z",
-   privacy_policy_version:"2026-10-31-retention-12m",last_contacted_at:null,legal_hold_until:null}];
+   privacy_policy_version:"2026-10-31-retention-12m",last_contacted_at:null,legal_hold_until:null,follow_up_at:null}];
  window.__ci_seed_extra_leads = count => {
    for(let i=0;i<count;i++)inquiries.push({
      id:"lead-extra-"+i,full_name:"KHÁCH GIẢ "+i,phone:"0900001"+String(i).padStart(3,"0"),
@@ -119,11 +120,20 @@ window.supabase={createClient:()=>{
      status:"new",created_at:"2026-10-31T00:00:00.000Z",
      consented_at:"2026-10-31T00:00:00.000Z",
      privacy_policy_version:"2026-10-31-retention-12m",
-     last_contacted_at:null,legal_hold_until:null
+     last_contacted_at:null,legal_hold_until:null,follow_up_at:null
    });
  };
  return {
    rpc(name,args) {
+     if(name==="schedule_inquiry_followup"){
+       const item=inquiries.find(row=>row.id===args.p_inquiry_id);
+       if(!item)return Promise.resolve({data:false,error:null});
+       item.follow_up_at=args.p_due_at;
+       careNotes.push({id:"care-"+careNotes.length,inquiry_id:item.id,note_kind:"reminder",
+         body:args.p_due_at?"Đặt lịch nhắc liên hệ":"Hủy lịch nhắc liên hệ",
+         scheduled_for:args.p_due_at,created_at:new Date().toISOString()});
+       return Promise.resolve({data:true,error:null});
+     }
      if(name!=="record_inquiry_contact")return Promise.resolve({data:null,error:{message:"Unknown RPC"}});
      const item=inquiries.find(row=>row.id===args.p_inquiry_id);
      if(!item)return Promise.resolve({data:false,error:null});
@@ -137,7 +147,7 @@ window.supabase={createClient:()=>{
      const q={
        conditions:[],head:false,countRequested:false,term:"",
        filtered(){
-         let items=table==="projects"?[...records]:table==="inquiries"?[...inquiries]:[];
+         let items=table==="projects"?[...records]:table==="inquiries"?[...inquiries]:table==="inquiry_care_notes"?[...careNotes]:[];
          for(const fn of q.conditions)items=items.filter(fn);
          if(q.term)items=items.filter(row=>[row.full_name,row.phone,row.service,row.space,row.details]
            .some(value=>String(value||"").toLowerCase().includes(q.term)));
@@ -147,10 +157,16 @@ window.supabase={createClient:()=>{
        order(){return q},
        eq(key,value){q.conditions.push(row=>row[key]===value);return q},
        gte(key,value){q.conditions.push(row=>row[key]>=value);return q},
+       gt(key,value){q.conditions.push(row=>row[key]>value);return q},
+       lte(key,value){q.conditions.push(row=>row[key] && row[key]<=value);return q},
        or(expression){const match=/full_name\.ilike\.%([^%]*)%/.exec(expression);q.term=(match?.[1]||"").toLowerCase();return q},
        range(start,end){const items=q.filtered();return Promise.resolve({data:items.slice(start,end+1),count:q.countRequested?items.length:null,error:null})},
        then(ok,fail){const items=q.filtered();return Promise.resolve({data:q.head?null:items,count:q.countRequested?items.length:null,error:null}).then(ok,fail)},
-       insert(value){records.push({id:"project-"+(records.length+1),...value});return Promise.resolve({error:null})},
+       insert(value){
+         if(table==="inquiry_care_notes")careNotes.push({id:"care-"+careNotes.length,created_at:new Date().toISOString(),note_kind:"note",...value});
+         else records.push({id:"project-"+(records.length+1),...value});
+         return Promise.resolve({error:null});
+       },
        update(value){return{eq(key,id){
          const items=table==="inquiries"?inquiries:records;
          const item=items.find(r=>r[key]===id);
@@ -181,6 +197,21 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#tab-inquiries").click();
     await adminCRUD.locator("#inquiries-table").getByText("KHÁCH KIỂM THỬ GIẢ").waitFor();
     assert.equal(await adminCRUD.locator("#crm-total").innerText(),"1");
+    assert.equal(await adminCRUD.locator("#crm-due").innerText(),"0");
+    await adminCRUD.locator("#inquiries-table").getByRole("button",{name:"Hồ sơ"}).click();
+    await adminCRUD.locator("#profile-name").getByText("KHÁCH KIỂM THỬ GIẢ").waitFor();
+    await adminCRUD.locator("#profile-note-input").fill("Đã xem hồ sơ và cần báo giá.");
+    await adminCRUD.locator("#profile-note-save").click();
+    await adminCRUD.locator("#profile-history").getByText("Đã xem hồ sơ và cần báo giá.").waitFor();
+    const followupValue=new Date(Date.now()+86400000).toISOString().slice(0,16);
+    await adminCRUD.locator("#profile-reminder-at").fill(followupValue);
+    await adminCRUD.locator("#profile-reminder-save").click();
+    await adminCRUD.locator("#profile-history").getByText("Đặt lịch nhắc liên hệ").waitFor();
+    await adminCRUD.locator("#profile-reminder-clear").click();
+    await adminCRUD.locator("#profile-history").getByText("Hủy lịch nhắc liên hệ").waitFor();
+    await adminCRUD.locator("#profile-close").click();
+    assert.equal(await adminCRUD.locator("#lead-profile").isVisible(),false);
+
     assert.equal(await adminCRUD.locator("#crm-contacted").innerText(),"0");
     await adminCRUD.locator("#lead-search").fill("0900000000");
     assert.match(await adminCRUD.locator("#lead-match-count").innerText(),/Hiển thị 1–1 \/ 1/);
