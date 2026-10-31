@@ -831,8 +831,12 @@
     for(const [id,count] of [["tasks-total",vals[0]],["tasks-todo",vals[1]],["tasks-progress",vals[2]],["tasks-done",vals[3]],["tasks-overdue",vals[4]]])$(id).textContent=count;
   }
   async function refreshTasksBoard(){
-    if($("panel-tasks").classList.contains("hide")){await loadPriorityHub();return}
-    await Promise.all([loadTaskBoard(),loadTaskKpis(),loadPriorityHub()]);
+    if($("panel-tasks").classList.contains("hide")){
+      if(state.currentRole==="admin")await loadPriorityHub();
+      return;
+    }
+    await Promise.all([loadTaskBoard(),loadTaskKpis(),
+      ...(state.currentRole==="admin"?[loadPriorityHub()]:[])]);
   }
   function newProject() {
     state.editingId=null;state.slugTouched=false;
