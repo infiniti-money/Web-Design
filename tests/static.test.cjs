@@ -83,6 +83,16 @@ test("Public and admin pages include key functional sections", () => {
   assert.match(adminJs,/function loadTaskBoard\(\)/);
   assert.match(adminJs,/from\("inquiry_care_tasks"\)/);
   assert.match(adminJs,/from\("inquiry_care_task_events"\)/);
+  for(const id of ["task-view-table","task-view-kanban","tasks-table-wrap","tasks-kanban",
+    "kanban-todo","kanban-progress","kanban-done","kanban-todo-count","kanban-progress-count","kanban-done-count"]){
+    assert.match(admin,new RegExp('id="'+id+'"'));
+  }
+  assert.match(adminJs,/function renderTaskKanban\(tasks\)/);
+  assert.match(adminJs,/function setTaskView\(mode\)/);
+  assert.match(adminJs,/function advanceTask\(task\)/);
+  assert.match(adminJs,/aria-pressed/);
+  assert.match(adminJs,/const updatingTasks=new Set\(\)/);
+
 
 });
 
