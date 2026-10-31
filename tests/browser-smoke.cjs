@@ -69,6 +69,7 @@ async function main() {
     await desktop.locator("#form-feedback").getByText("Yêu cầu đã được hệ thống ghi nhận").waitFor();
     assert.equal(intercepted.length,1,"Form must use Edge Function exactly once");
     assert.equal(intercepted[0].full_name,"Người kiểm thử");
+    assert.equal(intercepted[0].privacy_consent,true,"Website must forward affirmative consent");
     console.log("CONSULTATION: Edge Function request sent; mocked success without writing customer data");
 
     // Privacy notice must be published and linked by the consultation form.
@@ -160,6 +161,7 @@ window.supabase={createClient:()=>{
     await turnstileTest.locator("#form-feedback").getByText("Yêu cầu đã được hệ thống ghi nhận").waitFor();
     assert.equal(sentWithChallenge.length,1);
     assert.equal(sentWithChallenge[0].turnstile_token,"test-captcha-token");
+    assert.equal(sentWithChallenge[0].privacy_consent,true);
     console.log("TURNSTILE: simulated challenge token sent through protected API");
 
     // If the CDN fails on a LIVE site, never silently save a local demo lead.
