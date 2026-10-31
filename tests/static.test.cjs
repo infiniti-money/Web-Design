@@ -164,6 +164,17 @@ test("Public and admin pages include key functional sections", () => {
   assert.match(adminJs,/async function callStaffApi\(payload\)/);
   assert.match(adminJs,/assignee_user_id/);
   assert.match(adminJs,/state\.currentRole/);
+  const hardening=read("supabase/staff-role-hardening-v1_13_1.sql");
+  const reportHardening=read("supabase/staff-report-hardening-v1_13_1.sql");
+  assert.match(hardening,/private\.current_staff_role\(\)/);
+  assert.match(hardening,/raw_app_meta_data->>'role'/);
+  assert.match(hardening,/staff_profiles sp/);
+  assert.match(hardening,/sp\.active/);
+  assert.match(hardening,/EMPLOYEE_STATUS_ONLY/);
+  assert.match(hardening,/grant usage on schema private to authenticated/);
+  assert.match(hardening,/revoke all on function private\.current_staff_role\(\) from public,anon,authenticated/);
+  assert.match(reportHardening,/coalesce\(\(select private\.current_staff_role\(\)\)/);
+
 
   assert.match(adminJs,/reportDateStart\(days\)/);
 
