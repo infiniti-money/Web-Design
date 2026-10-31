@@ -71,6 +71,12 @@ test("Privacy notice and Turnstile integration are present and secrets stay serv
   assert.match(read("supabase/inquiry-retention-12m.sql"), /atelier-inquiry-retention-12m/);
   assert.match(read("supabase/inquiry-retention-12m.sql"), /legal_hold_until/);
   assert.match(read("admin.js"), /Ghi nhận liên hệ/);
+  assert.match(read("admin.js"), /client\.rpc\("record_inquiry_contact"/);
+  assert.doesNotMatch(read("admin.js"), /last_contacted_at:new Date\(\)/);
+  const contactSql=read("supabase/admin-contact-rpc.sql");
+  assert.match(contactSql, /security invoker/i);
+  assert.match(contactSql, /last_contacted_at = now\(\)/);
+  assert.match(contactSql, /revoke all on function public\.record_inquiry_contact\(uuid\) from PUBLIC, anon/);
   assert.match(schema, /last_contacted_at timestamptz/);
   assert.match(read("supabase/inquiry-rate-limit.sql"), /2026-10-31-retention-12m/);
   assert.match(policy, /Singapore/);
