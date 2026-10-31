@@ -149,10 +149,24 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#projects-table").getByText("Chưa có dự án").waitFor();
     await adminCRUD.locator("#tab-inquiries").click();
     await adminCRUD.locator("#inquiries-table").getByText("KHÁCH KIỂM THỬ GIẢ").waitFor();
+    assert.equal(await adminCRUD.locator("#crm-total").innerText(),"1");
+    assert.equal(await adminCRUD.locator("#crm-contacted").innerText(),"0");
+    await adminCRUD.locator("#lead-search").fill("0900000000");
+    assert.match(await adminCRUD.locator("#lead-match-count").innerText(),/Hiển thị 1 \/ 1/);
+    await adminCRUD.locator("#lead-search").fill("KHONG TON TAI");
+    await adminCRUD.locator("#inquiries-table").getByText("Không có hồ sơ phù hợp bộ lọc.").waitFor();
+    await adminCRUD.locator("#lead-clear-filters").click();
+    await adminCRUD.locator("#lead-filter-service").selectOption("Thi công trọn gói");
+    await adminCRUD.locator("#inquiries-table").getByText("Không có hồ sơ phù hợp bộ lọc.").waitFor();
+    await adminCRUD.locator("#lead-clear-filters").click();
+    await adminCRUD.locator("#lead-filter-status").selectOption("new");
+    await adminCRUD.locator("#inquiries-table").getByText("KHÁCH KIỂM THỬ GIẢ").waitFor();
+    await adminCRUD.locator("#lead-clear-filters").click();
     await adminCRUD.locator("#inquiries-table button").getByText("Ghi nhận liên hệ").click();
     await adminCRUD.locator("#inquiries-table").getByText(/Liên hệ cuối:/).waitFor();
     assert.equal(await adminCRUD.locator("#inquiries-table select").inputValue(),"contacted");
-    console.log("ADMIN-UI: project CRUD + server-timed contact RPC simulated, no live writes");
+    assert.equal(await adminCRUD.locator("#crm-contacted").innerText(),"1");
+    console.log("ADMIN-UI: project CRUD + CRM search, filters, KPIs and contact RPC mocked, no live writes");
 
     const mobile = await browser.newPage({ ...devices["iPhone 13"], locale: "vi-VN" });
     mobile.on("pageerror", error => consoleErrors.push("mobile: " + error.message));
