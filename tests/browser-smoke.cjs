@@ -108,12 +108,24 @@ async function main() {
       route.fulfill({status:200,contentType:"application/javascript",body:`
 window.supabase={createClient:()=>{
  let records=[];
+ let inquiries=[{id:"inquiry-mock-1",full_name:"KHÁCH KIỂM THỬ GIẢ",phone:"0900000000",
+   service:"Thiết kế nội thất",space:"Căn hộ",details:"CI ONLY",status:"new",
+   created_at:"2026-10-31T00:00:00.000Z",consented_at:"2026-10-31T00:00:00.000Z",
+   privacy_policy_version:"2026-10-31-retention-12m",last_contacted_at:null,legal_hold_until:null}];
  return {
+   rpc(name,args) {
+     if(name!=="record_inquiry_contact")return Promise.resolve({data:null,error:{message:"Unknown RPC"}});
+     const item=inquiries.find(row=>row.id===args.p_inquiry_id);
+     if(!item)return Promise.resolve({data:false,error:null});
+     item.last_contacted_at=new Date().toISOString();
+     if(item.status==="new")item.status="contacted";
+     return Promise.resolve({data:true,error:null});
+   },
    auth:{getUser:async()=>({data:{user:{email:"test-admin@example.invalid",app_metadata:{role:"admin"}}},error:null}),
          signOut:async()=>({error:null})},
    from(table) {
      const q={
-       select(){return q},order(){return q},range(){return Promise.resolve({data:table==="projects"?[...records]:[],error:null})},
+       select(){return q},order(){return q},range(){return Promise.resolve({data:table==="projects"?[...records]:table==="inquiries"?[...inquiries]:[],error:null})},
        insert(value){records.push({id:"project-"+(records.length+1),...value});return Promise.resolve({error:null})},
        update(value){return{eq(key,id){const item=records.find(r=>r[key]===id);if(item)Object.assign(item,value);return Promise.resolve({error:null})}}},
        delete(){return{eq(key,id){records=records.filter(r=>r[key]!==id);return Promise.resolve({error:null})}}}
@@ -135,7 +147,12 @@ window.supabase={createClient:()=>{
     adminCRUD.on("dialog",dialog=>dialog.accept());
     await adminCRUD.locator("#projects-table button").getByText("Xóa").click();
     await adminCRUD.locator("#projects-table").getByText("Chưa có dự án").waitFor();
-    console.log("ADMIN-UI: insert, update, delete passed with mocked admin client; no live writes");
+    await adminCRUD.locator("#tab-inquiries").click();
+    await adminCRUD.locator("#inquiries-table").getByText("KHÁCH KIỂM THỬ GIẢ").waitFor();
+    await adminCRUD.locator("#inquiries-table button").getByText("Ghi nhận liên hệ").click();
+    await adminCRUD.locator("#inquiries-table").getByText(/Liên hệ cuối:/).waitFor();
+    assert.equal(await adminCRUD.locator("#inquiries-table select").inputValue(),"contacted");
+    console.log("ADMIN-UI: project CRUD + server-timed contact RPC simulated, no live writes");
 
     const mobile = await browser.newPage({ ...devices["iPhone 13"], locale: "vi-VN" });
     mobile.on("pageerror", error => consoleErrors.push("mobile: " + error.message));
