@@ -54,6 +54,13 @@ GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và t
 - **Spinner** phản hồi trạng thái tải khi truy vấn danh sách, có chế độ giảm chuyển động cho người dùng nhạy cảm với hiệu ứng.
 - Phần email vẫn để sau theo lựa chọn chủ website, không yêu cầu secret mới và không đổi gói Supabase.
 
+## CRM v1.11 — Trung tâm ưu tiên trong Admin
+
+- Ngay dưới các chỉ số tổng quan, Admin có **4 nhóm ưu tiên**: việc quá hạn, việc đến hạn 7 ngày, lịch liên hệ đến hạn, lịch liên hệ 7 ngày tới.
+- Đếm chính xác từ Supabase theo quyền Admin; mỗi nhóm hiển thị **tối đa 5 hồ sơ/công việc có hạn gần nhất**.
+- Bấm thẻ để mở danh sách có bộ lọc tương ứng; nút **Làm mới ưu tiên** truy vấn lại dữ liệu. Số liệu cập nhật khi ghi nhận thay đổi tiến độ/lịch.
+- Đây là **trung tâm nhắc việc trong Admin**, không gửi email/tin nhắn/thông báo đẩy và không thêm quyền cho nhân viên.
+
 ## CRM v1.10 — Chỉnh sửa công việc kèm nhật ký
 
 - Tại **Hồ sơ khách hàng → Tiến độ công việc**, nhấn **Sửa công việc**. Cập nhật tên, mô tả, người phụ trách, mức ưu tiên hoặc hạn xử lý bằng biểu mẫu có nút Hủy chỉnh sửa.
