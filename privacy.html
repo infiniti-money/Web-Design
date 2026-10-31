@@ -17,13 +17,19 @@ main{max-width:920px;margin:auto;padding:55px 26px 90px}h1{font:normal clamp(32p
 <small>Thông tin xử lý dữ liệu cá nhân · Cập nhật 31/10/2026</small>
 <h1>Chính sách quyền riêng tư</h1>
 <p>ATELIER HOME tôn trọng quyền riêng tư của người truy cập. Trang này giải thích cách website mẫu tiếp nhận và bảo vệ dữ liệu khi bạn chủ động gửi yêu cầu tư vấn nội thất.</p>
-<div class="note"><strong>Thông tin cần hoàn thiện trước vận hành thương mại:</strong> ATELIER HOME hiện là website giới thiệu mẫu. Tên pháp lý, địa chỉ và đầu mối tiếp nhận yêu cầu về dữ liệu cá nhân của tổ chức vận hành chưa được xác minh/công bố. Chủ website phải bổ sung các thông tin này trước khi chính thức sử dụng website để thu thập dữ liệu khách hàng.</div>
+<section aria-labelledby="operator-title" class="note">
+<h2 id="operator-title" style="margin:0 0 12px;font-size:26px">Đơn vị vận hành và liên hệ</h2>
+<p><strong>Tên đơn vị:</strong> Tân Design</p>
+<p><strong>Địa chỉ do chủ website cung cấp:</strong> <address style="display:inline;font-style:normal">Tân Phú, Việt Yên, Hưng Yên</address></p>
+<p><strong>Email liên hệ và tiếp nhận yêu cầu về dữ liệu cá nhân:</strong> <a href="mailto:infinitimoney@icloud.com">infinitimoney@icloud.com</a></p>
+<p><small>Tên và địa chỉ trên được công bố theo thông tin của chủ website; chưa có thông tin xác minh đăng ký pháp lý hoặc mã số doanh nghiệp. Chủ website cần đối chiếu thông tin hành chính trước khi sử dụng làm hồ sơ pháp lý chính thức.</small></p>
+</section>
 <h2>1. Những dữ liệu được thu thập</h2>
 <ul>
 <li>Khi gửi tư vấn: họ tên, số điện thoại, loại dịch vụ, loại không gian, nội dung và nhu cầu do bạn nhập.</li>
 <li>Hệ thống lưu thời điểm tạo yêu cầu, trạng thái xử lý, thời điểm xác nhận đồng ý và phiên bản thông báo quyền riêng tư mà bạn đã chấp thuận.</li>
 <li>Để hạn chế spam, máy chủ xử lý địa chỉ IP và số điện thoại thành dấu vân tay HMAC theo từng khoảng thời gian; bảng giới hạn không lưu IP gốc.</li>
-<li>Nếu Cloudflare Turnstile được kích hoạt, dịch vụ có thể xử lý các tín hiệu trình duyệt và mạng nhằm xác minh tương tác của con người.</li>
+<li>Cloudflare Turnstile đang được dùng để xác minh tương tác nhằm hạn chế biểu mẫu tự động; dịch vụ có thể xử lý tín hiệu trình duyệt và mạng cần thiết cho hoạt động chống bot.</li>
 </ul>
 <p>Không đề nghị cung cấp CCCD, tài khoản ngân hàng, mật khẩu hoặc thông tin nhạy cảm qua biểu mẫu.</p>
 <h2>2. Mục đích và căn cứ xử lý</h2>
@@ -36,13 +42,13 @@ main{max-width:920px;margin:auto;padding:55px 26px 90px}h1{font:normal clamp(32p
 <p>Thông tin được lưu để phục vụ quá trình tiếp nhận và xử lý yêu cầu, cho đến khi không còn cần thiết hoặc khi có yêu cầu xóa hợp lệ, trừ trường hợp pháp luật quy định phải lưu lâu hơn. <strong>Chưa có thời hạn lưu cụ thể hoặc quy trình tự động xóa định kỳ được thiết lập;</strong> chủ website phải xác định lịch lưu/xóa trước vận hành chính thức.</p>
 <h2>6. Quyền của bạn</h2>
 <p>Bạn có thể yêu cầu biết thông tin đang được xử lý, xem, chỉnh sửa, rút lại sự đồng ý hoặc xóa dữ liệu trong phạm vi pháp luật cho phép. Khi gửi yêu cầu, cần cung cấp thông tin đủ để xác minh quyền sở hữu dữ liệu; không gửi thêm thông tin nhạy cảm không cần thiết.</p>
-<p><strong>Kênh tiếp nhận yêu cầu quyền riêng tư:</strong> đang chờ chủ website công bố thông tin liên hệ chính thức. Đây là điểm chưa hoàn thiện và cần được bổ sung trước khi tiếp nhận khách hàng thương mại.</p>
+<p><strong>Kênh tiếp nhận yêu cầu quyền riêng tư:</strong> gửi email đến <a href="mailto:infinitimoney@icloud.com">infinitimoney@icloud.com</a>, nêu rõ nội dung cần hỗ trợ để Tân Design tiếp nhận và xác minh phù hợp. Không gửi giấy tờ tùy thân hoặc thông tin nhạy cảm nếu chưa được yêu cầu theo kênh an toàn.</p>
 <h2>7. An toàn và giới hạn kỹ thuật</h2>
 <p>Website áp dụng Supabase Auth, phân quyền RLS, HTTPS, giới hạn tần suất gửi và bộ kiểm tra chống spam phía máy chủ. Việc truyền dữ liệu qua Internet không thể được bảo đảm an toàn tuyệt đối. Trình duyệt của quản trị viên có thể lưu phiên đăng nhập để duy trì xác thực; nên đăng xuất trên thiết bị dùng chung.</p>
 <h2>8. Cập nhật</h2>
 <p>Chính sách có thể được cập nhật khi thay đổi tính năng, nhà cung cấp dịch vụ, quy trình lưu trữ hay thông tin đơn vị vận hành. Phiên bản mới sẽ được công bố tại đường dẫn này.</p>
 <a class="back" href="./index.html">← Quay lại trang chủ</a>
 </main>
-<footer>© ATELIER HOME · Tài liệu minh bạch dữ liệu cho website mẫu</footer>
+<footer>© ATELIER HOME · Vận hành bởi Tân Design · <a href="mailto:infinitimoney@icloud.com">Liên hệ quyền riêng tư</a></footer>
 </body>
 </html>
