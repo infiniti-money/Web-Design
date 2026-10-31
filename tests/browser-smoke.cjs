@@ -128,6 +128,23 @@ window.supabase={createClient:()=>{
  };
  return {
    rpc(name,args) {
+     if(name==="care_performance_report"){
+       const selected=careTasks.filter(x=>x.created_at>=args.p_start&&x.created_at<args.p_end);
+       const tally=rows=>({
+         total:rows.length,todo:rows.filter(t=>t.status==="todo").length,
+         in_progress:rows.filter(t=>t.status==="in_progress").length,
+         done:rows.filter(t=>t.status==="done").length,
+         overdue:rows.filter(t=>t.status!=="done"&&t.due_at&&t.due_at<new Date().toISOString()).length,
+         completion_rate:rows.length?Math.round(rows.filter(t=>t.status==="done").length*1000/rows.length)/10:0
+       });
+       const groups=[...new Set(selected.map(x=>x.assignee_name))].sort();
+       const today=new Date().toISOString().slice(0,10);
+       return Promise.resolve({data:{
+         overview:tally(selected),completed_in_period:careTasks.filter(t=>t.completed_at>=args.p_start&&t.completed_at<args.p_end).length,
+         bucket:args.p_bucket,people:groups.map(name=>({assignee:name,...tally(selected.filter(t=>t.assignee_name===name))})),
+         trend:[{period:today,total:selected.length,done:selected.filter(t=>t.status==="done").length}]
+       },error:null});
+     }
      if(name==="edit_inquiry_care_note"){
        const item=careNotes.find(row=>row.id===args.p_note_id && row.editable===true);
        if(!item)return Promise.resolve({data:false,error:null});
@@ -241,6 +258,10 @@ window.supabase={createClient:()=>{
              });
            }
          }
+         if(item&&table==="inquiry_care_tasks"&&value.status){
+           if(value.status==="done"&&item.status!=="done")item.completed_at=new Date().toISOString();
+           else if(value.status!=="done")item.completed_at=null;
+         }
          if(item)Object.assign(item,value);
          return Promise.resolve({error:null})}}},
        delete(){return{eq(key,id){
@@ -349,6 +370,19 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#tasks-board-table").getByText("Chưa có công việc phù hợp.").waitFor();
     await adminCRUD.locator("#tasks-status-filter").selectOption("all");
     await adminCRUD.locator("#tasks-board-table").getByText("Gửi báo giá nội thất cập nhật").waitFor();
+    await adminCRUD.locator("#tab-reports").click();
+    await adminCRUD.waitForFunction(()=>document.querySelector("#report-total")?.textContent==="1");
+    assert.equal(await adminCRUD.locator("#report-done").innerText(),"1");
+    assert.equal(await adminCRUD.locator("#report-rate").innerText(),"100%");
+    assert.equal(await adminCRUD.locator("#report-completed-in-period").innerText(),"1");
+    await adminCRUD.locator("#report-people-table").getByText("Nhân viên A").waitFor();
+    assert.equal(await adminCRUD.locator("#report-chart .report-bar-group").count(),1);
+    await adminCRUD.locator("#report-bucket").selectOption("month");
+    await adminCRUD.waitForFunction(()=>document.querySelector("#report-chart")?.getAttribute("aria-label")?.startsWith("Theo tháng"));
+    await adminCRUD.locator("#report-range").selectOption("7");
+    await adminCRUD.waitForFunction(()=>document.querySelector("#report-total")?.textContent==="1");
+    await adminCRUD.locator("#report-refresh").click();
+    await adminCRUD.waitForFunction(()=>document.querySelector("#report-refresh")?.disabled===false);
     await adminCRUD.locator("#tab-inquiries").click();
 
     assert.equal(await adminCRUD.locator("#crm-contacted").innerText(),"0");
