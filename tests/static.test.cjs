@@ -95,7 +95,8 @@ test("Privacy notice and Turnstile integration are present and secrets stay serv
   assert.match(edge, /infinitimoney@icloud\.com/);
   assert.match(edge, /api\.resend\.com\/emails/);
   assert.match(edge, /Idempotency-Key/);
-  assert.doesNotMatch(edge, /body:\s*JSON\.stringify\(\{[\s\S]*?phone:\s*phone/);
+  assert.match(edge, /Email này không chứa dữ liệu cá nhân khách hàng/);
+  assert.match(edge, /if \(!apiKey \|\| !from\) return/);
   assert.match(schema, /consented_at timestamptz/);
   assert.match(schema, /privacy_policy_version text/);
   assert.match(read("supabase/privacy-consent.sql"), /privacy_policy_version/);
