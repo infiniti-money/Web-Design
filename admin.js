@@ -135,7 +135,11 @@
       if (retentionBase) {
         const expiry = new Date(retentionBase);
         if (!Number.isNaN(expiry.getTime())) {
+          const originalDay=expiry.getUTCDate();
+          expiry.setUTCDate(1);
           expiry.setUTCMonth(expiry.getUTCMonth() + 12);
+          const lastDay=new Date(Date.UTC(expiry.getUTCFullYear(),expiry.getUTCMonth()+1,0)).getUTCDate();
+          expiry.setUTCDate(Math.min(originalDay,lastDay));
           purpose.append(el("small","Liên hệ cuối: "+(i.last_contacted_at ? stamp(i.last_contacted_at) : "Chưa liên hệ")+" · Dự kiến xóa: "+stamp(expiry.toISOString())));
         }
       }
