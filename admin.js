@@ -84,7 +84,7 @@
   }
   async function loadInquiries() {
     const {data,error}=await client.from("inquiries")
-      .select("id,full_name,phone,service,space,details,status,created_at")
+      .select("id,full_name,phone,service,space,details,status,created_at,consented_at,privacy_policy_version")
       .order("created_at",{ascending:false}).range(0,199);
     if(error) {message("dash-status","Không đọc được yêu cầu tư vấn: "+(error.message||"Lỗi truy vấn"),true);return;}
     state.inquiries=data||[];renderInquiries();renderMetrics();
@@ -130,6 +130,7 @@
       const name=el("div");name.append(el("strong",i.full_name),el("small",stamp(i.created_at)));
       cell(tr,name);cell(tr,el("span",i.phone));
       const purpose=el("div");purpose.append(el("strong",i.service),el("small",i.space),el("small",i.details||""));
+      purpose.append(el("small",i.consented_at ? "Đồng ý: "+stamp(i.consented_at)+" · Chính sách: "+(i.privacy_policy_version||"—") : "Chưa có dấu thời gian đồng ý"));
       cell(tr,purpose);
       const status=el("select",undefined,"lead-status");
       status.setAttribute("aria-label","Trạng thái yêu cầu của "+i.full_name);
