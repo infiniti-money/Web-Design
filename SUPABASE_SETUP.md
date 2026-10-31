@@ -38,6 +38,16 @@
 - Ghi chú là dữ liệu cá nhân, phải được sử dụng đúng mục đích tư vấn; không tự động gửi thư hay thông báo hệ thống ngoài Admin.
 - Kiểm thử với bản ghi giả trong `BEGIN...ROLLBACK` cho thêm ghi chú, đặt lịch, cập nhật trạng thái và chặn non-admin; không còn bản ghi giả.
 
+## Báo cáo hiệu suất v1.12.0
+
+- Migration `supabase/customer-care-performance-v1_12.sql` đã áp dụng lên Supabase hiện tại; không tạo DB/project mới.
+- RPC `public.care_performance_report(p_start,p_end,p_bucket)` SECURITY INVOKER nên phải vượt qua RLS bảng `inquiry_care_tasks`. Function yêu cầu JWT app_metadata.role=`admin` và `auth.uid()` hợp lệ.
+- Thu hồi quyền `EXECUTE` của PUBLIC, anon; chỉ cấp authenticated; non-admin bị từ chối trong function. Chặn truy vấn kỳ ngoài 366 ngày, bucket ngoài `week` / `month`.
+- Nhóm nhiệm vụ theo **ngày tạo** và **người phụ trách hiện tại**, trạng thái hiện tại; tính tỉ lệ hoàn thành đúng trên toàn kỳ. `completed_in_period` tính riêng từ `completed_at`.
+- Biểu đồ tuần/tháng theo `Asia/Ho_Chi_Minh`, thêm các kỳ không có công việc bằng `generate_series`.
+- Kết quả là dữ liệu tổng hợp, không chứa số điện thoại hay nội dung tư vấn của khách. Báo cáo không xuất Excel/tải lên dịch vụ bên thứ ba.
+- Kiểm thử SQL trong BEGIN/ROLLBACK kiểm tra số liệu thực và từ chối quyền non-admin, không sửa hồ sơ đang có.
+
 ## Trung tâm việc cần xử lý v1.11.0
 
 - Không yêu cầu thay đổi schema/migration Supabase so với v1.10.
