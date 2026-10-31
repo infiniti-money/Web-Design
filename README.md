@@ -25,7 +25,7 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - `supabase/privacy-consent.sql` — migration bổ sung dấu thời gian đồng ý.
 - `supabase/functions/submit-inquiry/index.ts` — mã Edge Function đang chạy tại Supabase.
 - `SUPABASE_SETUP.md` — hướng dẫn bảo mật và vận hành.
-- `privacy.html` — chính sách quyền riêng tư (còn thiếu thông tin pháp lý chủ website và đầu mối dữ liệu).
+- `privacy.html` — chính sách quyền riêng tư: đơn vị Tân Design, địa chỉ chủ website cung cấp và email tiếp nhận `infinitimoney@icloud.com`; chưa có xác minh đăng ký pháp lý và thời hạn lưu/xóa.
 - `TURNSTILE_SETUP.md` — cấu hình Cloudflare widget và Supabase Edge secrets.
 - `tests/admin-rls-rollback.sql` — kiểm thử phân quyền admin có hoàn tác.
 
@@ -40,7 +40,7 @@ GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và t
 ## Lưu ý quan trọng trước khi kinh doanh
 
 - Giới hạn tốc độ và honeypot là các biện pháp chống spam cơ bản; **Turnstile đã bật và từ chối token giả**, nhưng vẫn không thể bảo đảm chặn mọi loại bot/tấn công phân tán.
-- Chưa có email thông báo khi nhận khách mới và thông tin pháp nhân/đầu mối quyền riêng tư đã xác minh. Trang chính sách hiện minh bạch tình trạng chưa hoàn thiện; chưa có xóa dữ liệu tự động.
+- Chưa có email thông báo khi nhận khách mới. Đã công bố thông tin liên hệ Tân Design do chủ website cung cấp, nhưng chưa có thông tin xác minh đăng ký pháp lý, thời hạn lưu/xóa được phê duyệt hoặc tác vụ xóa tự động.
 - Hình ảnh Unsplash, tên công trình và các mô tả trong dữ liệu mẫu **không phải công trình đã thi công thực tế**.
 - Đã thử INSERT/UPDATE/DELETE và từ chối non-admin trong PostgreSQL bằng JWT mô phỏng và ROLLBACK. Kiểm thử UI CRUD bằng Supabase mock trong Chromium; chưa thử đăng nhập bằng mật khẩu thật.
 - Không được đưa `sb_secret_`, `service_role`, mật khẩu hoặc token nhạy cảm vào frontend/GitHub.
