@@ -34,9 +34,10 @@ Visitor form -> Supabase Edge Function submit-inquiry
 
 - Limit hiện tại: **3 yêu cầu / giờ theo mạng IP** và **5 yêu cầu / ngày theo điện thoại**. Giới hạn tính theo từng cửa sổ UTC; không phải thuật toán trượt. Một số IP dùng chung có thể bị giới hạn sớm.
 - Chỉ lưu dấu vân tay HMAC của mạng/điện thoại trong bảng private; không lưu trực tiếp IP trong bảng giới hạn.
+- Biểu mẫu yêu cầu người dùng xác nhận đồng ý trước khi gửi; Edge Function kiểm tra `privacy_consent === true`. Cơ sở dữ liệu ghi `consented_at` và `privacy_policy_version` cho yêu cầu được tiếp nhận, phiên bản hiện tại `2026-10-31`.
 - Browser không được `INSERT/SELECT/UPDATE/DELETE` vào `public.inquiries`. Edge Function dùng khóa server-side nằm trong biến môi trường Supabase.
 - SQL logic: `supabase/inquiry-rate-limit.sql`; Edge source: `supabase/functions/submit-inquiry/index.ts`.
-- SQL migration đã áp dụng: `secure_inquiry_rate_limit_and_rpc`, sau đó `block_direct_anonymous_inquiry_inserts`. Không chạy lại migration trên dữ liệu thật mà chưa kiểm tra lịch sử.
+- SQL migration đã áp dụng: `secure_inquiry_rate_limit_and_rpc`, `block_direct_anonymous_inquiry_inserts`, và `record_inquiry_privacy_consent_version`. Không chạy lại migration trên dữ liệu thật mà chưa kiểm tra lịch sử.
 - Khi Edge Function không sẵn sàng, form không tự lưu cục bộ và không báo thành công giả.
 
 **Giới hạn cần lưu ý:** CORS và header Origin không chứng minh danh tính người gửi; bot có thể giả lập header hoặc thay IP. Rate limiting + honeypot chỉ giảm một số kiểu spam. Nên triển khai **Cloudflare Turnstile/CAPTCHA** phía máy chủ trước chiến dịch tiếp nhận khách hàng lớn. Không dùng dữ liệu thử làm thông tin liên hệ thật.
@@ -44,7 +45,7 @@ Visitor form -> Supabase Edge Function submit-inquiry
 ## 3. Kiểm thử đã chạy
 
 - API chấp nhận yêu cầu thử hợp lệ; dữ liệu thử đã được xóa.
-- API từ chối phương thức không hỗ trợ, JSON sai, Origin lạ và honeypot.
+- API từ chối phương thức không hỗ trợ, JSON sai, Origin lạ, honeypot, thiếu đồng ý và challenge Turnstile giả. Thử chức năng tạo bản ghi đồng ý bằng transaction có `ROLLBACK`.
 - Kiểm thử Chromium website thật: danh mục 6 dự án, bộ lọc, modal, trang đăng nhập, điện thoại; gửi form qua Edge API được *giả lập phản hồi thành công* để tránh lưu dữ liệu cá nhân.
 - Supabase đã xác nhận `anon` không có quyền trực tiếp ghi/đọc `inquiries`; chỉ vai trò server có quyền gọi RPC.
 - Chưa có kiểm thử đăng nhập bằng mật khẩu thật hay đầy đủ CRUD admin sau phiên đăng nhập.
