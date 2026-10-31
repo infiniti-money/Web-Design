@@ -62,6 +62,11 @@ test("Privacy notice and Turnstile integration are present and secrets stay serv
   assert.match(index, /href="\.\/privacy\.html"/);
   assert.match(index, /id="turnstile-container"/);
   assert.match(policy, /Chính sách quyền riêng tư/);
+  assert.match(policy, /Tân Design/);
+  assert.match(policy, /Tân Phú, Việt Yên, Hưng Yên/);
+  assert.match(policy, /mailto:infinitimoney@icloud\.com/);
+  assert.match(index, /mailto:infinitimoney@icloud\.com/);
+  assert.match(policy, /Chưa có thời hạn lưu cụ thể/);
   assert.match(policy, /Singapore/);
   assert.match(frontend, /turnstile_token/);
   assert.match(frontend, /privacy_consent/);
