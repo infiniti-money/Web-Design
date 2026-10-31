@@ -219,12 +219,9 @@
     if (!confirm('Xác nhận bạn vừa liên hệ với khách hàng "'+record.full_name+'"?')) return;
     setBusy(true);
     try {
-      const nextStatus=record.status==="new" ? "contacted" : record.status;
-      const {error}=await client.from("inquiries").update({
-        last_contacted_at:new Date().toISOString(),
-        status:nextStatus
-      }).eq("id",record.id);
+      const {data,error}=await client.rpc("record_inquiry_contact",{p_inquiry_id:record.id});
       if (error) throw error;
+      if (data !== true) throw new Error("Bạn không có quyền cập nhật hồ sơ hoặc hồ sơ đã được xóa.");
       await loadInquiries();
       message("dash-status","Đã ghi nhận liên hệ. Thời hạn lưu dữ liệu được tính lại 12 tháng.");
     } catch(error) {
