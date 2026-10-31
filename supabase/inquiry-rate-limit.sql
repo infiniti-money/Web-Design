@@ -56,10 +56,10 @@ begin
     raise exception 'RATE_LIMIT_EXCEEDED' using errcode='P0001';
   end if;
 
-  insert into public.inquiries(full_name,phone,service,space,details,status)
+  insert into public.inquiries(full_name,phone,service,space,details,status,consented_at,privacy_policy_version)
   values(btrim(p_full_name),btrim(p_phone),p_service,
          coalesce(nullif(btrim(p_space),''),'Khác'),
-         coalesce(btrim(p_details),''),'new')
+         coalesce(btrim(p_details),''),'new',now(),'2026-10-31')
   returning id into result_id;
 
   if random()<0.02 then
