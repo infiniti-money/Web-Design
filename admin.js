@@ -1,4 +1,4 @@
-/* ATELIER HOME v1.12.0 Admin.
+/* ATELIER HOME v1.13.0 Admin.
  * Authentication is Supabase Auth. Authorization is enforced on DB via RLS.
  * No service-role or private credentials are ever used by this browser app. */
 (() => {
@@ -19,7 +19,7 @@
   const PAGE_SIZE = 25;
   const state = { projects:[], inquiries:[], editingId:null, slugTouched:false, busy:false,
     leadSearch:"", leadStatus:"all", leadService:"all", leadPeriod:"all", leadPage:0, leadTotal:0,
-    leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0,customerTaskSeq:0,taskBoardSeq:0,taskBoardPage:0,prioritySeq:0,taskBoardTotal:0,taskView:"table",reportSeq:0,taskReport:null,editingTask:null,taskStatusFilter:"all",taskOwnerFilter:"",taskDueFilter:"all" };
+    leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0,customerTaskSeq:0,taskBoardSeq:0,taskBoardPage:0,prioritySeq:0,taskBoardTotal:0,taskView:"table",reportSeq:0,taskReport:null,editingTask:null,staff:[],currentUser:null,currentRole:null,myTaskSeq:0,taskStatusFilter:"all",taskOwnerFilter:"",taskDueFilter:"all" };
 
   function message(id, text, error=false) {
     const el = $(id); el.textContent = text;
@@ -59,13 +59,15 @@
       .replace(/^-+|-+$/g,"").slice(0,100);
   }
   function switchTab(name) {
-    for(const kind of ["projects","inquiries","tasks","reports"]) {
+    for(const kind of ["projects","inquiries","tasks","reports","my-tasks","staff"]) {
       const active = kind === name;
       $("panel-"+kind).classList.toggle("hide", !active);
       $("tab-"+kind).setAttribute("aria-selected", String(active));
     }
     if(name==="tasks")refreshTasksBoard();
     if(name==="reports")loadPerformanceReport();
+    if(name==="my-tasks")loadMyTasks();
+    if(name==="staff")loadStaff();
   }
   function setBusy(b) {
     state.busy=b;
@@ -74,6 +76,7 @@
   }
   function loginVisible() {
     state.activeProfile=null;
+    state.currentUser=null;state.currentRole=null;state.staff=[];
     ++state.profileSeq;
     $("lead-profile").classList.add("hide");
     $("profile-note-input").value="";
@@ -81,21 +84,114 @@
   }
   async function verify() {
     const {data,error}=await client.auth.getUser();
-    if(error || !data?.user) return null;
-    return data.user.app_metadata?.role==="admin" ? data.user : null;
+    const user=data?.user;
+    const role=user?.app_metadata?.role;
+    if(error || !user?.id || !["admin","manager","employee"].includes(role))return null;
+    const {data:profile,error:profileError}=await client.from("staff_profiles")
+      .select("role,active,full_name").eq("user_id",user.id).single();
+    if(profileError || !profile?.active || profile.role!==role)return null;
+    return {user,role,profile};
   }
   async function enterDashboard() {
-    const user=await verify();
-    if(!user) {
+    const verified=await verify();
+    if(!verified) {
       await client.auth.signOut();
       loginVisible();
-      message("login-status","Tài khoản chưa được cấp quyền quản trị. Liên hệ người quản lý để được phân quyền.",true);
+      message("login-status","Tài khoản chưa được cấp quyền hoặc đã vô hiệu hóa. Liên hệ quản trị viên.",true);
       return;
     }
+    const {user,role,profile}=verified;
+    state.currentUser=user;state.currentRole=role;
     $("login-panel").classList.add("hide");
     $("dashboard").classList.remove("hide");
-    $("signed-in-email").textContent=user.email || "Administrator";
-    await loadAll();
+    $("signed-in-email").textContent=user.email || "Tài khoản";
+    $("signed-in-role").textContent=profile.full_name+" · "+({admin:"Admin",manager:"Quản lý",employee:"Nhân viên"}[role]);
+    for(const tab of ["projects","inquiries","tasks","reports","my-tasks","staff"]){
+      const allowed=role==="admin" || (role==="manager" && ["tasks","reports","my-tasks"].includes(tab))
+        || (role==="employee" && tab==="my-tasks");
+      $("tab-"+tab).classList.toggle("hide",!allowed);
+    }
+    $("admin-overview-metrics").classList.toggle("hide",role!=="admin");
+    $("admin-priority-hub").classList.toggle("hide",role!=="admin");
+    if(role==="admin"){switchTab("projects");await Promise.all([loadAll(),loadStaff()]);}
+    else if(role==="manager"){switchTab("tasks");await Promise.all([loadStaff(),loadMyTasks()]);}
+    else switchTab("my-tasks");
+  }
+  async function loadStaff() {
+    if(state.currentRole==="employee")return;
+    const {data,error}=await client.from("staff_profiles")
+      .select("user_id,email,full_name,role,active").order("full_name",{ascending:true}).range(0,499);
+    if(error){message("staff-status","Không đọc được danh sách: "+error.message,true);return;}
+    state.staff=data||[];
+    const select=$("care-task-account"),previous=select.value;
+    select.replaceChildren();
+    const prompt=el("option","Chọn tài khoản đang hoạt động");prompt.value="";select.append(prompt);
+    for(const user of state.staff.filter(u=>u.active)){
+      const opt=el("option",user.full_name+" · "+user.email);opt.value=user.user_id;select.append(opt);
+    }
+    select.value=state.staff.some(u=>u.user_id===previous&&u.active)?previous:"";
+    if(state.currentRole==="admin")renderStaffTable();
+  }
+  function renderStaffTable(){
+    const tbody=$("staff-table");tbody.replaceChildren();
+    for(const person of state.staff){
+      const tr=el("tr");
+      cell(tr,el("strong",person.full_name));
+      cell(tr,el("span",person.email));
+      const choice=el("select");choice.setAttribute("aria-label","Vai trò: "+person.full_name);
+      for(const [id,label] of [["employee","Nhân viên"],["manager","Quản lý"],["admin","Admin"]]){
+        const o=el("option",label);o.value=id;choice.append(o);
+      }
+      choice.value=person.role;
+      const active=el("select");active.setAttribute("aria-label","Trạng thái: "+person.full_name);
+      for(const [id,label] of [["active","Hoạt động"],["disabled","Vô hiệu hóa"]]){
+        const o=el("option",label);o.value=id;active.append(o);
+      }
+      active.value=person.active?"active":"disabled";
+      cell(tr,choice);cell(tr,active);
+      const action=btn("Cập nhật",()=>saveStaffRole(person,choice.value,active.value==="active"));
+      if(person.user_id===state.currentUser?.id || person.role==="admin"){
+        action.disabled=true;action.title="Không thể vô hiệu hóa/hạ quyền Admin tại đây";
+      }
+      cell(tr,action);tbody.append(tr);
+    }
+    if(!state.staff.length){const tr=el("tr"),td=el("td","Chưa có nhân viên.","empty");td.colSpan=5;tr.append(td);tbody.append(tr);}
+  }
+  async function callStaffApi(payload){
+    const {data:session,error}=await client.auth.getSession();
+    if(error||!session.session?.access_token)throw new Error("Phiên đăng nhập hết hạn.");
+    const response=await fetch(cfg.supabaseUrl.replace(/\/$/,"")+"/functions/v1/staff-management",{
+      method:"POST",headers:{"Content-Type":"application/json",
+        "apikey":cfg.supabasePublishableKey,
+        "Authorization":"Bearer "+session.session.access_token},
+      body:JSON.stringify(payload)
+    });
+    const result=await response.json().catch(()=>({error:"SERVER_ERROR"}));
+    if(!response.ok||!result.ok)throw new Error(result.error||"SERVER_ERROR");
+    return result;
+  }
+  async function inviteStaff(event){
+    event.preventDefault();
+    if(state.currentRole!=="admin")return;
+    const email=$("staff-email").value.trim(),full_name=$("staff-name").value.trim(),role=$("staff-role").value;
+    if(full_name.length<2 || !email.includes("@")){message("staff-status","Thông tin chưa hợp lệ.",true);return;}
+    $("staff-invite-submit").disabled=true;
+    try{
+      await callStaffApi({action:"invite",email,full_name,role});
+      $("staff-invite-form").reset();
+      await loadStaff();
+      message("staff-status","Đã gửi lời mời tài khoản. Người nhận cần mở email xác thực và đặt mật khẩu.");
+    }catch(error){message("staff-status","Không mời được tài khoản: "+error.message,true)}
+    finally{$("staff-invite-submit").disabled=false}
+  }
+  async function saveStaffRole(person,role,active){
+    if(state.currentRole!=="admin")return;
+    if(!confirm("Cập nhật quyền truy cập của "+person.full_name+"?"))return;
+    try{
+      await callStaffApi({action:"update",user_id:person.user_id,role,active});
+      await loadStaff();
+      message("staff-status","Đã cập nhật quyền. Người dùng cần đăng nhập lại để làm mới vai trò.");
+    }catch(error){message("staff-status","Không cập nhật được: "+error.message,true)}
   }
   async function loadProjects() {
     const {data,error}=await client.from("projects")
