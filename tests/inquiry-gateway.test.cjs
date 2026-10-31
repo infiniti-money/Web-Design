@@ -43,7 +43,10 @@ test("Inquiry API rejects a fake Turnstile challenge",async()=>{
       service:"Thiết kế nội thất",space:"Căn hộ",details:"NOT_SAVED_BY_TEST",
       website:"",privacy_consent:true,turnstile_token:"INVALID_FAKE_CHALLENGE"}),
     signal:timeout()});
-  assert.ok([403,503].includes(res.status),"Fake challenge must not create a lead");
+  const body=await res.json();
+  assert.equal(res.status,403,
+    "Server must have a configured Cloudflare secret and reject invalid captcha; response code="+String(body.code));
+  assert.equal(body.code,"captcha_failed");
 });
 test("Inquiry API accepts exactly one clearly marked synthetic lead",
   {skip:process.env.RUN_LIVE_WRITE_TEST!=="1"},async()=>{
