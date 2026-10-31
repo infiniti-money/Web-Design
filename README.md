@@ -55,6 +55,17 @@ GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và t
 - **Spinner** phản hồi trạng thái tải khi truy vấn danh sách, có chế độ giảm chuyển động cho người dùng nhạy cảm với hiệu ứng.
 - Phần email vẫn để sau theo lựa chọn chủ website, không yêu cầu secret mới và không đổi gói Supabase.
 
+## CRM v1.13 — Nhân viên, phân quyền và giao việc theo tài khoản
+
+- Tab **Nhân viên và phân quyền** (Admin): mời email bằng **Supabase Auth**, phân vai trò Admin / Quản lý / Nhân viên, đổi vai trò và vô hiệu hóa tài khoản. Email mời thiết lập tài khoản không phải thông báo CRM, chưa cấu hình Resend.
+- **Admin:** đầy đủ dự án, khách hàng, ghi chú, nhiệm vụ và báo cáo. **Quản lý:** bảng công việc nhóm, chuyển tài khoản, báo cáo; không quản trị nhân sự. **Nhân viên:** chỉ tab **Công việc của tôi**, chỉ công việc được gắn với tài khoản, chỉ được đổi trạng thái.
+- Giao việc mới chọn tài khoản hoạt động, lưu `assignee_user_id` và tên tại thời điểm giao; tên công việc cũ không được khớp/gắn tài khoản tự động. Công việc **Gửi báo giá** của Quang được giữ nguyên cho tới khi Admin gắn đúng tài khoản.
+- Nhân viên chỉ đọc được khách hàng liên quan công việc của mình. **RLS** và trigger SQL chặn việc tự nhận công việc người khác hay sửa hạn/ưu tiên/mô tả.
+- Edge Function `supabase/functions/staff-management/index.ts` chạy **server-side**, xác minh Admin và dùng Auth Admin API, không xuất khóa đặc quyền trong JavaScript công khai.
+- SQL: `supabase/staff-roles-v1_13.sql`, `supabase/staff-manager-report-v1_13.sql`.
+- Khi mời nhân viên thực, Admin cần cho phép redirect `https://infiniti-money.github.io/Web-Design/admin.html` trong Supabase Auth URL Configuration; email mời phụ thuộc giới hạn gửi của Supabase.
+- Tài khoản/vai trò mới cần đăng nhập lại để cập nhật JWT. Trước khi sử dụng thực tế, kiểm thử lời mời với email do doanh nghiệp sở hữu.
+
 ## CRM v1.12 — Báo cáo hiệu suất nhân viên & xu hướng tuần/tháng
 
 - Tab **Báo cáo hiệu suất** hỗ trợ kỳ 7/30/90/365 ngày và biểu đồ nhóm **tuần / tháng**.
