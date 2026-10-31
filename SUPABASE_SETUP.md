@@ -10,6 +10,15 @@
 - GitHub Pages đang dùng quy trình triển khai Jekyll tự động trên `main`. Quy trình `Publish ATELIER HOME` chỉ tạo GitHub Release, tránh deploy trùng.
 - Không có khóa service-role hoặc mật khẩu trong frontend.
 
+## CRM phân trang và xuất dữ liệu v1.5.0
+
+- Chỉ Admin xác minh mới đọc hồ sơ tư vấn theo RLS; truy vấn thông qua Supabase publishable key và JWT, **không** dùng service-role trên trình duyệt.
+- Danh sách phân trang 25 hồ sơ. Tìm kiếm và lọc áp dụng phía máy chủ trước khi phân trang; `count: exact` hiển thị số hồ sơ phù hợp.
+- Bảng thống kê `count: exact` cho tổng số yêu cầu, mới hôm nay theo giờ Việt Nam, trạng thái `new`, `contacted`, `quoted`.
+- Nút **Xuất CSV trang này** ghi dữ liệu của tối đa 25 hồ sơ đang xem (không phải tất cả hồ sơ); tệp được tạo cục bộ trên thiết bị Admin, yêu cầu xác nhận và giảm thiểu CSV/Excel formula injection. Phải bảo vệ/xóa tệp tải về theo chính sách dữ liệu cá nhân.
+- Việc lọc dữ liệu sử dụng cú pháp PostgREST với từ khóa được giới hạn ký tự để chống chèn thêm điều kiện. Tìm tên tiếng Việt bằng dấu tương ứng để đạt kết quả chính xác; chưa hỗ trợ tìm không dấu hoàn chỉnh trên toàn bộ cơ sở dữ liệu.
+- Không thay đổi cơ chế xóa dữ liệu sau 12 tháng. Cấu hình email vẫn để sau theo quyết định của chủ website.
+
 ## 1. Đăng nhập quản trị
 
 1. Mở `/admin.html` của website.
