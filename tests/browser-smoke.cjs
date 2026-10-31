@@ -88,6 +88,7 @@ async function main() {
     assert.match(privacyHtml, /Tân Design/);
     assert.match(privacyHtml, /Tân Phú, Việt Yên, Hưng Yên/);
     assert.match(privacyHtml, /infinitimoney@icloud\.com/);
+    assert.match(privacyHtml, /12 tháng kể từ lần liên hệ cuối cùng/);
     assert.equal(await desktop.locator('footer a[href="mailto:infinitimoney@icloud.com"]').count(),1);
     assert.equal(await desktop.locator('#lead-form a[href="./privacy.html"]').count(),1);
     console.log("PRIVACY: published policy HTTP 200 and form link verified");
