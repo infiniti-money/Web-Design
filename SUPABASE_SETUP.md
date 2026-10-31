@@ -19,6 +19,15 @@
 - Việc lọc dữ liệu sử dụng cú pháp PostgREST với từ khóa được giới hạn ký tự để chống chèn thêm điều kiện. Tìm tên tiếng Việt bằng dấu tương ứng để đạt kết quả chính xác; chưa hỗ trợ tìm không dấu hoàn chỉnh trên toàn bộ cơ sở dữ liệu.
 - Không thay đổi cơ chế xóa dữ liệu sau 12 tháng. Cấu hình email vẫn để sau theo quyết định của chủ website.
 
+## Chỉnh sửa ghi chú và hoàn thành nhắc việc v1.7.0 (đã triển khai)
+
+- Migration `supabase/customer-care-edit-v1_7.sql`: bảng `public.inquiry_care_note_revisions` lưu nội dung trước/sau, mã ghi chú, người sửa và thời điểm; bật RLS chỉ Admin có thể SELECT. Bảng phiên bản xóa theo hồ sơ để tuân thủ hạn 12 tháng.
+- RPC `edit_inquiry_care_note(p_note_id,p_body,p_expected_updated_at)` xác minh quyền Admin qua JWT `app_metadata`, kiểm tra phiên bản để chặn ghi đè đồng thời, lưu revision và sửa ghi chú trong một transaction. RPC SECURITY DEFINER với `search_path=''` và không cấp quyền UPDATE trực tiếp cho authenticated.
+- Ghi chú hệ thống (gửi lịch/đổi trạng thái/ghi nhận liên hệ) có `editable=false`; chỉ ghi chú nhập thủ công được sửa. Việc sửa không kéo dài thời hạn lưu dữ liệu.
+- RPC `complete_inquiry_followup(p_inquiry_id)` hoàn thành nhắc việc và ghi sự kiện lịch sử, **không** tự cập nhật `last_contacted_at` (phải dùng chức năng Ghi nhận liên hệ cho trường hợp đã thực sự liên lạc).
+- Đã kiểm thử SQL transaction có ROLLBACK cho ghi chú thủ công, revision, chỉnh sửa lỗi thời, non-admin và đánh dấu hoàn thành; không làm thay đổi hồ sơ thật.
+- Không bật email tự động; lịch nhắc vẫn nằm trong Admin.
+
 ## Hồ sơ và nhắc liên hệ v1.6.0 (đã áp dụng trên dự án hiện tại)
 
 - `public.inquiries.follow_up_at`: mốc nhắc liên hệ trong Admin (UTC, hiển thị bằng múi giờ trình duyệt).
