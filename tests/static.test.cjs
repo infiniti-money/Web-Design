@@ -42,6 +42,11 @@ test("Public and admin pages include key functional sections", () => {
   assert.match(careSql,/security invoker/);
   assert.match(careSql,/grant select, insert on table public\.inquiry_care_notes to authenticated/);
   assert.match(careSql,/author_id = \(select auth\.uid\(\)\)/);
+  const auditSql=read("supabase/customer-care-audit-v1_6.sql");
+  assert.match(auditSql,/security invoker/);
+  assert.match(auditSql,/insert into public\.inquiry_care_notes/);
+  assert.match(auditSql,/update_inquiry_status_with_log/);
+
   assert.match(adminJs,/client\.rpc\("schedule_inquiry_followup"/);
   assert.match(adminJs,/from\("inquiry_care_notes"\)/);
   assert.match(adminJs,/classList\.remove\("hide"\)/);
