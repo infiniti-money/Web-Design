@@ -135,6 +135,36 @@ test("Public and admin pages include key functional sections", () => {
   assert.match(adminJs,/function renderPerformanceReport\(data\)/);
   assert.match(adminJs,/function renderReportChart\(rows,bucket\)/);
   assert.match(adminJs,/client\.rpc\("care_performance_report"/);
+  for(const id of ["tab-staff","panel-staff","staff-invite-form","staff-name","staff-email",
+    "staff-role","staff-table","staff-status","staff-invite-submit","tab-my-tasks",
+    "panel-my-tasks","my-tasks-table","my-tasks-refresh","my-reminders","care-task-account",
+    "signed-in-role","admin-overview-metrics","admin-priority-hub"]){
+    assert.match(admin,new RegExp('id="'+id+'"'));
+  }
+  const staffSql=read("supabase/staff-roles-v1_13.sql");
+  assert.match(staffSql,/staff_profiles enable row level security/);
+  assert.match(staffSql,/revoke all on public\.staff_profiles from public,anon,authenticated/);
+  assert.match(staffSql,/assignee_user_id uuid references auth\.users/);
+  assert.match(staffSql,/staff scoped inquiry access/);
+  assert.match(staffSql,/staff view assigned tasks/);
+  assert.match(staffSql,/staff_task_guard/);
+  assert.match(staffSql,/EMPLOYEE_STATUS_ONLY/);
+  assert.match(staffSql,/account_assigned/);
+  assert.match(staffSql,/on conflict\(user_id\) do nothing/);
+  const edge=read("supabase/functions/staff-management/index.ts");
+  assert.match(edge,/service\.auth\.getUser\(token\)/);
+  assert.match(edge,/operator\.app_metadata\?\.role!=="admin"/);
+  assert.match(edge,/service\.auth\.admin\.inviteUserByEmail/);
+  assert.match(edge,/service\.auth\.admin\.updateUserById/);
+  assert.match(edge,/CANNOT_DEMOTE_SELF/);
+  assert.match(edge,/ADMIN_ROLE_PROTECTED/);
+  assert.doesNotMatch(edge,/console\.log\([^\n]*serviceKey/);
+  assert.match(adminJs,/async function loadMyTasks\(\)/);
+  assert.match(adminJs,/async function loadStaff\(\)/);
+  assert.match(adminJs,/async function callStaffApi\(payload\)/);
+  assert.match(adminJs,/assignee_user_id/);
+  assert.match(adminJs,/state\.currentRole/);
+
   assert.match(adminJs,/reportDateStart\(days\)/);
 
 
