@@ -162,7 +162,7 @@
       const response = await fetch(cfg.supabaseUrl.replace(/\/$/,"") + "/functions/v1/submit-inquiry", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({...inquiry, website: String(values.get("website") || ""), ...(captchaActive ? {turnstile_token: captchaToken} : {})}),
+        body: JSON.stringify({...inquiry, privacy_consent: document.getElementById("consent")?.checked === true, website: String(values.get("website") || ""), ...(captchaActive ? {turnstile_token: captchaToken} : {})}),
       });
       if (!response.ok) {
         if (response.status === 429) {
