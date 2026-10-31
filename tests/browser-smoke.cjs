@@ -236,10 +236,11 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#lead-clear-filters").click();
     await adminCRUD.locator("#inquiries-table button").getByText("Ghi nhận liên hệ").click();
     await adminCRUD.locator("#inquiries-table").getByText(/Liên hệ cuối:/).waitFor();
-    await adminCRUD.locator("#inquiries-table").getByRole("combobox").selectOption("quoted");
-    await adminCRUD.locator("#inquiries-table").getByRole("combobox").inputValue().then(v=>assert.equal(v,"quoted"));
     assert.equal(await adminCRUD.locator("#inquiries-table select").inputValue(),"contacted");
     assert.equal(await adminCRUD.locator("#crm-contacted").innerText(),"1");
+    await adminCRUD.locator("#inquiries-table").getByRole("combobox").selectOption("quoted");
+    await adminCRUD.locator("#inquiries-table").getByRole("combobox").inputValue().then(v=>assert.equal(v,"quoted"));
+    assert.equal(await adminCRUD.locator("#crm-quoted").innerText(),"1");
     assert.equal(await adminCRUD.locator("#lead-page-label").innerText(),"Trang 1 / 1");
     assert.equal(await adminCRUD.locator("#lead-prev-page").isDisabled(),true);
     assert.equal(await adminCRUD.locator("#lead-next-page").isDisabled(),true);
