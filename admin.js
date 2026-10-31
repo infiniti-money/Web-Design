@@ -1,4 +1,4 @@
-/* ATELIER HOME v1.8.0 Admin.
+/* ATELIER HOME v1.9.0 Admin.
  * Authentication is Supabase Auth. Authorization is enforced on DB via RLS.
  * No service-role or private credentials are ever used by this browser app. */
 (() => {
@@ -19,7 +19,7 @@
   const PAGE_SIZE = 25;
   const state = { projects:[], inquiries:[], editingId:null, slugTouched:false, busy:false,
     leadSearch:"", leadStatus:"all", leadService:"all", leadPeriod:"all", leadPage:0, leadTotal:0,
-    leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0,customerTaskSeq:0,taskBoardSeq:0,taskBoardPage:0,taskBoardTotal:0,taskStatusFilter:"all",taskOwnerFilter:"",taskDueFilter:"all" };
+    leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0,customerTaskSeq:0,taskBoardSeq:0,taskBoardPage:0,taskBoardTotal:0,taskView:"table",taskStatusFilter:"all",taskOwnerFilter:"",taskDueFilter:"all" };
 
   function message(id, text, error=false) {
     const el = $(id); el.textContent = text;
@@ -290,6 +290,66 @@
     });
     return control;
   }
+  // Accessible keyboard/touch Kanban actions reuse the same RLS-protected task update.
+  const updatingTasks=new Set();
+  async function advanceTask(task){
+    if(updatingTasks.has(task.id))return;
+    const next={todo:"in_progress",in_progress:"done",done:"todo"}[task.status];
+    if(!next)return;
+    updatingTasks.add(task.id);
+    message("tasks-board-status","Đang cập nhật: "+task.title+"...");
+    try{
+      const {error}=await client.from("inquiry_care_tasks").update({status:next}).eq("id",task.id);
+      if(error)throw error;
+      await Promise.all([refreshTasksBoard(),loadCustomerTasks()]);
+      message("tasks-board-status","Đã cập nhật: "+task.title+" → "+taskStatuses[next]+".");
+    }catch(error){
+      message("tasks-board-status","Không cập nhật được công việc: "+(error.message||"Lỗi hệ thống"),true);
+    }finally{updatingTasks.delete(task.id);}
+  }
+  function setTaskView(mode){
+    state.taskView=mode==="kanban"?"kanban":"table";
+    $("tasks-table-wrap").classList.toggle("hide",state.taskView!=="table");
+    $("tasks-kanban").classList.toggle("hide",state.taskView!=="kanban");
+    $("task-view-table").setAttribute("aria-pressed",String(state.taskView==="table"));
+    $("task-view-kanban").setAttribute("aria-pressed",String(state.taskView==="kanban"));
+  }
+  function renderTaskKanban(tasks){
+    const groups={todo:[],in_progress:[],done:[]};
+    for(const task of tasks) if(groups[task.status])groups[task.status].push(task);
+    for(const [status,containerId,countId] of [
+      ["todo","kanban-todo","kanban-todo-count"],
+      ["in_progress","kanban-progress","kanban-progress-count"],
+      ["done","kanban-done","kanban-done-count"]
+    ]){
+      const container=$(containerId);
+      container.replaceChildren();
+      $(countId).textContent=groups[status].length;
+      if(!groups[status].length){
+        container.append(el("p","Không có công việc ở trang này.","muted"));
+        continue;
+      }
+      for(const task of groups[status]){
+        const card=el("article",undefined,"kanban-card"+
+          (task.priority==="urgent"?" priority-urgent":task.priority==="high"?" priority-high":"")+
+          (isOverdue(task)?" overdue":""));
+        const nextLabel={todo:"Bắt đầu",in_progress:"Hoàn thành",done:"Mở lại"}[status];
+        card.append(
+          el("strong",task.title),
+          el("small","Khách hàng: "+(task.inquiries?.full_name||"—")),
+          el("small","Phụ trách: "+task.assignee_name),
+          el("small","Ưu tiên: "+(taskPriorities[task.priority]||task.priority)),
+          el("small","Hạn: "+stamp(task.due_at)+(isOverdue(task)?" · QUÁ HẠN":""))
+        );
+        const actions=el("div",undefined,"actions");
+        const advance=btn(nextLabel,()=>advanceTask(task));
+        advance.setAttribute("aria-label",nextLabel+" công việc "+task.title);
+        actions.append(advance);
+        card.append(actions);
+        container.append(card);
+      }
+    }
+  }
   async function reassignCareTask(task){
     const name=prompt("Nhập tên người phụ trách mới:",task.assignee_name);
     if(name===null)return;
@@ -397,6 +457,7 @@
         state.taskBoardPage=Math.ceil(state.taskBoardTotal/taskPageSize)-1;
         return loadTaskBoard();
       }
+      renderTaskKanban(data||[]);
       const body=$("tasks-board-table");body.replaceChildren();
       for(const task of data||[]){
         const tr=el("tr");
@@ -791,6 +852,8 @@
   }
   $("care-task-form").addEventListener("submit",submitCareTask);
   $("reload-tasks").addEventListener("click",refreshTasksBoard);
+  $("task-view-table").addEventListener("click",()=>setTaskView("table"));
+  $("task-view-kanban").addEventListener("click",()=>setTaskView("kanban"));
   for(const [id,field] of [["tasks-status-filter","taskStatusFilter"],["tasks-due-filter","taskDueFilter"]]){
     $(id).addEventListener("change",()=>{
       state[field]=$(id).value;state.taskBoardPage=0;refreshTasksBoard();
