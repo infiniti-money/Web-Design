@@ -31,6 +31,22 @@ test("Public and admin pages include key functional sections", () => {
   assert.match(adminJs,/vietnamDayStartUTC/);
   assert.match(adminJs,/function exportLeadCsv\(\)/);
   assert.match(adminJs,/Neutralize CSV\/Excel formula injection/);
+  for(const id of ["crm-loading","lead-profile","profile-name","profile-fields","profile-note-form",
+      "profile-note-input","profile-history","profile-reminder-form","profile-reminder-at",
+      "profile-reminder-save","profile-reminder-clear","lead-filter-reminder","crm-open-due","crm-due"]) {
+    assert.match(admin,new RegExp('id="'+id+'"'));
+  }
+  const careSql=read("supabase/customer-care-v1_6.sql");
+  assert.match(careSql,/on delete cascade/);
+  assert.match(careSql,/enable row level security/);
+  assert.match(careSql,/security invoker/);
+  assert.match(careSql,/grant select, insert on table public\.inquiry_care_notes to authenticated/);
+  assert.match(careSql,/author_id = \(select auth\.uid\(\)\)/);
+  assert.match(adminJs,/client\.rpc\("schedule_inquiry_followup"/);
+  assert.match(adminJs,/from\("inquiry_care_notes"\)/);
+  assert.match(adminJs,/classList\.remove\("hide"\)/);
+  assert.match(adminJs,/prefers-reduced-motion|loadProfileNotes/);
+
 });
 
 test("All browser scripts and inline scripts are valid JavaScript", () => {
