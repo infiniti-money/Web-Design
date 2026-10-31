@@ -64,6 +64,11 @@ test("Privacy notice and Turnstile integration are present and secrets stay serv
   assert.match(policy, /Chính sách quyền riêng tư/);
   assert.match(policy, /Singapore/);
   assert.match(frontend, /turnstile_token/);
+  assert.match(frontend, /privacy_consent/);
+  assert.match(edge, /privacy_consent !== true/);
+  assert.match(schema, /consented_at timestamptz/);
+  assert.match(schema, /privacy_policy_version text/);
+  assert.match(read("supabase/privacy-consent.sql"), /privacy_policy_version/);
   assert.match(frontend, /challenges\.cloudflare\.com\/turnstile\/v0\/api\.js/);
   assert.match(edge, /Deno\.env\.get\("TURNSTILE_SECRET_KEY"\)/);
   assert.match(edge, /challenges\.cloudflare\.com\/turnstile\/v0\/siteverify/);
