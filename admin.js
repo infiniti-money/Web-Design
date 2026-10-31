@@ -325,17 +325,29 @@
       if (error) throw error;
       if (data !== true) throw new Error("Bạn không có quyền cập nhật hồ sơ hoặc hồ sơ đã được xóa.");
       await refreshInquiries();
-      message("dash-status","Đã ghi nhận liên hệ. Thời hạn lưu dữ liệu được tính lại 12 tháng.");
+      if(state.activeProfile?.id===record.id){
+        record.last_contacted_at=new Date().toISOString();
+        await openCustomerProfile(record);
+      }
+      message("dash-status","Đã ghi nhận liên hệ và thêm sự kiện vào lịch sử. Hạn lưu tính lại 12 tháng.");
     } catch(error) {
       message("dash-status","Không thể ghi nhận liên hệ: "+(error.message||"Lỗi hệ thống"),true);
     } finally {setBusy(false);}
   }
   async function updateInquiry(record,select) {
     const old=record.status;const next=select.value;select.disabled=true;
-    const {error}=await client.from("inquiries").update({status:next}).eq("id",record.id);
-    select.disabled=false;
-    if(error){select.value=old;message("dash-status","Không đổi được trạng thái: "+error.message,true);return}
-    await refreshInquiries();message("dash-status","Đã cập nhật trạng thái yêu cầu.");
+    try{
+      const {data,error}=await client.rpc("update_inquiry_status_with_log",{
+        p_inquiry_id:record.id,p_status:next
+      });
+      if(error)throw error;
+      if(data!==true)throw new Error("Không tìm thấy hồ sơ hoặc không có quyền cập nhật.");
+      record.status=next;
+      await refreshInquiries();
+      if(state.activeProfile?.id===record.id)await openCustomerProfile(record);
+      message("dash-status","Đã cập nhật trạng thái và ghi vào lịch sử chăm sóc.");
+    }catch(error){select.value=old;message("dash-status","Không đổi được trạng thái: "+(error.message||"Lỗi"),true)}
+    finally {select.disabled=false}
   }
   async function deleteInquiry(i) {
     if(!confirm('Xóa yêu cầu tư vấn của "'+i.full_name+'"?'))return;
