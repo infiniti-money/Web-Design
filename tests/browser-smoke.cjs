@@ -144,7 +144,7 @@ window.supabase={createClient:()=>{
     });
     await turnstileTest.goto(origin,{waitUntil:"domcontentloaded",timeout:45000});
     await turnstileTest.locator("#lead-form [type=submit]:not([disabled])").waitFor({timeout:20000});
-    assert.equal(await turnstileTest.locator("#turnstile-container").isVisible(),true);
+    assert.equal(await turnstileTest.locator("#turnstile-container").evaluate(el => !el.hidden),true);
     await turnstileTest.locator("#full-name").fill("Người kiểm thử");
     await turnstileTest.locator("#phone").fill("0900000000");
     await turnstileTest.locator("#service").selectOption({label:"Thiết kế nội thất"});
