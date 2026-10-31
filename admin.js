@@ -315,7 +315,7 @@
         .select("id,inquiry_id,title,details,assignee_name,status,priority,due_at,created_at,completed_at")
         .eq("inquiry_id",record.id).order("created_at",{ascending:false}).range(0,99),
       client.from("inquiry_care_task_events")
-        .select("id,event_type,previous_value,current_value,created_at")
+        .select("id,task_id,event_type,previous_value,current_value,created_at")
         .eq("inquiry_id",record.id).order("created_at",{ascending:false}).range(0,99)
     ]);
     if(seq!==state.customerTaskSeq || state.activeProfile?.id!==record.id)return;
@@ -340,7 +340,8 @@
     const names={created:"Giao công việc",status_changed:"Chuyển tiến độ",reassigned:"Chuyển người phụ trách"};
     for(const event of events.data||[]) {
       const li=el("li");
-      li.append(el("strong",names[event.event_type]||event.event_type),
+      const taskTitle=(tasks.data||[]).find(t=>t.id===event.task_id)?.title||"Công việc";
+      li.append(el("strong",taskTitle+" · "+(names[event.event_type]||event.event_type)),
         el("small",stamp(event.created_at)),el("div",
           (event.previous_value?event.previous_value+" → ":"")+(event.current_value||"")));
       history.append(li);
