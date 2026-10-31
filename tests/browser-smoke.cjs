@@ -112,6 +112,10 @@ window.supabase={createClient:()=>{
  let noteRevisions=[];
  let careTasks=[];
  let taskEvents=[];
+ let staffProfiles=[
+   {user_id:"ci-admin-0001",email:"test-admin@example.invalid",full_name:"Admin CI",role:"admin",active:true},
+   {user_id:"ci-employee-0002",email:"employee@example.invalid",full_name:"Nhân viên A",role:"employee",active:true}
+ ];
  let inquiries=[{id:"inquiry-mock-1",full_name:"KHÁCH KIỂM THỬ GIẢ",phone:"0900000000",
    service:"Thiết kế nội thất",space:"Căn hộ",details:"CI ONLY",status:"new",
    created_at:"2026-10-31T00:00:00.000Z",consented_at:"2026-10-31T00:00:00.000Z",
@@ -191,7 +195,8 @@ window.supabase={createClient:()=>{
        body:"Đã ghi nhận liên hệ thực tế",created_at:new Date().toISOString()});
      return Promise.resolve({data:true,error:null});
    },
-   auth:{getUser:async()=>({data:{user:{email:"test-admin@example.invalid",app_metadata:{role:"admin"}}},error:null}),
+   auth:{getUser:async()=>({data:{user:{id:"ci-admin-0001",email:"test-admin@example.invalid",app_metadata:{role:"admin"}}},error:null}),
+         getSession:async()=>({data:{session:{access_token:"mock-session"}},error:null}),
          signOut:async()=>({error:null})},
    from(table) {
      const q={
@@ -200,7 +205,7 @@ window.supabase={createClient:()=>{
          let items=table==="projects"?[...records]:table==="inquiries"?[...inquiries]:
            table==="inquiry_care_notes"?[...careNotes]:table==="inquiry_care_note_revisions"?[...noteRevisions]:
            table==="inquiry_care_tasks"?careTasks.map(x=>({...x,inquiries:{full_name:inquiries.find(i=>i.id===x.inquiry_id)?.full_name||""}})):
-           table==="inquiry_care_task_events"?[...taskEvents]:[];
+           table==="inquiry_care_task_events"?[...taskEvents]:table==="staff_profiles"?[...staffProfiles]:[];
          for(const fn of q.conditions)items=items.filter(fn);
          if(q.term)items=items.filter(row=>[row.full_name,row.phone,row.service,row.space,row.details]
            .some(value=>String(value||"").toLowerCase().includes(q.term)));
@@ -220,6 +225,7 @@ window.supabase={createClient:()=>{
        lte(key,value){q.conditions.push(row=>row[key] && row[key]<=value);return q},
        or(expression){const match=/full_name\.ilike\.%([^%]*)%/.exec(expression);q.term=(match?.[1]||"").toLowerCase();return q},
        range(start,end){const items=q.filtered();return Promise.resolve({data:items.slice(start,end+1),count:q.countRequested?items.length:null,error:null})},
+       single(){const item=q.filtered()[0];return Promise.resolve({data:item||null,error:item?null:{message:"No matching row"}})},
        then(ok,fail){const items=q.filtered();return Promise.resolve({data:q.head?null:items,count:q.countRequested?items.length:null,error:null}).then(ok,fail)},
        insert(value){
          if(table==="inquiry_care_notes"){
@@ -274,6 +280,9 @@ window.supabase={createClient:()=>{
 }};`}));
     await adminCRUD.goto(new URL("admin.html",origin).toString(),{waitUntil:"domcontentloaded",timeout:45000});
     await adminCRUD.locator("#dashboard:not(.hide)").waitFor({timeout:15000});
+    await adminCRUD.locator("#tab-staff").click();
+    await adminCRUD.locator("#staff-table").getByText("Nhân viên A").waitFor();
+    await adminCRUD.locator("#tab-projects").click();
     await adminCRUD.waitForFunction(()=>document.querySelector("#priority-task-overdue")?.textContent==="0");
     assert.equal(await adminCRUD.locator("#priority-lead-soon").innerText(),"0");
     await adminCRUD.locator("#p-title").fill("Thử nghiệm giao diện");
@@ -319,7 +328,8 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#profile-reminder-clear").click();
     await adminCRUD.locator("#profile-history").getByText("Hủy lịch nhắc liên hệ").waitFor();
     await adminCRUD.locator("#care-task-title").fill("Gửi báo giá nội thất");
-    await adminCRUD.locator("#care-task-assignee").fill("Nhân viên A");
+    await adminCRUD.locator("#care-task-account").selectOption("ci-employee-0002");
+    assert.equal(await adminCRUD.locator("#care-task-assignee").inputValue(),"Nhân viên A");
     await adminCRUD.locator("#care-task-details").fill("Liên hệ xác nhận và gửi dự toán.");
     await adminCRUD.locator("#care-task-priority").selectOption("high");
     await adminCRUD.locator("#care-task-due").fill(new Date(Date.now()+3*86400000).toISOString().slice(0,16));
