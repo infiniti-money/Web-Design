@@ -92,6 +92,16 @@ test("Public and admin pages include key functional sections", () => {
   assert.match(adminJs,/function advanceTask\(task\)/);
   assert.match(adminJs,/aria-pressed/);
   assert.match(adminJs,/const updatingTasks=new Set\(\)/);
+  const taskEditSql=read("supabase/customer-care-task-edit-v1_10.sql");
+  assert.match(taskEditSql,/IMMUTABLE_TASK_IDENTITY/);
+  assert.match(taskEditSql,/title_changed/);
+  assert.match(taskEditSql,/details_changed/);
+  assert.match(taskEditSql,/priority_changed/);
+  assert.match(taskEditSql,/due_changed/);
+  assert.match(admin,new RegExp('id="care-task-cancel"'));
+  assert.match(adminJs,/function editCareTask\(task\)/);
+  assert.match(adminJs,/function resetCareTaskEditor\(\)/);
+  assert.match(adminJs,/Đã cập nhật công việc và ghi nhật ký thay đổi/);
 
 
 });
