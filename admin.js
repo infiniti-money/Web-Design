@@ -423,11 +423,11 @@
     const head=()=>client.from("inquiry_care_tasks").select("id",{count:"exact",head:true});
     const res=await Promise.all([
       head(),head().eq("status","todo"),head().eq("status","in_progress"),
-      head().neq("status","done").lt("due_at",new Date().toISOString())
+      head().eq("status","done"),head().neq("status","done").lt("due_at",new Date().toISOString())
     ]);
     if(res.some(r=>r.error)){message("tasks-board-status","Không đọc được thống kê công việc.",true);return;}
     const vals=res.map(r=>r.count||0);
-    for(const [id,count] of [["tasks-total",vals[0]],["tasks-todo",vals[1]],["tasks-progress",vals[2]],["tasks-overdue",vals[3]]])$(id).textContent=count;
+    for(const [id,count] of [["tasks-total",vals[0]],["tasks-todo",vals[1]],["tasks-progress",vals[2]],["tasks-done",vals[3]],["tasks-overdue",vals[4]]])$(id).textContent=count;
   }
   async function refreshTasksBoard(){
     if($("panel-tasks").classList.contains("hide"))return;
