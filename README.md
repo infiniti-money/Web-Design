@@ -10,6 +10,7 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - **Tài khoản quản trị:** 1 tài khoản email đã xác minh, được cấp `app_metadata.role = admin`. Không có mật khẩu trong mã nguồn.
 - **Cơ sở dữ liệu:** `public.projects` với 6 dự án minh họa, `public.inquiries` chứa yêu cầu tư vấn riêng tư.
 - **Quyền dữ liệu:** RLS bật; khách chỉ được xem dự án published, **không được đọc hoặc ghi trực tiếp vào bảng khách hàng**.
+- **Turnstile:** mã widget và Siteverify đã tích hợp, **chưa kích hoạt** vì chưa có sitekey/secret thực từ Cloudflare; xem [TURNSTILE_SETUP.md](TURNSTILE_SETUP.md).
 - **Biểu mẫu:** gọi Supabase Edge Function `submit-inquiry`; API kiểm tra đầu vào, trường honeypot, nguồn gọi, hạn chế tần suất (3 lần/giờ theo IP, 5 lần/ngày theo số điện thoại). Chỉ mã máy chủ giữ khóa đặc quyền.
 - **Triển khai:** GitHub Pages được xuất bản bằng quy trình Jekyll tự động từ nhánh chính. Release GitHub riêng đóng gói phiên bản tải xuống.
 
@@ -23,6 +24,9 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - `supabase/inquiry-rate-limit.sql` — RPC atomic và cơ chế hạn chế gửi.
 - `supabase/functions/submit-inquiry/index.ts` — mã Edge Function đang chạy tại Supabase.
 - `SUPABASE_SETUP.md` — hướng dẫn bảo mật và vận hành.
+- `privacy.html` — chính sách quyền riêng tư (còn thiếu thông tin pháp lý chủ website và đầu mối dữ liệu).
+- `TURNSTILE_SETUP.md` — cấu hình Cloudflare widget và Supabase Edge secrets.
+- `tests/admin-rls-rollback.sql` — kiểm thử phân quyền admin có hoàn tác.
 
 ## Kiểm thử
 
@@ -34,10 +38,10 @@ GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và t
 
 ## Lưu ý quan trọng trước khi kinh doanh
 
-- Giới hạn tốc độ và honeypot là các biện pháp chống spam cơ bản; **chưa tích hợp CAPTCHA/Turnstile**, chưa chống mọi loại bot/tấn công phân tán.
-- Chưa có email thông báo khi nhận khách mới, thông tin pháp nhân đầy đủ, chính sách quyền riêng tư đã xác minh hoặc quy trình xử lý yêu cầu xóa dữ liệu.
+- Giới hạn tốc độ và honeypot là các biện pháp chống spam cơ bản; **Turnstile đã có mã nhưng chưa được bật bằng khóa thật**, chưa chống mọi loại bot/tấn công phân tán.
+- Chưa có email thông báo khi nhận khách mới và thông tin pháp nhân/đầu mối quyền riêng tư đã xác minh. Trang chính sách hiện minh bạch tình trạng chưa hoàn thiện; chưa có xóa dữ liệu tự động.
 - Hình ảnh Unsplash, tên công trình và các mô tả trong dữ liệu mẫu **không phải công trình đã thi công thực tế**.
-- Chưa thử đăng nhập và thao tác CRUD quản trị trên phiên người dùng thật; chỉ xác minh quyền trong database.
+- Đã thử INSERT/UPDATE/DELETE và từ chối non-admin trong PostgreSQL bằng JWT mô phỏng và ROLLBACK. Kiểm thử UI CRUD bằng Supabase mock trong Chromium; chưa thử đăng nhập bằng mật khẩu thật.
 - Không được đưa `sb_secret_`, `service_role`, mật khẩu hoặc token nhạy cảm vào frontend/GitHub.
 
 Chi tiết: [SUPABASE_SETUP.md](SUPABASE_SETUP.md).
