@@ -32,7 +32,7 @@
 .task-form .field{margin:0}.task-form .field label{font-size:11px}
 .task-form textarea{min-height:70px}.task-taskline{margin:12px 0;padding:13px;border:1px solid var(--line);background:#f9fbf8}
 .task-taskline p{margin:2px 0}.task-taskline small{display:block;color:var(--muted)}
-.task-taskline .actions{margin-top:10px}.task-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.task-taskline .actions{margin-top:10px}.task-board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:20px}
 .task-board article{border:1px solid var(--line);background:#fff;padding:15px}.task-board strong{display:block;font:28px Georgia,serif}
 .task-board span{font-size:12px;color:var(--muted)}.task-filters{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:15px}
 .task-filters .field{min-width:155px;margin:0}.task-filters select,.task-filters input{width:100%;min-height:44px;padding:10px;border:1px solid var(--line);background:#fff}
@@ -119,6 +119,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <article><strong id="tasks-total">0</strong><span>Tổng công việc</span></article>
 <article><strong id="tasks-todo">0</strong><span>Chờ thực hiện</span></article>
 <article><strong id="tasks-progress">0</strong><span>Đang thực hiện</span></article>
+<article><strong id="tasks-done">0</strong><span>Hoàn thành</span></article>
 <article><strong id="tasks-overdue">0</strong><span>Quá hạn chưa hoàn thành</span></article></div>
 <div class="task-filters">
 <div class="field"><label for="tasks-status-filter">Trạng thái</label><select id="tasks-status-filter"><option value="all">Tất cả</option><option value="todo">Chờ làm</option><option value="in_progress">Đang làm</option><option value="done">Hoàn thành</option></select></div>
