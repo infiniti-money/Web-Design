@@ -51,7 +51,7 @@
   const informCaptcha = (message) => {
     if (feedback) feedback.textContent = message;
   };
-  if (captchaActive) {
+  if (captchaActive && client) {
     if (submit) submit.disabled = true;
     if (captchaHost) captchaHost.hidden = false;
     informCaptcha("Đang tải xác minh chống bot...");
