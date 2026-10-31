@@ -32,6 +32,46 @@ async function fingerprint(secret: string, value: string) {
   const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(value));
   return Array.from(new Uint8Array(signature)).map(v => v.toString(16).padStart(2,"0")).join("");
 }
+// Optional notification: only server-side secrets, never frontend credentials.
+// Email contains no customer name, telephone or request details; Admin uses RLS dashboard.
+async function notifyAdminAboutInquiry(inquiryId: unknown, service: string): Promise<void> {
+  const apiKey = Deno.env.get("RESEND_API_KEY") || "";
+  const from = Deno.env.get("NOTIFY_FROM_EMAIL") || "";
+  const to = "infinitimoney@icloud.com";
+  if (!apiKey || !from) return; // Safe until the owner connects a verified sender.
+  if (typeof inquiryId !== "string" || !/^[0-9a-f-]{36}$/i.test(inquiryId)) {
+    console.error("consultation_notification_missing_id");
+    return;
+  }
+  const senderValid = /^(?:[^<>]{1,70} <)?[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+>?$/.test(from);
+  if (!senderValid) {
+    console.error("consultation_notification_sender_invalid");
+    return;
+  }
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      signal: AbortSignal.timeout(6000),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + apiKey,
+        "Idempotency-Key": "tan-design-lead-" + inquiryId,
+      },
+      body: JSON.stringify({
+        from, to: [to],
+        subject: "Tân Design | Có yêu cầu tư vấn mới",
+        text: "Website Tân Design vừa tiếp nhận yêu cầu tư vấn (" + service +
+          "). Đăng nhập Admin để xem và liên hệ: " +
+          "https://infiniti-money.github.io/Web-Design/admin.html" +
+          "\n\nEmail này không chứa dữ liệu cá nhân khách hàng.",
+      }),
+    });
+    if (!response.ok) console.error("consultation_notification_failed", response.status);
+  } catch (error) {
+    // Do not disclose PII, keys or provider responses in logs.
+    console.error("consultation_notification_error", error instanceof Error ? error.name : "unknown");
+  }
+}
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin") || "";
   if (!SITE_ORIGINS.has(origin)) return respond(403, {ok:false,code:"origin_denied"}, "null");
@@ -130,7 +170,12 @@ Deno.serve(async (req: Request) => {
         p_ip_key:ipHash, p_phone_key:phoneHash,
       }),
     });
-    if (response.ok) return respond(201,{ok:true},origin);
+    if (response.ok) {
+      const insertedId: unknown = await response.json().catch(() => null);
+      // A notification problem must never turn a successfully saved lead into a failed form.
+      await notifyAdminAboutInquiry(insertedId, service);
+      return respond(201,{ok:true},origin);
+    }
     const data = await response.json().catch(()=>({}));
     if (data?.message === "RATE_LIMIT_EXCEEDED")
       return respond(429,{ok:false,code:"rate_limited"},origin);
