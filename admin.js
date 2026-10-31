@@ -67,7 +67,8 @@
   }
   function setBusy(b) {
     state.busy=b;
-    for(const id of ["project-save","login-button","reload-projects","reload-inquiries","profile-note-save","profile-reminder-save","profile-reminder-clear","profile-reminder-done"]) $(id).disabled=b;
+    for(const id of ["project-save","login-button","reload-projects","reload-inquiries","profile-note-save","profile-reminder-save","profile-reminder-clear"]) $(id).disabled=b;
+    $("profile-reminder-done").disabled=b || !state.activeProfile?.follow_up_at;
   }
   function loginVisible() {
     state.activeProfile=null;
