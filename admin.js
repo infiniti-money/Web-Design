@@ -1,4 +1,4 @@
-/* ATELIER HOME v1.7.0 Admin.
+/* ATELIER HOME v1.8.0 Admin.
  * Authentication is Supabase Auth. Authorization is enforced on DB via RLS.
  * No service-role or private credentials are ever used by this browser app. */
 (() => {
@@ -19,7 +19,7 @@
   const PAGE_SIZE = 25;
   const state = { projects:[], inquiries:[], editingId:null, slugTouched:false, busy:false,
     leadSearch:"", leadStatus:"all", leadService:"all", leadPeriod:"all", leadPage:0, leadTotal:0,
-    leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0 };
+    leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0,customerTaskSeq:0,taskBoardSeq:0,taskBoardPage:0,taskBoardTotal:0,taskStatusFilter:"all",taskOwnerFilter:"",taskDueFilter:"all" };
 
   function message(id, text, error=false) {
     const el = $(id); el.textContent = text;
@@ -59,11 +59,12 @@
       .replace(/^-+|-+$/g,"").slice(0,100);
   }
   function switchTab(name) {
-    for(const kind of ["projects","inquiries"]) {
+    for(const kind of ["projects","inquiries","tasks"]) {
       const active = kind === name;
       $("panel-"+kind).classList.toggle("hide", !active);
       $("tab-"+kind).setAttribute("aria-selected", String(active));
     }
+    if(name==="tasks")refreshTasksBoard();
   }
   function setBusy(b) {
     state.busy=b;
@@ -264,6 +265,174 @@
       body.append(tr);
     });
   }
+  const taskStatuses={todo:"Chờ thực hiện",in_progress:"Đang thực hiện",done:"Hoàn thành"};
+  const taskPriorities={normal:"Bình thường",high:"Cao",urgent:"Khẩn cấp"};
+  const taskPageSize=25;
+  const taskColumns="id,inquiry_id,title,details,assignee_name,status,priority,due_at,completed_at,created_at,inquiries(full_name)";
+  const isOverdue=t=>t.status!=="done"&&t.due_at&&new Date(t.due_at)<new Date();
+  function statusSelector(task) {
+    const control=el("select",undefined,"lead-status");
+    control.setAttribute("aria-label","Tiến độ: "+task.title);
+    for(const [value,label] of Object.entries(taskStatuses)) {
+      const option=el("option",label);option.value=value;control.append(option);
+    }
+    control.value=task.status;
+    control.addEventListener("change",async()=>{
+      const old=task.status;control.disabled=true;
+      try{
+        const {error}=await client.from("inquiry_care_tasks").update({status:control.value}).eq("id",task.id);
+        if(error)throw error;
+        await Promise.all([refreshTasksBoard(),loadCustomerTasks()]);
+        message("dash-status","Đã cập nhật tiến độ công việc và ghi nhật ký.");
+      }catch(error){
+        control.value=old;message("dash-status","Không đổi được tiến độ: "+(error.message||"Lỗi hệ thống"),true);
+      }finally{control.disabled=false}
+    });
+    return control;
+  }
+  async function reassignCareTask(task){
+    const name=prompt("Nhập tên người phụ trách mới:",task.assignee_name);
+    if(name===null)return;
+    const next=name.trim();
+    if(next.length<2||next.length>100){
+      message("care-task-status","Tên người phụ trách phải từ 2 đến 100 ký tự.",true);return;
+    }
+    if(next===task.assignee_name)return;
+    const {error}=await client.from("inquiry_care_tasks").update({assignee_name:next}).eq("id",task.id);
+    if(error){message("care-task-status","Không thể chuyển việc: "+error.message,true);return}
+    await Promise.all([loadCustomerTasks(),refreshTasksBoard()]);
+    message("care-task-status","Đã chuyển người phụ trách và lưu lịch sử.");
+  }
+  async function loadCustomerTasks(){
+    const record=state.activeProfile;
+    if(!record)return;
+    const seq=++state.customerTaskSeq;
+    const list=$("care-task-list"),history=$("care-task-events");
+    list.replaceChildren(el("p","Đang tải công việc...","muted"));
+    history.replaceChildren(el("li","Đang tải lịch sử giao việc..."));
+    const [tasks,events]=await Promise.all([
+      client.from("inquiry_care_tasks")
+        .select("id,inquiry_id,title,details,assignee_name,status,priority,due_at,created_at,completed_at")
+        .eq("inquiry_id",record.id).order("created_at",{ascending:false}).range(0,99),
+      client.from("inquiry_care_task_events")
+        .select("id,event_type,previous_value,current_value,created_at")
+        .eq("inquiry_id",record.id).order("created_at",{ascending:false}).range(0,99)
+    ]);
+    if(seq!==state.customerTaskSeq || state.activeProfile?.id!==record.id)return;
+    if(tasks.error||events.error){
+      list.replaceChildren(el("p","Không đọc được công việc: "+(tasks.error?.message||events.error?.message||"Lỗi"),"error"));
+      history.replaceChildren(el("li","Không tải được lịch sử."));
+      return;
+    }
+    list.replaceChildren();history.replaceChildren();
+    if(!tasks.data?.length)list.append(el("p","Chưa giao công việc nào.","muted"));
+    for(const task of tasks.data||[]){
+      const section=el("section",undefined,"task-taskline");
+      section.append(el("strong",task.title),
+        el("small","Phụ trách: "+task.assignee_name+" · "+taskPriorities[task.priority]+
+          " · Hạn: "+stamp(task.due_at)+(isOverdue(task)?" · QUÁ HẠN":"")),
+        el("p",task.details));
+      const actions=el("div",undefined,"actions");
+      actions.append(statusSelector(task),btn("Chuyển người",()=>reassignCareTask(task)));
+      section.append(actions);list.append(section);
+    }
+    if(!events.data?.length)history.append(el("li","Chưa có thay đổi tiến độ."));
+    const names={created:"Giao công việc",status_changed:"Chuyển tiến độ",reassigned:"Chuyển người phụ trách"};
+    for(const event of events.data||[]) {
+      const li=el("li");
+      li.append(el("strong",names[event.event_type]||event.event_type),
+        el("small",stamp(event.created_at)),el("div",
+          (event.previous_value?event.previous_value+" → ":"")+(event.current_value||"")));
+      history.append(li);
+    }
+  }
+  async function submitCareTask(event){
+    event.preventDefault();
+    if(state.busy||!state.activeProfile)return;
+    const record=state.activeProfile;
+    const title=$("care-task-title").value.trim();
+    const assignee=$("care-task-assignee").value.trim();
+    const details=$("care-task-details").value.trim();
+    const priority=$("care-task-priority").value;
+    const dateValue=$("care-task-due").value;
+    const due=dateValue?new Date(dateValue):null;
+    if(title.length<3||title.length>180||assignee.length<2||assignee.length>100||
+      details.length>1500||(due&&Number.isNaN(due.getTime()))){
+      message("care-task-status","Tên việc, người phụ trách hoặc hạn xử lý không hợp lệ.",true);return;
+    }
+    setBusy(true);
+    $("care-task-create").disabled=true;
+    try{
+      const {error}=await client.from("inquiry_care_tasks").insert({
+        inquiry_id:record.id,title,assignee_name:assignee,details,
+        priority,due_at:due?due.toISOString():null
+      });
+      if(error)throw error;
+      $("care-task-form").reset();
+      await Promise.all([loadCustomerTasks(),refreshTasksBoard()]);
+      message("care-task-status","Đã giao công việc và tạo nhật ký.");
+    }catch(error){message("care-task-status","Không giao được việc: "+(error.message||"Lỗi"),true)}
+    finally{setBusy(false);$("care-task-create").disabled=false}
+  }
+  async function loadTaskBoard(){
+    const seq=++state.taskBoardSeq;
+    message("tasks-board-status","Đang tải công việc...");
+    $("tasks-prev").disabled=true;$("tasks-next").disabled=true;
+    let query=client.from("inquiry_care_tasks").select(taskColumns,{count:"exact"})
+      .order("created_at",{ascending:false});
+    if(state.taskStatusFilter!=="all")query=query.eq("status",state.taskStatusFilter);
+    const owner=state.taskOwnerFilter.trim().replace(/[^\p{L}\p{N}\s-]/gu,"").slice(0,80);
+    if(owner)query=query.ilike("assignee_name","%"+owner+"%");
+    if(state.taskDueFilter==="overdue")query=query.neq("status","done").lt("due_at",new Date().toISOString());
+    if(state.taskDueFilter==="7")query=query.gte("due_at",new Date().toISOString())
+      .lte("due_at",new Date(Date.now()+7*86400000).toISOString());
+    const start=state.taskBoardPage*taskPageSize;
+    try{
+      const {data,error,count}=await query.range(start,start+taskPageSize-1);
+      if(seq!==state.taskBoardSeq)return;
+      if(error)throw error;
+      state.taskBoardTotal=typeof count==="number"?count:(data||[]).length;
+      if(!data?.length&&state.taskBoardPage>0&&state.taskBoardTotal>0){
+        state.taskBoardPage=Math.ceil(state.taskBoardTotal/taskPageSize)-1;
+        return loadTaskBoard();
+      }
+      const body=$("tasks-board-table");body.replaceChildren();
+      for(const task of data||[]){
+        const tr=el("tr");
+        cell(tr,el("strong",task.inquiries?.full_name||"Khách hàng"));
+        cell(tr,el("strong",task.title));
+        cell(tr,el("span",task.assignee_name));
+        const due=el("div");
+        due.append(el("strong",taskPriorities[task.priority]||task.priority),
+          el("small",stamp(task.due_at)+(isOverdue(task)?" · Quá hạn":"")));
+        cell(tr,due);cell(tr,statusSelector(task));
+        body.append(tr);
+      }
+      if(!data?.length){
+        const tr=el("tr"),td=el("td","Chưa có công việc phù hợp.","empty");td.colSpan=5;tr.append(td);body.append(tr);
+      }
+      $("tasks-page-label").textContent="Trang "+(state.taskBoardPage+1)+" / "+Math.max(1,Math.ceil(state.taskBoardTotal/taskPageSize));
+      $("tasks-prev").disabled=state.taskBoardPage===0;
+      $("tasks-next").disabled=(state.taskBoardPage+1)*taskPageSize>=state.taskBoardTotal;
+      message("tasks-board-status","Hiển thị "+(data||[]).length+" / "+state.taskBoardTotal+" công việc phù hợp (25 việc/trang).");
+    }catch(error){
+      if(seq===state.taskBoardSeq)message("tasks-board-status","Lỗi tải công việc: "+(error.message||"Lỗi hệ thống"),true);
+    }
+  }
+  async function loadTaskKpis(){
+    const head=()=>client.from("inquiry_care_tasks").select("id",{count:"exact",head:true});
+    const res=await Promise.all([
+      head(),head().eq("status","todo"),head().eq("status","in_progress"),
+      head().neq("status","done").lt("due_at",new Date().toISOString())
+    ]);
+    if(res.some(r=>r.error)){message("tasks-board-status","Không đọc được thống kê công việc.",true);return;}
+    const vals=res.map(r=>r.count||0);
+    for(const [id,count] of [["tasks-total",vals[0]],["tasks-todo",vals[1]],["tasks-progress",vals[2]],["tasks-overdue",vals[3]]])$(id).textContent=count;
+  }
+  async function refreshTasksBoard(){
+    if($("panel-tasks").classList.contains("hide"))return;
+    await Promise.all([loadTaskBoard(),loadTaskKpis()]);
+  }
   function newProject() {
     state.editingId=null;state.slugTouched=false;
     $("project-form").reset();$("p-order").value="0";
@@ -359,10 +528,14 @@
   }
   function closeCustomerProfile() {
     ++state.profileSeq;
+    ++state.customerTaskSeq;
     state.activeProfile=null;
     $("lead-profile").classList.add("hide");
     $("profile-history").replaceChildren();
     $("profile-revisions").replaceChildren();
+    $("care-task-list").replaceChildren();
+    $("care-task-events").replaceChildren();
+    $("care-task-form").reset();
     $("profile-note-input").value="";
     $("profile-reminder-at").value="";
     message("profile-status","");
@@ -485,7 +658,7 @@
     $("lead-profile").classList.remove("hide");
     message("profile-status","");
     $("lead-profile").scrollIntoView({behavior:"smooth",block:"start"});
-    await loadProfileNotes();
+    await Promise.all([loadProfileNotes(),loadCustomerTasks()]);
   }
   async function saveCareNote(event) {
     event.preventDefault();
@@ -555,6 +728,7 @@
   $("project-form").addEventListener("submit",submitProject);
   $("tab-projects").addEventListener("click",()=>switchTab("projects"));
   $("tab-inquiries").addEventListener("click",()=>switchTab("inquiries"));
+  $("tab-tasks").addEventListener("click",()=>switchTab("tasks"));
   $("reload-projects").addEventListener("click",loadProjects);
   $("reload-inquiries").addEventListener("click",refreshInquiries);
   let searchTimer;
@@ -614,6 +788,26 @@
     document.body.append(link);link.click();link.remove();
     setTimeout(()=>URL.revokeObjectURL(uri),10000);
   }
+  $("care-task-form").addEventListener("submit",submitCareTask);
+  $("reload-tasks").addEventListener("click",refreshTasksBoard);
+  for(const [id,field] of [["tasks-status-filter","taskStatusFilter"],["tasks-due-filter","taskDueFilter"]]){
+    $(id).addEventListener("change",()=>{
+      state[field]=$(id).value;state.taskBoardPage=0;refreshTasksBoard();
+    });
+  }
+  let taskFilterTimer;
+  $("tasks-owner-filter").addEventListener("input",()=>{
+    state.taskOwnerFilter=$("tasks-owner-filter").value;state.taskBoardPage=0;
+    clearTimeout(taskFilterTimer);taskFilterTimer=setTimeout(refreshTasksBoard,300);
+  });
+  $("tasks-prev").addEventListener("click",()=>{
+    if(state.taskBoardPage>0){state.taskBoardPage--;refreshTasksBoard();}
+  });
+  $("tasks-next").addEventListener("click",()=>{
+    if((state.taskBoardPage+1)*taskPageSize<state.taskBoardTotal){
+      state.taskBoardPage++;refreshTasksBoard();
+    }
+  });
   $("lead-export-csv").addEventListener("click",exportLeadCsv);
   $("profile-close").addEventListener("click",closeCustomerProfile);
   $("profile-note-form").addEventListener("submit",saveCareNote);
