@@ -112,6 +112,16 @@ window.supabase={createClient:()=>{
    service:"Thiết kế nội thất",space:"Căn hộ",details:"CI ONLY",status:"new",
    created_at:"2026-10-31T00:00:00.000Z",consented_at:"2026-10-31T00:00:00.000Z",
    privacy_policy_version:"2026-10-31-retention-12m",last_contacted_at:null,legal_hold_until:null}];
+ window.__ci_seed_extra_leads = count => {
+   for(let i=0;i<count;i++)inquiries.push({
+     id:"lead-extra-"+i,full_name:"KHÁCH GIẢ "+i,phone:"0900001"+String(i).padStart(3,"0"),
+     service:"Thiết kế nội thất",space:"Căn hộ",details:"SYNTHETIC_CI_"+i,
+     status:"new",created_at:"2026-10-31T00:00:00.000Z",
+     consented_at:"2026-10-31T00:00:00.000Z",
+     privacy_policy_version:"2026-10-31-retention-12m",
+     last_contacted_at:null,legal_hold_until:null
+   });
+ };
  return {
    rpc(name,args) {
      if(name!=="record_inquiry_contact")return Promise.resolve({data:null,error:{message:"Unknown RPC"}});
@@ -197,7 +207,20 @@ window.supabase={createClient:()=>{
     const bytes=fs.readFileSync(await exported.path());
     assert.equal(bytes.subarray(0,3).toString("hex"),"efbbbf","CSV must include Excel UTF-8 BOM");
     assert.match(bytes.toString("utf8"),/KHÁCH KIỂM THỬ GIẢ/);
-    console.log("ADMIN-UI: project CRUD + server-filtered CRM, exact KPIs, pagination and CSV download simulated; no live writes");
+    await adminCRUD.evaluate(()=>window.__ci_seed_extra_leads(27));
+    await adminCRUD.locator("#reload-inquiries").click();
+    await adminCRUD.locator("#lead-match-count").getByText(/Hiển thị 1–25 \/ 28/).waitFor();
+    assert.equal(await adminCRUD.locator("#crm-total").innerText(),"28");
+    assert.equal(await adminCRUD.locator("#lead-next-page").isDisabled(),false);
+    await adminCRUD.locator("#lead-next-page").click();
+    await adminCRUD.locator("#lead-page-label").getByText("Trang 2 / 2").waitFor();
+    assert.match(await adminCRUD.locator("#lead-match-count").innerText(),/Hiển thị 26–28 \/ 28/);
+    await adminCRUD.locator("#lead-search").fill("0900001026");
+    await adminCRUD.locator("#lead-match-count").getByText(/Hiển thị 1–1 \/ 1/).waitFor();
+    assert.equal(await adminCRUD.locator("#lead-page-label").innerText(),"Trang 1 / 1");
+    await adminCRUD.locator("#lead-clear-filters").click();
+    await adminCRUD.locator("#lead-match-count").getByText(/Hiển thị 1–25 \/ 28/).waitFor();
+    console.log("ADMIN-UI: project CRUD + server-filtered CRM, 28-record paging, exact KPIs and CSV download simulated; no live writes");
 
     const mobile = await browser.newPage({ ...devices["iPhone 13"], locale: "vi-VN" });
     mobile.on("pageerror", error => consoleErrors.push("mobile: " + error.message));
