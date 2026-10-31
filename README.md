@@ -29,6 +29,7 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - `supabase/customer-care-audit-v1_6.sql` — tự ghi lịch sử khi liên hệ thật/chuyển trạng thái trên máy chủ.
 - `supabase/customer-care-edit-v1_7.sql` — chỉnh sửa ghi chú qua RPC có đối chiếu phiên bản, ghi lịch sử trước/sau, chặn sửa ghi chú hệ thống và hoàn thành nhắc việc.
 - `supabase/customer-care-tasks-v1_8.sql` — phân công chăm sóc, trạng thái, ưu tiên, thời hạn, RLS và lịch sử cập nhật nhiệm vụ.
+- `supabase/customer-care-task-edit-v1_10.sql` — kiểm tra danh tính công việc bất biến và ghi nhật ký mỗi lần sửa mô tả, ưu tiên, hạn hoặc tên.
 - `supabase/functions/submit-inquiry/index.ts` — mã Edge Function đang chạy tại Supabase.
 - `SUPABASE_SETUP.md` — hướng dẫn bảo mật và vận hành.
 - `privacy.html` — chính sách quyền riêng tư: đơn vị Tân Design, địa chỉ chủ website cung cấp và email tiếp nhận `infinitimoney@icloud.com`; chưa có xác minh đăng ký pháp lý, đã cấu hình giữ dữ liệu 12 tháng.
@@ -52,6 +53,13 @@ GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và t
 - Các lần Admin xác nhận đã liên hệ và chuyển trạng thái được lưu thành sự kiện lịch sử theo giờ máy chủ trong cùng một giao dịch.
 - **Spinner** phản hồi trạng thái tải khi truy vấn danh sách, có chế độ giảm chuyển động cho người dùng nhạy cảm với hiệu ứng.
 - Phần email vẫn để sau theo lựa chọn chủ website, không yêu cầu secret mới và không đổi gói Supabase.
+
+## CRM v1.10 — Chỉnh sửa công việc kèm nhật ký
+
+- Tại **Hồ sơ khách hàng → Tiến độ công việc**, nhấn **Sửa công việc**. Cập nhật tên, mô tả, người phụ trách, mức ưu tiên hoặc hạn xử lý bằng biểu mẫu có nút Hủy chỉnh sửa.
+- Chỉnh sửa được ghi thành sự kiện có nội dung cũ/mới: `title_changed`, `details_changed`, `priority_changed`, `due_changed`, `reassigned` và `status_changed`.
+- Migration `supabase/customer-care-task-edit-v1_10.sql` không cho di chuyển lén một nhiệm vụ sang hồ sơ khách hàng khác, đổi mã định danh hoặc người tạo.
+- Mọi dữ liệu nhiệm vụ vẫn thuộc hồ sơ tư vấn, áp dụng RLS chỉ-Admin và xóa theo thời hạn lưu 12 tháng. Email/đẩy thông báo chưa được bật.
 
 ## CRM v1.9 — Bảng Kanban
 
