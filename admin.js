@@ -1,4 +1,4 @@
-/* ATELIER HOME v1.10.0 Admin.
+/* ATELIER HOME v1.11.0 Admin.
  * Authentication is Supabase Auth. Authorization is enforced on DB via RLS.
  * No service-role or private credentials are ever used by this browser app. */
 (() => {
@@ -19,7 +19,7 @@
   const PAGE_SIZE = 25;
   const state = { projects:[], inquiries:[], editingId:null, slugTouched:false, busy:false,
     leadSearch:"", leadStatus:"all", leadService:"all", leadPeriod:"all", leadPage:0, leadTotal:0,
-    leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0,customerTaskSeq:0,taskBoardSeq:0,taskBoardPage:0,taskBoardTotal:0,taskView:"table",editingTask:null,taskStatusFilter:"all",taskOwnerFilter:"",taskDueFilter:"all" };
+    leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0,customerTaskSeq:0,taskBoardSeq:0,taskBoardPage:0,prioritySeq:0,taskBoardTotal:0,taskView:"table",editingTask:null,taskStatusFilter:"all",taskOwnerFilter:"",taskDueFilter:"all" };
 
   function message(id, text, error=false) {
     const el = $(id); el.textContent = text;
@@ -180,7 +180,74 @@
     $("crm-due").textContent=due;
   }
   async function refreshInquiries() {
-    await Promise.all([loadInquiries(),loadLeadStats()]);
+    await Promise.all([loadInquiries(),loadLeadStats(),loadPriorityHub()]);
+  }
+  // Priority center reads only Admin-RLS-authorized rows and exact server counts.
+  // The lists are deliberately capped to five items; KPI totals are not capped.
+  async function loadPriorityHub() {
+    const seq=++state.prioritySeq;
+    message("priority-status","Đang cập nhật lịch ưu tiên...");
+    const now=new Date().toISOString();
+    const until=new Date(Date.now()+7*86400000).toISOString();
+    const taskQuery=()=>client.from("inquiry_care_tasks")
+      .select("id,title,assignee_name,due_at,status,inquiries(full_name)",{count:"exact"})
+      .neq("status","done");
+    const leadQuery=()=>client.from("inquiries")
+      .select("id,full_name,follow_up_at",{count:"exact"});
+    const specs=[
+      {key:"task-overdue",task:true,q:taskQuery().lt("due_at",now).order("due_at",{ascending:true})},
+      {key:"task-soon",task:true,q:taskQuery().gte("due_at",now).lte("due_at",until).order("due_at",{ascending:true})},
+      {key:"lead-overdue",task:false,q:leadQuery().lte("follow_up_at",now).order("follow_up_at",{ascending:true})},
+      {key:"lead-soon",task:false,q:leadQuery().gt("follow_up_at",now).lte("follow_up_at",until).order("follow_up_at",{ascending:true})}
+    ];
+    const results=await Promise.allSettled(specs.map(x=>x.q.range(0,4)));
+    if(seq!==state.prioritySeq)return;
+    let failed=0;
+    for(let index=0;index<specs.length;index++){
+      const spec=specs[index],result=results[index];
+      const countEl=$("priority-"+spec.key),list=$("priority-"+spec.key+"-list");
+      list.replaceChildren();
+      if(result.status!=="fulfilled"||result.value.error){
+        countEl.textContent="—";list.append(el("li","Không tải được dữ liệu."));failed++;continue;
+      }
+      const {data,count}=result.value;
+      countEl.textContent=typeof count==="number"?count:(data||[]).length;
+      if(!data?.length){list.append(el("li","Không có mục nào."));continue}
+      for(const item of data){
+        const li=el("li");
+        li.append(el("strong",spec.task?item.title:item.full_name),
+          el("small",(spec.task
+            ? (item.inquiries?.full_name||"Khách hàng")+" · "+item.assignee_name
+            : "Liên hệ khách hàng")+" · "+stamp(spec.task?item.due_at:item.follow_up_at)));
+        list.append(li);
+      }
+    }
+    message("priority-status",failed
+      ? "Có "+failed+" nhóm ưu tiên không tải được. Nhấn Làm mới ưu tiên để thử lại."
+      : "Đã đồng bộ việc cần xử lý từ Supabase.",failed>0);
+  }
+  function showTaskPriority(filter){
+    state.taskDueFilter=filter;
+    state.taskStatusFilter="all";
+    state.taskOwnerFilter="";
+    state.taskBoardPage=0;
+    $("tasks-due-filter").value=filter;
+    $("tasks-status-filter").value="all";
+    $("tasks-owner-filter").value="";
+    switchTab("tasks");
+    $("panel-tasks").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  function showLeadPriority(filter){
+    state.leadReminder=filter;
+    state.leadStatus="all";state.leadService="all";state.leadPeriod="all";state.leadSearch="";
+    state.leadPage=0;
+    for(const [id,value] of [
+      ["lead-filter-reminder",filter],["lead-filter-status","all"],
+      ["lead-filter-service","all"],["lead-filter-period","all"],["lead-search",""]
+    ])$(id).value=value;
+    switchTab("inquiries");
+    loadInquiries();
+    $("panel-inquiries").scrollIntoView({behavior:"smooth",block:"start"});
   }
   async function loadAll() {
     message("dash-status","Đang tải dữ liệu...");
@@ -519,8 +586,8 @@
     for(const [id,count] of [["tasks-total",vals[0]],["tasks-todo",vals[1]],["tasks-progress",vals[2]],["tasks-done",vals[3]],["tasks-overdue",vals[4]]])$(id).textContent=count;
   }
   async function refreshTasksBoard(){
-    if($("panel-tasks").classList.contains("hide"))return;
-    await Promise.all([loadTaskBoard(),loadTaskKpis()]);
+    if($("panel-tasks").classList.contains("hide")){await loadPriorityHub();return}
+    await Promise.all([loadTaskBoard(),loadTaskKpis(),loadPriorityHub()]);
   }
   function newProject() {
     state.editingId=null;state.slugTouched=false;
@@ -818,6 +885,11 @@
   $("tab-projects").addEventListener("click",()=>switchTab("projects"));
   $("tab-inquiries").addEventListener("click",()=>switchTab("inquiries"));
   $("tab-tasks").addEventListener("click",()=>switchTab("tasks"));
+  $("priority-refresh").addEventListener("click",loadPriorityHub);
+  $("priority-task-overdue-open").addEventListener("click",()=>showTaskPriority("overdue"));
+  $("priority-task-soon-open").addEventListener("click",()=>showTaskPriority("7"));
+  $("priority-lead-overdue-open").addEventListener("click",()=>showLeadPriority("due"));
+  $("priority-lead-soon-open").addEventListener("click",()=>showLeadPriority("upcoming"));
   $("reload-projects").addEventListener("click",loadProjects);
   $("reload-inquiries").addEventListener("click",refreshInquiries);
   let searchTimer;
