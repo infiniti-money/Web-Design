@@ -19,6 +19,16 @@
 - Việc lọc dữ liệu sử dụng cú pháp PostgREST với từ khóa được giới hạn ký tự để chống chèn thêm điều kiện. Tìm tên tiếng Việt bằng dấu tương ứng để đạt kết quả chính xác; chưa hỗ trợ tìm không dấu hoàn chỉnh trên toàn bộ cơ sở dữ liệu.
 - Không thay đổi cơ chế xóa dữ liệu sau 12 tháng. Cấu hình email vẫn để sau theo quyết định của chủ website.
 
+## Hồ sơ và nhắc liên hệ v1.6.0 (đã áp dụng trên dự án hiện tại)
+
+- `public.inquiries.follow_up_at`: mốc nhắc liên hệ trong Admin (UTC, hiển thị bằng múi giờ trình duyệt).
+- `public.inquiry_care_notes`: ghi chú và nhật ký nhắc, chỉ Admin có thể đọc/thêm; không cấp SELECT cho anon. Có `ON DELETE CASCADE` để xóa cùng hồ sơ sau 12 tháng hoặc khi quản trị viên xóa hợp lệ.
+- `public.schedule_inquiry_followup`: RPC Security Invoker, kiểm tra thời hạn 12 tháng và ghi dấu đặt/hủy lịch nguyên tử.
+- `public.record_inquiry_contact` và `public.update_inquiry_status_with_log`: ghi dấu liên hệ và thay trạng thái atomically trong nhật ký chăm sóc; vẫn kế thừa RLS.
+- SQL nguồn `supabase/customer-care-v1_6.sql` và `supabase/customer-care-audit-v1_6.sql` đã chạy trên Supabase. Đừng chạy lại các policy mà chưa kiểm tra migration.
+- Ghi chú là dữ liệu cá nhân, phải được sử dụng đúng mục đích tư vấn; không tự động gửi thư hay thông báo hệ thống ngoài Admin.
+- Kiểm thử với bản ghi giả trong `BEGIN...ROLLBACK` cho thêm ghi chú, đặt lịch, cập nhật trạng thái và chặn non-admin; không còn bản ghi giả.
+
 ## 1. Đăng nhập quản trị
 
 1. Mở `/admin.html` của website.
