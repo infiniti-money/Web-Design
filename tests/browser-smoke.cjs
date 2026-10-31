@@ -125,10 +125,31 @@ window.supabase={createClient:()=>{
          signOut:async()=>({error:null})},
    from(table) {
      const q={
-       select(){return q},order(){return q},range(){return Promise.resolve({data:table==="projects"?[...records]:table==="inquiries"?[...inquiries]:[],error:null})},
+       conditions:[],head:false,countRequested:false,term:"",
+       filtered(){
+         let items=table==="projects"?[...records]:table==="inquiries"?[...inquiries]:[];
+         for(const fn of q.conditions)items=items.filter(fn);
+         if(q.term)items=items.filter(row=>[row.full_name,row.phone,row.service,row.space,row.details]
+           .some(value=>String(value||"").toLowerCase().includes(q.term)));
+         return items;
+       },
+       select(_fields,options){q.head=!!options?.head;q.countRequested=options?.count==="exact";return q},
+       order(){return q},
+       eq(key,value){q.conditions.push(row=>row[key]===value);return q},
+       gte(key,value){q.conditions.push(row=>row[key]>=value);return q},
+       or(expression){const match=/full_name\.ilike\.%([^%]*)%/.exec(expression);q.term=(match?.[1]||"").toLowerCase();return q},
+       range(start,end){const items=q.filtered();return Promise.resolve({data:items.slice(start,end+1),count:q.countRequested?items.length:null,error:null})},
+       then(ok,fail){const items=q.filtered();return Promise.resolve({data:q.head?null:items,count:q.countRequested?items.length:null,error:null}).then(ok,fail)},
        insert(value){records.push({id:"project-"+(records.length+1),...value});return Promise.resolve({error:null})},
-       update(value){return{eq(key,id){const item=records.find(r=>r[key]===id);if(item)Object.assign(item,value);return Promise.resolve({error:null})}}},
-       delete(){return{eq(key,id){records=records.filter(r=>r[key]!==id);return Promise.resolve({error:null})}}}
+       update(value){return{eq(key,id){
+         const items=table==="inquiries"?inquiries:records;
+         const item=items.find(r=>r[key]===id);
+         if(item)Object.assign(item,value);
+         return Promise.resolve({error:null})}}},
+       delete(){return{eq(key,id){
+         if(table==="inquiries")inquiries=inquiries.filter(r=>r[key]!==id);
+         else records=records.filter(r=>r[key]!==id);
+         return Promise.resolve({error:null})}}}
      };return q;
    }
  };
@@ -152,7 +173,7 @@ window.supabase={createClient:()=>{
     assert.equal(await adminCRUD.locator("#crm-total").innerText(),"1");
     assert.equal(await adminCRUD.locator("#crm-contacted").innerText(),"0");
     await adminCRUD.locator("#lead-search").fill("0900000000");
-    assert.match(await adminCRUD.locator("#lead-match-count").innerText(),/Hiển thị 1 \/ 1/);
+    assert.match(await adminCRUD.locator("#lead-match-count").innerText(),/Hiển thị 1–1 \/ 1/);
     await adminCRUD.locator("#lead-search").fill("KHONG TON TAI");
     await adminCRUD.locator("#inquiries-table").getByText("Không có hồ sơ phù hợp bộ lọc.").waitFor();
     await adminCRUD.locator("#lead-clear-filters").click();
@@ -166,7 +187,17 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#inquiries-table").getByText(/Liên hệ cuối:/).waitFor();
     assert.equal(await adminCRUD.locator("#inquiries-table select").inputValue(),"contacted");
     assert.equal(await adminCRUD.locator("#crm-contacted").innerText(),"1");
-    console.log("ADMIN-UI: project CRUD + CRM search, filters, KPIs and contact RPC mocked, no live writes");
+    assert.equal(await adminCRUD.locator("#lead-page-label").innerText(),"Trang 1 / 1");
+    assert.equal(await adminCRUD.locator("#lead-prev-page").isDisabled(),true);
+    assert.equal(await adminCRUD.locator("#lead-next-page").isDisabled(),true);
+    const downloadReady=adminCRUD.waitForEvent("download");
+    await adminCRUD.locator("#lead-export-csv").click();
+    const exported=await downloadReady;
+    assert.match(exported.suggestedFilename(),/tan-design-khach-hang-trang-1\.csv/);
+    const bytes=fs.readFileSync(await exported.path());
+    assert.equal(bytes.subarray(0,3).toString("hex"),"efbbbf","CSV must include Excel UTF-8 BOM");
+    assert.match(bytes.toString("utf8"),/KHÁCH KIỂM THỬ GIẢ/);
+    console.log("ADMIN-UI: project CRUD + server-filtered CRM, exact KPIs, pagination and CSV download simulated; no live writes");
 
     const mobile = await browser.newPage({ ...devices["iPhone 13"], locale: "vi-VN" });
     mobile.on("pageerror", error => consoleErrors.push("mobile: " + error.message));
