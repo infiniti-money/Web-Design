@@ -37,6 +37,16 @@ test("Inquiry API requires affirmative privacy consent",async()=>{
   assert.equal(res.status,400);
   assert.equal(body.code,"privacy_consent_required");
 });
+test("Turnstile enabled: missing challenge must be rejected before DB writes",async()=>{
+  const res=await fetch(url,{method:"POST",headers:{...authHeaders,"Content-Type":"application/json"},
+    body:JSON.stringify({full_name:"CI NO CHALLENGE",phone:"0000000000",
+      service:"Thiết kế nội thất",space:"Căn hộ",details:"DO_NOT_STORE",
+      privacy_consent:true,website:""}),
+    signal:timeout()});
+  const body=await res.json();
+  assert.equal(res.status,403,"Missing challenge must be rejected by enabled Turnstile server");
+  assert.equal(body.code,"captcha_required");
+});
 test("Inquiry API rejects a fake Turnstile challenge",async()=>{
   const res=await fetch(url,{method:"POST",headers:{...authHeaders,"Content-Type":"application/json"},
     body:JSON.stringify({full_name:"CI CHALLENGE REJECTION",phone:"0912345000",
