@@ -1,4 +1,4 @@
-/* ATELIER HOME v1.1 Admin.
+/* ATELIER HOME v1.5.0 Admin.
  * Authentication is Supabase Auth. Authorization is enforced on DB via RLS.
  * No service-role or private credentials are ever used by this browser app. */
 (() => {
@@ -16,7 +16,11 @@
   const client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
   const categories = { apartment:"Căn hộ", villa:"Biệt thự", house:"Nhà phố", commercial:"Thương mại" };
   const inquiryStates = { "new":"Mới", "contacted":"Đã liên hệ", "quoted":"Đã báo giá", "closed":"Hoàn thành" };
-  const state = { projects:[], inquiries:[], editingId:null, slugTouched:false, busy:false, leadSearch:"", leadStatus:"all", leadService:"all", leadPeriod:"all" };
+  const PAGE_SIZE = 25;
+  const state = { projects:[], inquiries:[], editingId:null, slugTouched:false, busy:false,
+    leadSearch:"", leadStatus:"all", leadService:"all", leadPeriod:"all", leadPage:0, leadTotal:0,
+    leadQuerySeq:0, leadStatsSeq:0 };
+
   function message(id, text, error=false) {
     const el = $(id); el.textContent = text;
     el.classList.toggle("error", !!error);
@@ -82,61 +86,80 @@
     if(error) {message("dash-status","Không đọc được dự án: "+(error.message||"Lỗi truy vấn"),true);return;}
     state.projects=data||[];renderProjects();renderMetrics();
   }
+  // All customer data is fetched only after verifying Admin authentication.
+  // RLS is the final authorization boundary for every query.
+  const inquiryColumns="id,full_name,phone,service,space,details,status,created_at,consented_at,privacy_policy_version,last_contacted_at,legal_hold_until";
+  const vietnamDayStartUTC=() => {
+    const date = new Date(Date.now() + 7 * 3600000).toISOString().slice(0,10);
+    return new Date(Date.parse(date+"T00:00:00Z") - 7 * 3600000).toISOString();
+  };
+  function applyInquiryQuery(query) {
+    if(state.leadStatus!=="all") query=query.eq("status",state.leadStatus);
+    if(state.leadService!=="all") query=query.eq("service",state.leadService);
+    if(state.leadPeriod==="today") query=query.gte("created_at",vietnamDayStartUTC());
+    else if(["7","30","90"].includes(state.leadPeriod))
+      query=query.gte("created_at",new Date(Date.now()-Number(state.leadPeriod)*86400000).toISOString());
+    // Escape PostgREST filter grammar: user text cannot add extra OR clauses.
+    const term=state.leadSearch.slice(0,90).replace(/[^\\p{L}\\p{N}\\s-]/gu,"").trim();
+    if(term) query=query.or(["full_name","phone","details","service","space"]
+      .map(column=>column+".ilike.%"+term+"%").join(","));
+    return query;
+  }
   async function loadInquiries() {
-    const {data,error}=await client.from("inquiries")
-      .select("id,full_name,phone,service,space,details,status,created_at,consented_at,privacy_policy_version,last_contacted_at,legal_hold_until")
-      .order("created_at",{ascending:false}).range(0,199);
-    if(error) {message("dash-status","Không đọc được yêu cầu tư vấn: "+(error.message||"Lỗi truy vấn"),true);return;}
-    state.inquiries=data||[];renderInquiries();renderMetrics();
+    const seq=++state.leadQuerySeq;
+    const from=state.leadPage*PAGE_SIZE;
+    let query=client.from("inquiries").select(inquiryColumns,{count:"exact"})
+      .order("created_at",{ascending:false}).order("id",{ascending:false});
+    query=applyInquiryQuery(query);
+    const {data,error,count}=await query.range(from,from+PAGE_SIZE-1);
+    if(seq!==state.leadQuerySeq)return;
+    if(error){
+      message("dash-status","Không đọc được yêu cầu tư vấn: "+(error.message||"Lỗi truy vấn"),true);
+      $("lead-match-count").textContent="Không tải được hồ sơ.";
+      return;
+    }
+    state.leadTotal=typeof count==="number" ? count : (data||[]).length;
+    // When a record is deleted or filters change, move to the last existing page.
+    if(!data?.length && state.leadPage>0 && state.leadTotal>0){
+      state.leadPage=Math.ceil(state.leadTotal/PAGE_SIZE)-1;
+      return loadInquiries();
+    }
+    state.inquiries=data||[];
+    renderInquiries();
+  }
+  async function loadLeadStats() {
+    const seq=++state.leadStatsSeq;
+    const head=() => client.from("inquiries").select("id",{count:"exact",head:true});
+    const requests=[
+      head(),head().gte("created_at",vietnamDayStartUTC()),
+      head().eq("status","contacted"),head().eq("status","quoted"),
+      head().eq("status","new")
+    ];
+    const results=await Promise.all(requests);
+    if(seq!==state.leadStatsSeq)return;
+    if(results.some(x=>x.error)){
+      message("dash-status","Không tải được thống kê tư vấn.",true);
+      return;
+    }
+    const [total,today,contacted,quoted,newCount]=results.map(x=>Number(x.count)||0);
+    $("crm-total").textContent=total;
+    $("crm-today").textContent=today;
+    $("crm-contacted").textContent=contacted;
+    $("crm-quoted").textContent=quoted;
+    $("metric-inquiries").textContent=newCount;
+  }
+  async function refreshInquiries() {
+    await Promise.all([loadInquiries(),loadLeadStats()]);
   }
   async function loadAll() {
     message("dash-status","Đang tải dữ liệu...");
-    await Promise.all([loadProjects(),loadInquiries()]);
+    await Promise.all([loadProjects(),refreshInquiries()]);
     if(!$("dash-status").classList.contains("error"))
-      message("dash-status","Đã tải dữ liệu. Hiển thị tối đa 200 bản ghi mới nhất mỗi danh mục.");
-  }
-  // Privacy: all customer searching occurs only after a verified Admin loads
-  // up to 200 RLS-authorized records. No customer search is sent to third parties.
-  const normalized = value => String(value || "").normalize("NFD")
-    .replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase();
-  const vnDate = value => {
-    const parsed=new Date(value);
-    if(Number.isNaN(parsed.getTime()))return "";
-    const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Ho_Chi_Minh",
-      day:"2-digit",month:"2-digit",year:"numeric"}).formatToParts(parsed);
-    const get=key=>parts.find(p=>p.type===key)?.value || "";
-    return get("year")+"-"+get("month")+"-"+get("day");
-  };
-  function filteredInquiries() {
-    const search=normalized(state.leadSearch).trim();
-    const now=Date.now();
-    return state.inquiries.filter(i=>{
-      if(state.leadStatus!=="all" && i.status!==state.leadStatus)return false;
-      if(state.leadService!=="all" && i.service!==state.leadService)return false;
-      if(state.leadPeriod==="today" && vnDate(i.created_at)!==vnDate(now))return false;
-      if(["7","30","90"].includes(state.leadPeriod)) {
-        const created=new Date(i.created_at).getTime();
-        if(!Number.isFinite(created)||created<now-Number(state.leadPeriod)*86400000)return false;
-      }
-      if(search) {
-        const haystack=normalized([i.full_name,i.phone,i.service,i.space,i.details].join(" "));
-        if(!haystack.includes(search))return false;
-      }
-      return true;
-    });
-  }
-  function renderLeadStats() {
-    const today=vnDate(Date.now());
-    $("crm-total").textContent=state.inquiries.length;
-    $("crm-today").textContent=state.inquiries.filter(i=>vnDate(i.created_at)===today).length;
-    $("crm-contacted").textContent=state.inquiries.filter(i=>i.status==="contacted").length;
-    $("crm-quoted").textContent=state.inquiries.filter(i=>i.status==="quoted").length;
+      message("dash-status","Đã tải dữ liệu. Quản lý khách hàng phân trang 25 hồ sơ, thống kê toàn bộ dữ liệu.");
   }
   function renderMetrics() {
     $("metric-projects").textContent=state.projects.length;
     $("metric-published").textContent=state.projects.filter(p=>p.published).length;
-    $("metric-inquiries").textContent=state.inquiries.filter(p=>p.status==="new").length;
-    renderLeadStats();
   }
   function renderProjects() {
     const body=$("projects-table");body.replaceChildren();
@@ -159,10 +182,19 @@
   }
   function renderInquiries() {
     const body=$("inquiries-table");body.replaceChildren();
-    const visible=filteredInquiries();
-    $("lead-match-count").textContent="Hiển thị "+visible.length+" / "+state.inquiries.length+" hồ sơ đã tải";
+    const visible=state.inquiries;
+    const start=state.leadPage*PAGE_SIZE;
+    const last=start+visible.length;
+    $("lead-match-count").textContent=state.leadTotal
+      ? "Hiển thị "+(start+1)+"–"+last+" / "+state.leadTotal+" hồ sơ phù hợp"
+      : "Không có hồ sơ phù hợp bộ lọc.";
+    const pages=Math.max(1,Math.ceil(state.leadTotal/PAGE_SIZE));
+    $("lead-page-label").textContent="Trang "+(state.leadPage+1)+" / "+pages;
+    $("lead-prev-page").disabled=state.leadPage===0;
+    $("lead-next-page").disabled=state.leadPage+1>=pages;
+    $("lead-export-csv").disabled=!visible.length;
     if(!visible.length) {
-      const tr=el("tr"),td=el("td",state.inquiries.length ? "Không có hồ sơ phù hợp bộ lọc." : "Chưa có yêu cầu tư vấn.","empty");
+      const tr=el("tr"),td=el("td","Không có hồ sơ phù hợp bộ lọc.","empty");
       td.colSpan=5;tr.append(td);body.append(tr);return;
     }
     visible.forEach(i=>{
@@ -262,7 +294,7 @@
       const {data,error}=await client.rpc("record_inquiry_contact",{p_inquiry_id:record.id});
       if (error) throw error;
       if (data !== true) throw new Error("Bạn không có quyền cập nhật hồ sơ hoặc hồ sơ đã được xóa.");
-      await loadInquiries();
+      await refreshInquiries();
       message("dash-status","Đã ghi nhận liên hệ. Thời hạn lưu dữ liệu được tính lại 12 tháng.");
     } catch(error) {
       message("dash-status","Không thể ghi nhận liên hệ: "+(error.message||"Lỗi hệ thống"),true);
@@ -273,13 +305,13 @@
     const {error}=await client.from("inquiries").update({status:next}).eq("id",record.id);
     select.disabled=false;
     if(error){select.value=old;message("dash-status","Không đổi được trạng thái: "+error.message,true);return}
-    record.status=next;renderMetrics();renderInquiries();message("dash-status","Đã cập nhật trạng thái yêu cầu.");
+    await refreshInquiries();message("dash-status","Đã cập nhật trạng thái yêu cầu.");
   }
   async function deleteInquiry(i) {
     if(!confirm('Xóa yêu cầu tư vấn của "'+i.full_name+'"?'))return;
     const {error}=await client.from("inquiries").delete().eq("id",i.id);
     if(error){message("dash-status","Không xóa được yêu cầu: "+error.message,true);return}
-    await loadInquiries();message("dash-status","Đã xóa yêu cầu.");
+    await refreshInquiries();message("dash-status","Đã xóa yêu cầu.");
   }
   $("p-title").addEventListener("input",()=>{
     if(!state.slugTouched)$("p-slug").value=slugify($("p-title").value);
@@ -290,7 +322,8 @@
   $("tab-projects").addEventListener("click",()=>switchTab("projects"));
   $("tab-inquiries").addEventListener("click",()=>switchTab("inquiries"));
   $("reload-projects").addEventListener("click",loadProjects);
-  $("reload-inquiries").addEventListener("click",loadInquiries);
+  $("reload-inquiries").addEventListener("click",refreshInquiries);
+  let searchTimer;
   const leadFilters=[
     ["lead-search","leadSearch","input"],
     ["lead-filter-status","leadStatus","change"],
@@ -300,15 +333,53 @@
   for(const [id,key,event] of leadFilters) {
     $(id).addEventListener(event,()=>{
       state[key]=$(id).value;
-      renderInquiries();
+      state.leadPage=0;
+      clearTimeout(searchTimer);
+      if(key==="leadSearch")searchTimer=setTimeout(loadInquiries,300);
+      else loadInquiries();
     });
   }
   $("lead-clear-filters").addEventListener("click",()=>{
+    clearTimeout(searchTimer);
     state.leadSearch=""; state.leadStatus="all"; state.leadService="all";state.leadPeriod="all";
+    state.leadPage=0;
     for(const [id,key] of leadFilters) $(id).value=state[key];
-    renderInquiries();
+    loadInquiries();
     $("lead-search").focus();
   });
+  $("lead-prev-page").addEventListener("click",()=>{
+    if(state.leadPage===0)return;
+    state.leadPage--;
+    loadInquiries();
+  });
+  $("lead-next-page").addEventListener("click",()=>{
+    if((state.leadPage+1)*PAGE_SIZE>=state.leadTotal)return;
+    state.leadPage++;
+    loadInquiries();
+  });
+  function exportLeadCsv() {
+    if(!state.inquiries.length)return;
+    if(!confirm("Xuất "+state.inquiries.length+" hồ sơ của trang đang hiển thị? Tệp chứa dữ liệu cá nhân: chỉ tải trên thiết bị riêng, không chia sẻ công khai."))return;
+    const quote=value=>{
+      let text=String(value??"").replace(/[\\u0000-\\u001f\\u007f]/g," ").trim();
+      // Neutralize CSV/Excel formula injection for customer-supplied fields.
+      if(/^[=+@-]/.test(text))text="'"+text;
+      return '"'+text.replace(/"/g,'""')+'"';
+    };
+    const head=["Tên khách hàng","Số điện thoại","Dịch vụ","Không gian","Nội dung","Trạng thái","Ngày nhận","Ngày liên hệ","Ngày đồng ý","Phiên bản chính sách"];
+    const rows=state.inquiries.map(i=>[
+      i.full_name,i.phone,i.service,i.space,i.details,inquiryStates[i.status]||i.status,
+      i.created_at,i.last_contacted_at,i.consented_at,i.privacy_policy_version
+    ]);
+    const csv="\\uFEFF"+[head,...rows].map(row=>row.map(quote).join(",")).join("\\r\\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+    const link=document.createElement("a");
+    const uri=URL.createObjectURL(blob);
+    link.href=uri;link.download="tan-design-khach-hang-trang-"+(state.leadPage+1)+".csv";
+    document.body.append(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(uri),10000);
+  }
+  $("lead-export-csv").addEventListener("click",exportLeadCsv);
   $("logout").addEventListener("click",async()=>{await client.auth.signOut();loginVisible();});
   $("login-form").addEventListener("submit",async(event)=>{
     event.preventDefault();
