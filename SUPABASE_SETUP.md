@@ -40,6 +40,7 @@ Visitor form -> Supabase Edge Function submit-inquiry
 - SQL logic: `supabase/inquiry-rate-limit.sql`; Edge source: `supabase/functions/submit-inquiry/index.ts`.
 - SQL migration đã áp dụng: `secure_inquiry_rate_limit_and_rpc`, `block_direct_anonymous_inquiry_inserts`, và `record_inquiry_privacy_consent_version`. Không chạy lại migration trên dữ liệu thật mà chưa kiểm tra lịch sử.
 - Khi Edge Function không sẵn sàng, form không tự lưu cục bộ và không báo thành công giả.
+- Edge Function `submit-inquiry` v6 có chức năng **thử gửi** email thông báo bằng Resend khi DB ghi thành công. Chỉ dùng `RESEND_API_KEY` và `NOTIFY_FROM_EMAIL` từ Supabase Secrets; không gửi PII của khách qua email. **Chưa xác minh đã kích hoạt** do nhà cung cấp và địa chỉ gửi cần cấu hình; xem `EMAIL_NOTIFICATIONS_SETUP.md`. Email lỗi không làm mất yêu cầu tư vấn.
 
 **Giới hạn cần lưu ý:** CORS và header Origin không chứng minh danh tính người gửi; bot có thể giả lập header hoặc thay IP. Rate limiting + honeypot chỉ giảm một số kiểu spam. Cloudflare Turnstile đã kích hoạt; phép thử bằng token giả trả 403. Cần thử một yêu cầu hợp lệ thật để xác nhận trọn vòng. Không dùng dữ liệu thử làm thông tin liên hệ thật.
 
@@ -56,7 +57,7 @@ Visitor form -> Supabase Edge Function submit-inquiry
 - Turnstile đã được xác minh chặn token giả bằng HTTP 403; kiểm thử thủ công một lượt gửi hợp lệ với token thật.
 - Bật Leaked Password Protection tại [Supabase Auth](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) nếu gói dịch vụ hỗ trợ.
 - Chính sách quyền riêng tư đã hiển thị tên Tân Design, địa chỉ, email tiếp nhận và thời hạn lưu **12 tháng** đã được chủ website quyết định. Cần chủ website xác minh địa chỉ hành chính/tư cách pháp lý và quy trình yêu cầu xóa trước hạn.
-- Bổ sung thông báo email, sao lưu, nhật ký hoạt động và giám sát bất thường.
+- Hoàn tất cấu hình API key và domain gửi email rồi kiểm thử gửi thực; bổ sung sao lưu, nhật ký hoạt động và giám sát bất thường.
 - Thay tất cả dữ liệu và ảnh minh họa bằng công trình đã được phép công bố.
 
 ## 5. Tài liệu
