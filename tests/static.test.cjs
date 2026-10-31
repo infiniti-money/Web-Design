@@ -66,6 +66,23 @@ test("Public and admin pages include key functional sections", () => {
   assert.match(migrationV17,/from public,anon,authenticated/);
   assert.match(migrationV17,/on delete cascade/);
   assert.match(migrationV17,/admin view note revisions/);
+  const tasksSql=read("supabase/customer-care-tasks-v1_8.sql");
+  assert.match(tasksSql,/alter table public\.inquiry_care_tasks enable row level security/);
+  assert.match(tasksSql,/alter table public\.inquiry_care_task_events enable row level security/);
+  assert.match(tasksSql,/on delete cascade/);
+  assert.match(tasksSql,/record_care_task_change/);
+  assert.match(tasksSql,/revoke all on public\.inquiry_care_task_events from public,anon,authenticated/);
+  const taskIds=["tab-tasks","panel-tasks","care-task-form","care-task-title",
+   "care-task-assignee","care-task-priority","care-task-due","care-task-create",
+   "care-task-list","care-task-events","tasks-board-table","tasks-total","tasks-todo",
+   "tasks-progress","tasks-done","tasks-overdue","tasks-status-filter",
+   "tasks-owner-filter","tasks-due-filter","tasks-next","tasks-prev"];
+  for(const id of taskIds)assert.match(admin,new RegExp('id="'+id+'"'));
+  assert.match(adminJs,/function submitCareTask\(event\)/);
+  assert.match(adminJs,/function loadCustomerTasks\(\)/);
+  assert.match(adminJs,/function loadTaskBoard\(\)/);
+  assert.match(adminJs,/from\("inquiry_care_tasks"\)/);
+  assert.match(adminJs,/from\("inquiry_care_task_events"\)/);
 
 });
 
