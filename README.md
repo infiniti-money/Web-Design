@@ -30,6 +30,7 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - `supabase/customer-care-edit-v1_7.sql` — chỉnh sửa ghi chú qua RPC có đối chiếu phiên bản, ghi lịch sử trước/sau, chặn sửa ghi chú hệ thống và hoàn thành nhắc việc.
 - `supabase/customer-care-tasks-v1_8.sql` — phân công chăm sóc, trạng thái, ưu tiên, thời hạn, RLS và lịch sử cập nhật nhiệm vụ.
 - `supabase/customer-care-task-edit-v1_10.sql` — kiểm tra danh tính công việc bất biến và ghi nhật ký mỗi lần sửa mô tả, ưu tiên, hạn hoặc tên.
+- `supabase/customer-care-performance-v1_12.sql` — RPC hiệu suất an toàn, thống kê theo người phụ trách, tuần/tháng, hạn chế quyền và thời gian truy vấn.
 - `supabase/functions/submit-inquiry/index.ts` — mã Edge Function đang chạy tại Supabase.
 - `SUPABASE_SETUP.md` — hướng dẫn bảo mật và vận hành.
 - `privacy.html` — chính sách quyền riêng tư: đơn vị Tân Design, địa chỉ chủ website cung cấp và email tiếp nhận `infinitimoney@icloud.com`; chưa có xác minh đăng ký pháp lý, đã cấu hình giữ dữ liệu 12 tháng.
@@ -53,6 +54,15 @@ GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và t
 - Các lần Admin xác nhận đã liên hệ và chuyển trạng thái được lưu thành sự kiện lịch sử theo giờ máy chủ trong cùng một giao dịch.
 - **Spinner** phản hồi trạng thái tải khi truy vấn danh sách, có chế độ giảm chuyển động cho người dùng nhạy cảm với hiệu ứng.
 - Phần email vẫn để sau theo lựa chọn chủ website, không yêu cầu secret mới và không đổi gói Supabase.
+
+## CRM v1.12 — Báo cáo hiệu suất nhân viên & xu hướng tuần/tháng
+
+- Tab **Báo cáo hiệu suất** hỗ trợ kỳ 7/30/90/365 ngày và biểu đồ nhóm **tuần / tháng**.
+- KPI: tổng công việc **tạo trong kỳ**, số việc hiện hoàn thành, **tỷ lệ = việc tạo trong kỳ hiện hoàn thành / tổng việc tạo trong kỳ**, số đang làm, quá hạn và số thực tế hoàn tất trong kỳ.
+- Bảng theo **người phụ trách hiện tại** gồm công việc được giao, đang xử lý, hoàn thành và quá hạn. Người phụ trách hiện chỉ là tên, không phải tài khoản nhân viên đã cấp quyền.
+- RPC phía Supabase có RLS Admin, dùng dữ liệu toàn bộ kỳ thay vì chỉ 25 công việc trang hiện tại. Biểu đồ dùng múi giờ Việt Nam, tuần bắt đầu thứ Hai.
+- Thống kê lịch sử phản ánh **trạng thái hiện tại của nhóm việc tạo trong kỳ**, không phải snapshot tại thời điểm của tuần/tháng. Việc chuyển người phụ trách sẽ ảnh hưởng báo cáo cũ.
+- SQL: `supabase/customer-care-performance-v1_12.sql`. Chưa bật email/đẩy thông báo.
 
 ## CRM v1.11 — Trung tâm ưu tiên trong Admin
 
