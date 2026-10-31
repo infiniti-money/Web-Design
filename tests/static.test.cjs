@@ -18,12 +18,19 @@ test("Public and admin pages include key functional sections", () => {
   assert.match(index, /<meta name="viewport"/);
   assert.match(admin, /<meta name="robots" content="noindex,nofollow">/);
   for (const id of ["lead-search","lead-filter-status","lead-filter-service","lead-filter-period",
-    "lead-clear-filters","lead-match-count","crm-total","crm-today","crm-contacted","crm-quoted"]) {
+    "lead-clear-filters","lead-match-count","crm-total","crm-today","crm-contacted","crm-quoted",
+    "lead-prev-page","lead-next-page","lead-page-label","lead-export-csv"]) {
     assert.match(admin, new RegExp('id="'+id+'"'));
   }
-  assert.match(read("admin.js"), /function filteredInquiries\(\)/);
-  assert.match(read("admin.js"), /function renderLeadStats\(\)/);
-  assert.match(read("admin.js"), /Asia\/Ho_Chi_Minh/);
+  const adminJs=read("admin.js");
+  assert.match(adminJs,/function applyInquiryQuery\(query\)/);
+  assert.match(adminJs,/function loadLeadStats\(\)/);
+  assert.match(adminJs,/const PAGE_SIZE = 25/);
+  assert.match(adminJs,/count:"exact"/);
+  assert.match(adminJs,/head:true/);
+  assert.match(adminJs,/vietnamDayStartUTC/);
+  assert.match(adminJs,/function exportLeadCsv\(\)/);
+  assert.match(adminJs,/Neutralize CSV\/Excel formula injection/);
 });
 
 test("All browser scripts and inline scripts are valid JavaScript", () => {
