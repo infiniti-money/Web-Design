@@ -92,6 +92,34 @@ async function main() {
     assert.equal(overflow, false, "Homepage should not overflow horizontally at mobile width");
     console.log("MOBILE: loaded; no horizontal overflow");
 
+    // Simulate Cloudflare Turnstile in browser without a real widget or a customer record.
+    const turnstileTest = await browser.newPage({ viewport: { width: 1080, height: 800 }, locale: "vi-VN" });
+    const configured = fs.readFileSync("app-config.js","utf8")
+      .replace('turnstileSiteKey: ""', 'turnstileSiteKey: "1x00000000000000000000AA"');
+    assert.match(configured, /turnstileSiteKey: "1x00000000000000000000AA"/);
+    await turnstileTest.route("**/app-config.js", route =>
+      route.fulfill({status:200,contentType:"application/javascript",body:configured}));
+    await turnstileTest.route("**/challenges.cloudflare.com/turnstile/v0/api.js**", route =>
+      route.fulfill({status:200,contentType:"application/javascript",body:
+        'window.turnstile={render:function(el,opts){opts.callback("test-captcha-token");return "widget";},reset:function(){}};'}));
+    const sentWithChallenge=[];
+    await turnstileTest.route("**/functions/v1/submit-inquiry", route => {
+      sentWithChallenge.push(route.request().postDataJSON());
+      return route.fulfill({status:201,contentType:"application/json",body:'{"ok":true}'});
+    });
+    await turnstileTest.goto(origin,{waitUntil:"domcontentloaded",timeout:45000});
+    await turnstileTest.locator("#lead-form [type=submit]:not([disabled])").waitFor({timeout:20000});
+    assert.equal(await turnstileTest.locator("#turnstile-container").isVisible(),true);
+    await turnstileTest.locator("#full-name").fill("Người kiểm thử");
+    await turnstileTest.locator("#phone").fill("0900000000");
+    await turnstileTest.locator("#service").selectOption({label:"Thiết kế nội thất"});
+    await turnstileTest.locator("#consent").check();
+    await turnstileTest.locator("#lead-form [type=submit]").click();
+    await turnstileTest.locator("#form-feedback").getByText("Yêu cầu đã được hệ thống ghi nhận").waitFor();
+    assert.equal(sentWithChallenge.length,1);
+    assert.equal(sentWithChallenge[0].turnstile_token,"test-captcha-token");
+    console.log("TURNSTILE: simulated challenge token sent through protected API");
+
     // If the CDN fails on a LIVE site, never silently save a local demo lead.
     const disconnected = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     await disconnected.route("**/cdn.jsdelivr.net/npm/@supabase/**", route => route.abort());
