@@ -54,7 +54,7 @@ Visitor form -> Supabase Edge Function submit-inquiry
 
 - Turnstile đã được xác minh chặn token giả bằng HTTP 403; kiểm thử thủ công một lượt gửi hợp lệ với token thật.
 - Bật Leaked Password Protection tại [Supabase Auth](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) nếu gói dịch vụ hỗ trợ.
-- Xây dựng trang chính sách quyền riêng tư với địa chỉ/đầu mối pháp lý thực, mục đích, thời hạn lưu và quyền xóa dữ liệu.
+- Chính sách quyền riêng tư đã hiển thị tên Tân Design, địa chỉ và email tiếp nhận do chủ website cung cấp; cần chủ website xác minh địa chỉ hành chính/tư cách pháp lý và quyết định thời hạn lưu/xóa cụ thể trước khi hoàn thiện.
 - Bổ sung thông báo email, sao lưu, nhật ký hoạt động và giám sát bất thường.
 - Thay tất cả dữ liệu và ảnh minh họa bằng công trình đã được phép công bố.
 
