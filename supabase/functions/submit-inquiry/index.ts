@@ -53,6 +53,7 @@ Deno.serve(async (req: Request) => {
     return respond(400,{ok:false,code:"invalid_json"},origin);
   }
   if (payload.website) return respond(400,{ok:false,code:"invalid_request"},origin);
+  if (payload.privacy_consent !== true) return respond(400,{ok:false,code:"privacy_consent_required"},origin);
   const fullName = payload.full_name;
   const phone = payload.phone;
   const service = payload.service;
