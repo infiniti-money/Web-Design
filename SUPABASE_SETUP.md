@@ -38,6 +38,19 @@
 - Ghi chú là dữ liệu cá nhân, phải được sử dụng đúng mục đích tư vấn; không tự động gửi thư hay thông báo hệ thống ngoài Admin.
 - Kiểm thử với bản ghi giả trong `BEGIN...ROLLBACK` cho thêm ghi chú, đặt lịch, cập nhật trạng thái và chặn non-admin; không còn bản ghi giả.
 
+## Nhân viên và phân quyền v1.13.0
+
+- Đã triển khai `supabase/staff-roles-v1_13.sql` trên dự án hiện hữu và nâng quyền báo cáo cho Quản lý bằng `supabase/staff-manager-report-v1_13.sql`.
+- `staff_profiles` được tạo từ tài khoản Auth Admin hiện có; giữ nguyên role và quyền. Không tự sinh nhân viên hoặc gắn lại nhiệm vụ cũ. `assignee_user_id` là UUID của tài khoản nhân viên được giao.
+- RLS: Admin và Quản lý được xem bảng công việc; Nhân viên chỉ thấy nhiệm vụ đúng `auth.uid()` và hồ sơ khách hàng liên quan. Nhân viên chỉ UPDATE `status` của nhiệm vụ mình, bị trigger chặn sửa chi tiết, hạn và người nhận.
+- Edge Function `staff-management` đã triển khai với `verify_jwt=true`. Chỉ Admin đang hoạt động được gọi Auth Admin API; tuyệt đối không đưa `SUPABASE_SERVICE_ROLE_KEY` hoặc secret key lên GitHub.
+- Admin mở **Authentication → URL Configuration** và thêm vào Redirect URLs: `https://infiniti-money.github.io/Web-Design/admin.html`. Thiết lập Site URL thích hợp nếu tài khoản được mời chuyển hướng sai.
+- Mời nhân viên: Admin → **Nhân viên và phân quyền** → họ tên, email, vai trò → gửi lời mời. Kiểm tra thư mời từ Supabase Auth. Mở thư và tạo mật khẩu, đăng nhập vào trang Admin.
+- Chưa có email nhân viên thật để kiểm thử lời mời. Mọi kiểm thử RLS, trigger và đổi trạng thái được thực hiện trong `BEGIN…ROLLBACK`.
+- Role trong JWT chỉ mới có hiệu lực khi phiên được cấp lại: đăng xuất/đăng nhập khi thay đổi quyền. Khi vô hiệu hóa, `staff_profiles.active=false` chặn truy vấn công việc và hồ sơ khách hàng ngay; role Auth được thay bằng `disabled`.
+- Không cho vô hiệu hóa hoặc tự hạ quyền Admin từ giao diện để tránh khóa quyền quản trị hiện có. Các trường hợp thay đổi quyền Admin cần quy trình tin cậy và thu hồi phiên đăng nhập riêng.
+- Giữ Supabase Free, giới hạn lưu hồ sơ 12 tháng và phần gửi email CRM để sau.
+
 ## Báo cáo hiệu suất v1.12.0
 
 - Migration `supabase/customer-care-performance-v1_12.sql` đã áp dụng lên Supabase hiện tại; không tạo DB/project mới.
