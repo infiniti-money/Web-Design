@@ -55,6 +55,23 @@ test("Database tables use RLS, limited permissions, and administrator claim", ()
   assert.doesNotMatch(schema, /auth\.jwt\(\) -> 'user_metadata'/);
 });
 
+test("Privacy notice and Turnstile integration are present and secrets stay server-side", () => {
+  const policy = read("privacy.html");
+  const frontend = read("site-backend.js");
+  const edge = read("supabase/functions/submit-inquiry/index.ts");
+  assert.match(index, /href="\.\/privacy\.html"/);
+  assert.match(index, /id="turnstile-container"/);
+  assert.match(policy, /Chính sách quyền riêng tư/);
+  assert.match(policy, /Singapore/);
+  assert.match(frontend, /turnstile_token/);
+  assert.match(frontend, /challenges\.cloudflare\.com\/turnstile\/v0\/api\.js/);
+  assert.match(edge, /Deno\.env\.get\("TURNSTILE_SECRET_KEY"\)/);
+  assert.match(edge, /challenges\.cloudflare\.com\/turnstile\/v0\/siteverify/);
+  assert.match(edge, /result\?\.hostname !== "infiniti-money\.github\.io"/);
+  assert.match(edge, /result\?\.action !== "consultation"/);
+  assert.doesNotMatch(read("app-config.js"), /sb_secret_[A-Za-z0-9_-]{10,}/);
+});
+
 test("Configured public site uses live API, demo fallback remains explicit", () => {
   assert.match(read("site-backend.js"), /\/functions\/v1\/submit-inquiry/);
   assert.doesNotMatch(read("site-backend.js"), /from\("inquiries"\)\.insert/);
