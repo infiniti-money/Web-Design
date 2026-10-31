@@ -263,7 +263,7 @@
     return Number.isFinite(n)?n:0;
   }
   function reportPeriodLabel(period,bucket){
-    if(typeof period!=="string"||!^\d{4}-\d\d-\d\d$/.test(period))return "—";
+    if(typeof period!=="string"||!/^\d{4}-\d\d-\d\d$/.test(period))return "—";
     const [y,m,d]=period.split("-");
     return bucket==="month"?m+"/"+y:d+"/"+m;
   }
