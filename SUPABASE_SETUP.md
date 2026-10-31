@@ -38,6 +38,14 @@
 - Ghi chú là dữ liệu cá nhân, phải được sử dụng đúng mục đích tư vấn; không tự động gửi thư hay thông báo hệ thống ngoài Admin.
 - Kiểm thử với bản ghi giả trong `BEGIN...ROLLBACK` cho thêm ghi chú, đặt lịch, cập nhật trạng thái và chặn non-admin; không còn bản ghi giả.
 
+## Trung tâm việc cần xử lý v1.11.0
+
+- Không yêu cầu thay đổi schema/migration Supabase so với v1.10.
+- Admin dùng `count: exact` cùng danh sách `range(0,4)` để lấy chính xác số lượng và 5 mục ưu tiên gần hạn cho 4 nhóm (công việc quá hạn/7 ngày; lịch liên hệ đến hạn/7 ngày).
+- Các truy vấn dữ liệu sử dụng Supabase publishable key và JWT Admin hiện có; PostgreSQL RLS tiếp tục giới hạn dữ liệu.
+- Khi click nhóm ưu tiên, giao diện chuyển đến tab và thiết lập lại bộ lọc phù hợp; không tự cập nhật trạng thái nhiệm vụ hay liên hệ thực tế.
+- Không có email/SMS/push tự động. Admin cần đăng nhập/mở/làm mới giao diện để xem dữ liệu.
+
 ## Sửa và kiểm toán nhiệm vụ v1.10.0
 
 - `supabase/customer-care-task-edit-v1_10.sql` đã áp dụng trên Supabase thật.
