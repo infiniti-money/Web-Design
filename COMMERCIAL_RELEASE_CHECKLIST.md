@@ -1,0 +1,29 @@
+# Tân Design v1.17 — Kiểm thử và phát hành an toàn
+
+## Đã xác minh (02/11/2026)
+- GitHub Actions `Validate ATELIER HOME` thành công trên nhánh tích hợp.
+- Supabase project hiện tại: `atelier-home-web-design` (`mswiegltusllzvuavjdh`). Không tạo project/database mới.
+- Đã áp dụng 2 migration tăng cường vào **database hiện hữu**:
+  - `commercial_quote_guard_evidence_v1_17_1`: bắt buộc liên kết báo giá, nguyên nhân từ chối và căn cứ chấp nhận.
+  - `commercial_approved_quote_snapshot_v1_17_2`: lưu và kiểm tra đúng phiên bản được duyệt.
+- Kiểm tra SQL tại database: `customer_contracts.quote_id` và `quote_version_id` không cho NULL; `anon` không được gọi RPC `commercial_action`.
+- Kiểm thử giao dịch trong subtransaction **cố ý rollback** với JWT giả lập cho Admin/Quản lý đã xác minh các trạng thái:
+  - Tạo → thêm phiên bản → trình duyệt → từ chối có lý do → sửa phiên bản → trình lại → duyệt → gửi → ghi nhận khách chấp nhận → hợp đồng → xem xét → xác nhận ký.
+  - Bị từ chối đúng khi Quản lý cố duyệt/ký, khi thiếu lý do/căn cứ, thiếu báo giá, sai khách hàng hoặc sai phiên bản được duyệt.
+  - Sau kiểm thử: báo giá, hợp đồng và nhật ký thử vẫn bằng **0**.
+- Kiểm thử bằng JWT giả lập **không thay thế** việc đăng nhập bằng tài khoản thực tế qua trình duyệt.
+
+## Cần hoàn thành trước khi gộp/phát hành
+- [ ] Đăng nhập bằng tài khoản Admin thực, tạo và duyệt/từ chối báo giá thử; kiểm tra nhật ký và mã phiên bản.
+- [ ] Đăng nhập bằng tài khoản Quản lý thực, tạo/sửa/trình báo giá; xác nhận không thể duyệt hoặc ký.
+- [ ] Kiểm thử tài khoản Nhân viên thực sau khi doanh nghiệp cấp tài khoản; không được mở trang thương mại hoặc đọc báo giá ngoài quyền.
+- [ ] Xác nhận khách hàng thực tế chỉ được ghi nhận là "đã chấp nhận" khi có bằng chứng bên ngoài hệ thống; không giả mạo chữ ký.
+- [ ] Kiểm tra hiển thị trên điện thoại, dấu tiếng Việt, danh sách dài, phản hồi khi mất kết nối.
+- [ ] Kiểm tra GitHub Pages sau khi merge: `commercial.html`, phân quyền hiển thị các liên kết và thử lại RLS.
+- [ ] Kiểm tra bản sao lưu và số lượng hồ sơ trước/sau deploy; chỉ tạo Release khi toàn bộ tiêu chí đạt.
+
+## Quy tắc migration
+- **Không chạy lại** ba tệp schema/links/actions ban đầu trên database đang sử dụng: các bảng, policy và RPC đã tồn tại.
+- Hai tệp `...safety-hardening.sql` và `...approved-snapshot.sql` là bản tương ứng với các migration đã áp dụng. Không áp dụng lặp khi không cần.
+- Với cơ sở dữ liệu mới, chạy schema → link → actions theo thứ tự (hoặc quy trình migration được kiểm thử), sau đó kiểm tra `pg_policies` và `information_schema.columns`.
+- Không đưa mật khẩu, session JWT, `service_role` hay secret Supabase vào mã nguồn client, log hoặc PR.
