@@ -49,7 +49,9 @@ begin
  else
   if p_action='create' then
    if p_inquiry is null or length(trim(coalesce(p_title,''))) not between 3 and 90 then raise exception 'INVALID_CONTRACT';end if;
-   insert into public.customer_contracts(inquiry_id,contract_number,description,created_by) values(p_inquiry,trim(p_title),coalesce(p_content->>'description',''),auth.uid()) returning id into v_id;
+   if p_content is null or p_content->>'quote_id' is null or p_content->>'quote_version_id' is null then raise exception 'ACCEPTED_QUOTE_REQUIRED';end if;
+   insert into public.customer_contracts(inquiry_id,contract_number,description,quote_id,quote_version_id,created_by)
+   values(p_inquiry,trim(p_title),left(coalesce(p_content->>'description',''),2000),(p_content->>'quote_id')::uuid,(p_content->>'quote_version_id')::uuid,auth.uid()) returning id into v_id;
   else
    select status into v_status from public.customer_contracts where id=p_id for update;
    if v_status is null then raise exception 'CONTRACT_NOT_FOUND';end if;
