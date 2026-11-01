@@ -48,7 +48,7 @@ Deno.serve(async(req:Request)=>{
     if(!emailPattern.test(email)||name.length<2||name.length>100||!roles.has(role))
       return reply(422,{error:"INVALID_STAFF_DATA"});
     const {data:invite,error:inviteError}=await service.auth.admin.inviteUserByEmail(email,{
-      redirectTo:"https://infiniti-money.github.io/Web-Design/admin.html"
+      redirectTo:"https://infiniti-money.github.io/Web-Design/set-password.html"
     });
     if(inviteError||!invite.user)return reply(409,{error:"INVITE_FAILED"});
     const user=invite.user;
