@@ -18,7 +18,7 @@ class FakeElement {
 }
 async function start(role="admin",opts={}){
  const elements=new Map();
- const get=id=>{if(!elements.has(id))elements.set(id,new FakeElement(id));return elements.get(id);};
+ const get=id=>{if(!elements.has(id))elements.set(id,new FakeElement(["quote-inquiry","contract-inquiry","contract-quote"].includes(id)?"select":id));return elements.get(id);};
  get("app").hidden=true;
  const calls=[];
  let reads=0;
