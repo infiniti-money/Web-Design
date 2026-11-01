@@ -1304,6 +1304,16 @@
   (async()=>{
     const user=await verify();
     if(user) await enterDashboard();
-    else loginVisible();
+    else {
+      const {data:{user:account}}=await client.auth.getUser();
+      // Do not associate users by email. Identity linking must use Supabase's verified user ID.
+      // Only a new Google-authenticated account without a staff role can complete a pending profile.
+      if(account && !account.app_metadata?.role && account.app_metadata?.registration_status!=="rejected"
+          && account.app_metadata?.providers?.includes("google")){
+        location.replace("./complete-profile.html");return;
+      }
+      if(account)await client.auth.signOut();
+      loginVisible();
+    }
   })();
 })();
