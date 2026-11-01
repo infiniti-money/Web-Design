@@ -113,6 +113,8 @@
     }
     $("admin-overview-metrics").classList.toggle("hide",role!=="admin");
     $("admin-priority-hub").classList.toggle("hide",role!=="admin");
+    $("catalog-link-card").classList.toggle("hide",role!=="admin");
+    $("commercial-link-card").classList.toggle("hide",role==="employee");
     if(role==="admin"){switchTab("projects");await Promise.all([loadAll(),loadStaff()]);}
     else if(role==="manager"){switchTab("tasks");await Promise.all([loadStaff(),loadMyTasks()]);}
     else switchTab("my-tasks");
