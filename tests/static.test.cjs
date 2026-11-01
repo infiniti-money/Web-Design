@@ -325,3 +325,14 @@ test("Commercial contract guard and approval audit demand evidence", () => {
 test("A contract always requires a quote and version",()=>{const sql=read("supabase/quotes-contracts-v1_17-link.sql");assert.match(sql,/alter column quote_id set not null/);assert.match(sql,/alter column quote_version_id set not null/);});
 
 test("Commercial and catalog links remain hidden for unauthorized roles",()=>{const adminJs=read("admin.js");assert.match(admin,/id="catalog-link-card" class="card hide"/);assert.match(admin,/id="commercial-link-card" class="card hide"/);assert.match(adminJs,/catalog-link-card/);assert.match(adminJs,/commercial-link-card/);});
+
+test("Contracts bind to the exact approved quote version",()=>{
+ const schema=read("supabase/quotes-contracts-v1_17.sql");
+ const actions=read("supabase/quotes-contracts-v1_17-actions.sql");
+ const guard=read("supabase/quotes-contracts-v1_17-link.sql");
+ const html=read("commercial.html");
+ assert.match(schema,/approved_version_id uuid references/);
+ assert.match(actions,/approved_version_id=case when p_action='approve'/);
+ assert.match(guard,/QUOTE_VERSION_NOT_APPROVED/);
+ assert.match(html,/match.data.approved_version_id/);
+});
