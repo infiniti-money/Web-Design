@@ -271,3 +271,8 @@ test("Configured public site uses live API, demo fallback remains explicit", () 
   assert.match(index, /ATELIER_SET_PROJECTS/);
   assert.match(index, /localStorage/);
 });
+
+test("Notification trigger cannot be executed directly by clients", () => {
+  const hardening=read("supabase/notifications-execute-hardening-v1_15_1.sql");
+  assert.match(hardening,/revoke execute on function public\\.notify_task_assignment\\(\\) from public, anon, authenticated/);
+});
