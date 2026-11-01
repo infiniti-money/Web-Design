@@ -9,11 +9,12 @@ as $$
 declare q record;
 begin
  if new.quote_id is null or new.quote_version_id is null then raise exception 'QUOTE_VERSION_REQUIRED';end if;
- select qt.inquiry_id,qt.status,qt.approved_by,qv.quote_id,qv.version_no into q
+ select qt.inquiry_id,qt.status,qt.approved_by,qt.approved_version_id,qv.quote_id,qv.version_no into q
  from public.customer_quotes qt join public.customer_quote_versions qv on qv.quote_id=qt.id
  where qt.id=new.quote_id and qv.id=new.quote_version_id;
  if not found or q.inquiry_id<>new.inquiry_id then raise exception 'QUOTE_CUSTOMER_MISMATCH';end if;
  if q.status<>'accepted' or q.approved_by is null then raise exception 'QUOTE_NOT_ACCEPTED';end if;
+ if q.approved_version_id is distinct from new.quote_version_id then raise exception 'QUOTE_VERSION_NOT_APPROVED';end if;
  if exists(select 1 from public.customer_quote_versions v where v.quote_id=new.quote_id and v.version_no>q.version_no)
  then raise exception 'QUOTE_VERSION_NOT_CURRENT';end if;
  return new;
