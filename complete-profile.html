@@ -1,0 +1,28 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Hoàn thiện hồ sơ | Tân Design</title><style>body{font:15px/1.6 system-ui,sans-serif;background:#f4f6f3;color:#22382c;display:grid;place-items:center;min-height:100vh;margin:0;padding:20px}main{box-sizing:border-box;background:#fff;border:1px solid #d5dfd6;padding:30px;border-radius:16px;width:min(100%,490px)}label{display:block;margin-top:15px;font-weight:600}input{box-sizing:border-box;width:100%;padding:12px;margin-top:5px;border:1px solid #9eafa3;border-radius:8px;font:inherit}button{background:#28533a;color:white;border:0;border-radius:8px;padding:13px;width:100%;margin-top:20px}button:disabled{opacity:.6}a{color:#265a39}.muted{font-size:13px;color:#5c6b61}#status{min-height:25px}</style></head><body><main><h1>Hoàn thiện hồ sơ</h1><p class="muted">Tài khoản Google cần bổ sung thông tin trước khi Admin xét duyệt. Đăng ký không tự cấp quyền quản trị.</p><p id="email"></p><form id="profile" hidden><label for="name">Họ tên</label><input id="name" minlength="2" maxlength="100" autocomplete="name" required><label for="dob">Ngày sinh</label><input type="date" id="dob" required><label for="phone">Số điện thoại</label><input id="phone" type="tel" autocomplete="tel" placeholder="09xxxxxxxx hoặc +849xxxxxxxx" maxlength="20" required><label><input id="consent" type="checkbox" style="width:auto" required> Tôi đồng ý với <a href="./privacy.html" target="_blank" rel="noopener">chính sách riêng tư</a></label><button type="submit" id="save">Gửi hồ sơ chờ duyệt</button></form><p id="status" role="status" aria-live="polite">Đang xác thực tài khoản...</p><a href="./admin.html">Quay lại đăng nhập</a></main><script src="./app-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0"></script><script>
+(async()=>{"use strict";const $=id=>document.getElementById(id),cfg=window.ATELIER_CONFIG;
+if(!cfg?.supabaseUrl||!cfg?.supabasePublishableKey||!window.supabase?.createClient){$("status").textContent="Không kết nối được hệ thống.";return}
+const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey);
+const {data,error}=await client.auth.getUser(),user=data?.user;
+if(error||!user){$("status").textContent="Vui lòng đăng nhập Google trước khi hoàn thiện hồ sơ.";return}
+if(user.app_metadata?.role){$("status").textContent="Tài khoản đã được cấp quyền. Hãy quay về đăng nhập.";return}
+if(user.app_metadata?.registration_status==="rejected"){$("status").textContent="Hồ sơ đã bị từ chối. Liên hệ quản trị viên.";return}
+$("email").textContent=user.email||"Tài khoản Google";
+const metadata=user.user_metadata||{};
+$("name").value=metadata.full_name||metadata.name||"";
+$("dob").max=new Date().toISOString().slice(0,10);
+$("dob").value=metadata.date_of_birth||"";
+$("phone").value=metadata.phone_number_unverified||"";
+$("profile").hidden=false;$("status").textContent="Thông tin được gửi để Admin xét duyệt.";
+$("profile").addEventListener("submit",async e=>{
+e.preventDefault();const full_name=$("name").value.trim(),date_of_birth=$("dob").value,raw=$("phone").value.replace(/[\s().-]/g,""),phone=/^0\d{9}$/.test(raw)?"+84"+raw.slice(1):raw;
+const d=new Date(date_of_birth+"T00:00:00Z");
+if(full_name.length<2||full_name.length>100||!/^\+[1-9]\d{7,14}$/.test(phone)||!/^\d{4}-\d{2}-\d{2}$/.test(date_of_birth)||isNaN(d.getTime())||d.toISOString().slice(0,10)!==date_of_birth||d>new Date()){$("status").textContent="Vui lòng kiểm tra lại họ tên, ngày sinh và số điện thoại.";return}
+$("save").disabled=true;
+try{
+const {error:saveError}=await client.auth.updateUser({data:{full_name,date_of_birth,phone_number_unverified:phone,profile_consent_at:new Date().toISOString()}});
+if(saveError)throw saveError;
+$("profile").hidden=true;$("status").textContent="Đã lưu hồ sơ. Vui lòng chờ Admin duyệt quyền Nhân viên.";
+}catch{$("status").textContent="Không lưu được hồ sơ. Vui lòng thử lại."}finally{$("save").disabled=false}
+});
+})();
+</script></body></html>
