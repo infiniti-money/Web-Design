@@ -170,6 +170,31 @@
     if(!response.ok||!result.ok)throw new Error(result.error||"SERVER_ERROR");
     return result;
   }
+  async function loadPendingRegistrations(){
+    if(state.currentRole!=="admin")return;
+    message("pending-status","Đang tải tài khoản chờ duyệt...");
+    const table=$("pending-table");table.replaceChildren();
+    try{
+      const result=await callStaffApi({action:"pending"});
+      for(const person of result.accounts){
+        const tr=el("tr");
+        for(const value of [person.full_name,person.email,person.date_of_birth,person.phone])cell(tr,el("span",value||"—"));
+        const td=el("td");
+        for(const [label,decision] of [["Duyệt","approve"],["Từ chối","reject"]]){
+          td.append(btn(label,async()=>{
+            if(!confirm((decision==="approve"?"Cấp quyền Nhân viên":"Từ chối đăng ký")+" cho "+person.email+"?"))return;
+            try{
+              await callStaffApi({action:"review_registration",user_id:person.user_id,decision});
+              await loadPendingRegistrations();await loadStaff();
+            }catch(err){message("pending-status","Không thể xử lý: "+err.message,true)}
+          }));
+        }
+        tr.append(td);table.append(tr);
+      }
+      message("pending-status",result.accounts.length+" tài khoản chờ duyệt.");
+    }catch(err){message("pending-status","Lỗi danh sách chờ duyệt: "+err.message,true)}
+  }
+  $("pending-refresh").addEventListener("click",loadPendingRegistrations);
   async function inviteStaff(event){
     event.preventDefault();
     if(state.currentRole!=="admin")return;
@@ -1269,9 +1294,26 @@
       message("login-status","Đăng nhập không thành công. Kiểm tra tài khoản và mật khẩu.",true);
     } finally {setBusy(false)}
   });
+  // Social and phone sign-in are authentication only. verify() enforces staff RLS/roles.
+  $("google-login").addEventListener("click",async()=>{
+    message("login-status","Đang chuyển sang Google…");
+    const redirectTo=new URL("./admin.html",location.href).href;
+    const {error}=await client.auth.signInWithOAuth({provider:"google",options:{redirectTo}});
+    if(error)message("login-status","Không mở được đăng nhập Google. Kiểm tra cấu hình nhà cung cấp.",true);
+  });
   (async()=>{
     const user=await verify();
     if(user) await enterDashboard();
-    else loginVisible();
+    else {
+      const {data:{user:account}}=await client.auth.getUser();
+      // Do not associate users by email. Identity linking must use Supabase's verified user ID.
+      // Only a new Google-authenticated account without a staff role can complete a pending profile.
+      if(account && !account.app_metadata?.role && account.app_metadata?.registration_status!=="rejected"
+          && account.app_metadata?.providers?.includes("google")){
+        location.replace("./complete-profile.html");return;
+      }
+      if(account)await client.auth.signOut();
+      loginVisible();
+    }
   })();
 })();
