@@ -30,6 +30,7 @@ create table if not exists public.customer_contracts (
  created_by uuid not null references auth.users(id),
  created_at timestamptz not null default now()
 );
+alter table public.customer_quotes add column if not exists approved_version_id uuid references public.customer_quote_versions(id) on delete restrict;
 alter table public.customer_quotes enable row level security;
 alter table public.customer_quote_versions enable row level security;
 alter table public.customer_contracts enable row level security;
