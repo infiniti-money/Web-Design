@@ -1269,6 +1269,38 @@
       message("login-status","Đăng nhập không thành công. Kiểm tra tài khoản và mật khẩu.",true);
     } finally {setBusy(false)}
   });
+  // Social and phone sign-in are authentication only. verify() enforces staff RLS/roles.
+  $("google-login").addEventListener("click",async()=>{
+    message("login-status","Đang chuyển sang Google…");
+    const redirectTo=new URL("./admin.html",location.href).href;
+    const {error}=await client.auth.signInWithOAuth({provider:"google",options:{redirectTo}});
+    if(error)message("login-status","Không mở được đăng nhập Google. Kiểm tra cấu hình nhà cung cấp.",true);
+  });
+  let pendingPhone="";
+  $("phone-login-form").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const phone=$("phone-login").value.trim();
+    if(!/^\+[1-9]\d{7,14}$/.test(phone)){message("login-status","Nhập số điện thoại theo định dạng quốc tế, ví dụ +849xxxxxxxx.",true);return}
+    $("phone-send").disabled=true;
+    try{
+      const {error}=await client.auth.signInWithOtp({phone,options:{shouldCreateUser:false}});
+      if(error)throw error;
+      pendingPhone=phone;$("phone-verify-form").classList.remove("hide");
+      message("login-status","Nếu số điện thoại đã được liên kết với tài khoản hợp lệ, mã OTP sẽ được gửi.");
+    }catch{message("login-status","Không gửi được SMS. Kiểm tra số đã liên kết và cấu hình SMS của Supabase.",true)}
+    finally{$("phone-send").disabled=false}
+  });
+  $("phone-verify-form").addEventListener("submit",async e=>{
+    e.preventDefault();
+    if(!pendingPhone)return;
+    $("phone-verify").disabled=true;
+    try{
+      const {error}=await client.auth.verifyOtp({phone:pendingPhone,token:$("phone-code").value.trim(),type:"sms"});
+      if(error)throw error;
+      await enterDashboard();
+    }catch{message("login-status","Mã OTP không đúng, đã hết hạn hoặc tài khoản chưa được cấp quyền.",true)}
+    finally{$("phone-verify").disabled=false}
+  });
   (async()=>{
     const user=await verify();
     if(user) await enterDashboard();
