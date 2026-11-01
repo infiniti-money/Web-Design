@@ -336,3 +336,5 @@ test("Contracts bind to the exact approved quote version",()=>{
  assert.match(guard,/QUOTE_VERSION_NOT_APPROVED/);
  assert.match(html,/match.data.approved_version_id/);
 });
+
+test("Commercial activity includes version amounts and auditable decisions",()=>{const html=read("commercial.html");assert.match(html,/versionByQuote/);assert.match(html,/staffName/);assert.match(html,/d.reason/);assert.match(html,/d.evidence/);});
