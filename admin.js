@@ -118,10 +118,10 @@
     else switchTab("my-tasks");
   }
   async function loadStaff() {
-    if(state.currentRole==="employee")return;
+    if(state.currentRole==="employee")return false;
     const {data,error}=await client.from("staff_profiles")
       .select("user_id,email,full_name,role,active").order("full_name",{ascending:true}).range(0,499);
-    if(error){message("staff-status","Không đọc được danh sách: "+error.message,true);return;}
+    if(error){message("staff-status","Không đọc được danh sách: "+error.message,true);return false;}
     state.staff=data||[];
     const select=$("care-task-account"),previous=select.value;
     select.replaceChildren();
@@ -131,6 +131,7 @@
     }
     select.value=state.staff.some(u=>u.user_id===previous&&u.active)?previous:"";
     if(state.currentRole==="admin")renderStaffTable();
+    return true;
   }
   function renderStaffTable(){
     const tbody=$("staff-table");tbody.replaceChildren();
@@ -679,18 +680,40 @@
     }
   }
   async function reassignCareTask(task){
-    if(!state.staff.length)await loadStaff();
-    const email=prompt("Nhập email của tài khoản nhân viên nhận việc:");
-    if(email===null)return;
-    const person=state.staff.find(p=>p.active&&p.email.toLowerCase()===email.trim().toLowerCase());
-    if(!person){message("care-task-status","Không tìm thấy tài khoản đang hoạt động.",true);return;}
-    if(person.user_id===task.assignee_user_id)return;
-    const {error}=await client.from("inquiry_care_tasks").update({
-      assignee_name:person.full_name,assignee_user_id:person.user_id
-    }).eq("id",task.id);
-    if(error){message("care-task-status","Không thể chuyển việc: "+error.message,true);return}
-    await Promise.all([loadCustomerTasks(),refreshTasksBoard()]);
-    message("care-task-status","Đã chuyển người phụ trách và lưu lịch sử.");
+    if(state.currentRole!=="admin"&&state.currentRole!=="manager")return;
+    const notify=(text,error=false)=>{
+      message("care-task-status",text,error);
+      message("tasks-board-status",text,error);
+    };
+    if(updatingTasks.has(task.id))return;
+    const loaded=await loadStaff();
+    if(!loaded){notify("Không tải được nhân viên. Kiểm tra quyền và thử lại.",true);return;}
+    const eligible=state.staff.filter(p=>p.active&&p.user_id!==task.assignee_user_id);
+    if(!eligible.length){notify("Không có tài khoản khác đang hoạt động để nhận việc.",true);return;}
+    const choices=eligible.map((p,i)=>(i+1)+". "+p.full_name+" ("+p.email+") — "+p.role).join("\n");
+    const selected=prompt("Chọn số thứ tự người nhận việc:\n"+choices);
+    if(selected===null)return;
+    const ordinal=Number(selected.trim());
+    if(!Number.isInteger(ordinal)||ordinal<1||ordinal>eligible.length){
+      notify("Vui lòng chọn đúng số thứ tự tài khoản nhận việc.",true);return;
+    }
+    const person=eligible[ordinal-1];
+    if(!confirm("Chuyển công việc \""+task.title+"\" sang "+person.full_name+"?"))return;
+    updatingTasks.add(task.id);
+    notify("Đang chuyển công việc cho "+person.full_name+"...");
+    try{
+      const {data,error}=await client.from("inquiry_care_tasks")
+        .update({assignee_name:person.full_name,assignee_user_id:person.user_id})
+        .eq("id",task.id).select("id,assignee_user_id").maybeSingle();
+      if(error)throw error;
+      if(!data||data.assignee_user_id!==person.user_id){
+        notify("Chuyển việc chưa được xác nhận. Kiểm tra quyền truy cập và thử lại.",true);
+        return;
+      }
+      await Promise.all([loadCustomerTasks(),refreshTasksBoard()]);
+      notify("Đã chuyển việc cho "+person.full_name+" và lưu lịch sử thay đổi.");
+    }catch(error){notify("Không chuyển được việc: "+(error.message||"Lỗi hệ thống"),true);}
+    finally{updatingTasks.delete(task.id);}
   }
   function resetCareTaskEditor(){
     state.editingTask=null;
