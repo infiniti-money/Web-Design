@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Tạo tài khoản | Tân Design</title>
+<style>*{box-sizing:border-box}body{font:15px/1.5 system-ui,sans-serif;background:#f3f5f1;color:#22312b;margin:0;padding:24px;display:grid;min-height:100vh;place-items:center}main{width:min(100%,510px);background:#fff;padding:28px;border:1px solid #dbe4db;border-radius:16px}label{display:block;margin:14px 0 5px;font-weight:600}input{width:100%;padding:11px;border:1px solid #9caea1;border-radius:8px;font:inherit}button{background:#264f39;color:white;border:0;border-radius:8px;padding:13px;margin-top:19px;width:100%;font:inherit;cursor:pointer}button:disabled{opacity:.6}a{color:#245b3c}.hint{font-size:13px;color:#5b695f}.agree{display:flex;gap:9px;align-items:flex-start}.agree input{width:auto;margin-top:4px}#status{min-height:25px;color:#972b2b}.ok{color:#16653b!important}</style></head>
+<body><main><p class="hint">TÂN DESIGN · TÀI KHOẢN</p><h1>Tạo tài khoản</h1>
+<p class="hint">Đăng ký tài khoản không tự cấp quyền vào trang quản trị. Admin cần xác minh và cấp quyền nhân viên riêng.</p>
+<form id="signup">
+<label for="full-name">Họ và tên *</label><input id="full-name" maxlength="100" minlength="2" autocomplete="name" required>
+<label for="birthday">Ngày sinh *</label><input id="birthday" type="date" required>
+<label for="phone">Số điện thoại *</label><input id="phone" type="tel" inputmode="tel" maxlength="16" placeholder="+849xxxxxxxx hoặc 09xxxxxxxx" required>
+<label for="email">Email *</label><input id="email" type="email" autocomplete="email" maxlength="254" required>
+<label for="password">Mật khẩu *</label><input id="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+<label for="confirm">Xác nhận mật khẩu *</label><input id="confirm" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+<label class="agree"><input type="checkbox" id="consent" required><span>Tôi đồng ý cung cấp thông tin đăng ký tài khoản theo <a href="./privacy.html" target="_blank" rel="noopener">chính sách quyền riêng tư</a>.</span></label>
+<button id="submit" type="submit">Tạo tài khoản</button></form>
+<p id="status" role="status" aria-live="polite"></p><p><a href="./admin.html">Quay về đăng nhập</a></p>
+</main><script src="./app-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0"></script>
+<script>
+(()=>{"use strict";const $=id=>document.getElementById(id);const cfg=window.ATELIER_CONFIG;
+const status=$("status");function msg(t,ok=false){status.textContent=t;status.classList.toggle("ok",ok)}
+if(!cfg?.supabaseUrl||!cfg?.supabasePublishableKey||!window.supabase?.createClient){msg("Chưa thể kết nối hệ thống đăng ký.");$("submit").disabled=true;return}
+const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey);
+$("birthday").max=new Date().toISOString().slice(0,10);
+$("signup").addEventListener("submit",async e=>{
+e.preventDefault();const name=$("full-name").value.trim(),birthday=$("birthday").value,raw=$("phone").value.replace(/[\s().-]/g,""),email=$("email").value.trim(),password=$("password").value;
+const phone=/^0\d{9}$/.test(raw)?"+84"+raw.slice(1):raw;
+if(name.length<2||name.length>100){msg("Họ tên phải có 2–100 ký tự.");return}
+const date=new Date(birthday+"T00:00:00Z");
+if(!/^\d{4}-\d{2}-\d{2}$/.test(birthday)||isNaN(date.getTime())||date.toISOString().slice(0,10)!==birthday||date>new Date()){msg("Ngày sinh không hợp lệ.");return}
+if(!/^\+[1-9]\d{7,14}$/.test(phone)){msg("Số điện thoại không hợp lệ.");return}
+if(password.length<12||password.length>128||password!==$("confirm").value){msg("Mật khẩu tối thiểu 12 ký tự và hai lần nhập phải khớp.");return}
+if(!$("consent").checked){msg("Vui lòng xác nhận chính sách quyền riêng tư.");return}
+$("submit").disabled=true;msg("Đang gửi đăng ký…");
+try{
+const {error}=await client.auth.signUp({email,password,options:{emailRedirectTo:new URL("./admin.html",location.href).href,data:{full_name:name,date_of_birth:birthday,phone_number_unverified:phone}}});
+if(error)throw error;
+$("signup").reset();
+msg("Đã tiếp nhận yêu cầu. Nếu email hợp lệ, hãy kiểm tra thư xác nhận. Sau đó liên hệ Admin để được cấp quyền vào CRM.",true);
+}catch{msg("Không thể tạo tài khoản lúc này. Kiểm tra dữ liệu hoặc thử lại sau.")}finally{$("submit").disabled=false}
+});
+})();
+</script></body></html>
