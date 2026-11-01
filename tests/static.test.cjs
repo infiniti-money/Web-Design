@@ -296,8 +296,8 @@ test("Commercial workflow has a protected UI and database checks", () => {
   for(const table of ["customer_quotes","customer_quote_versions","customer_contracts"])
     assert.match(schema,new RegExp("alter table public\\."+table+" enable row level security"));
   for(const file of ["commercial.html"]){
-    for(const script of read(file).matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)){
-      if(/\\bsrc\\s*=/.test(script[1])||!script[2].trim())continue;
+    for(const script of read(file).matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)){
+      if(/\bsrc\s*=/.test(script[1])||!script[2].trim())continue;
       assert.doesNotThrow(()=>new vm.Script(script[2],{filename:file}));
     }
   }
