@@ -54,6 +54,9 @@ const equipmentAdvice={
 "Thiết bị điện thông minh":"Xác minh giao thức kết nối, tương thích mạng, điều khiển cục bộ và bảo mật."};
 function addPhoto(host,x){if(x.image_url){const image=document.createElement("img");image.src=x.image_url;image.loading="lazy";image.alt="Ảnh mẫu: "+x.name;image.onerror=()=>{image.replaceWith(makePlaceholder(x))};host.append(image)}else host.append(makePlaceholder(x))}
 function makePlaceholder(x){const p=document.createElement("div");p.className="no-photo";p.textContent=x.category+" · "+x.name+" — Đang cập nhật ảnh đúng mẫu";return p}
+// Curated visual references for preview only; never claim that a group photo is an exact product.
+const demoPhotos={"Phòng khách":"https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=75","Phòng ngủ":"https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=900&q=75","Phòng bếp":"https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=900&q=75","Căn hộ studio":"https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=75","Nhà phố":"https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=900&q=75","Biệt thự":"https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=900&q=75","Gỗ công nghiệp":"https://images.unsplash.com/photo-1752321531753-d02f83283c5e?auto=format&fit=crop&w=900&q=75","Đá tự nhiên":"https://images.unsplash.com/photo-1752321531753-d02f83283c5e?auto=format&fit=crop&w=900&q=75","Da và vải bọc":"https://images.unsplash.com/photo-1770970831074-6e88b6cc260b?auto=format&fit=crop&w=900&q=75","Thiết bị bếp":"https://images.unsplash.com/photo-1770063817031-f3b98dff347f?auto=format&fit=crop&w=900&q=75"};
+for(const item of items){if(demoPhotos[item.name]){item.image_url=demoPhotos[item.name];item.photo_note="Ảnh tham khảo theo nhóm, không phải sản phẩm thực tế";}}
 const bookState={pages:[],index:0};
 function pagesFor(x){
  const specific=roomAdvice[x.name]||materialAdvice[x.name]||equipmentAdvice[x.name]||"Đối chiếu công năng, kích thước và chất liệu trước khi lựa chọn.";
@@ -71,7 +74,7 @@ function pagesFor(x){
  ["Giải pháp tiện nghi","Cân nhắc tính linh hoạt, điều khiển và trải nghiệm sử dụng."],
  ["Giải pháp nâng cao","Xem xét khả năng tích hợp, độ bền và chính sách bảo hành."]
  ];
- return variants.map(([label,description],i)=>({title:x.name+" — "+label,description:description+" "+specific,code:"Gợi ý "+String(i+1).padStart(2,"0"),image_url:i===0?x.image_url||"":""}));
+ return variants.map(([label,description],i)=>({title:x.name+" — "+label,description:description+" "+specific,code:"Mẫu ý tưởng "+String(i+1).padStart(2,"0"),image_url:i===0?x.image_url||"":"",photo_note:x.photo_note||""}));
 }
 function renderBook(){
  const x=bookState.pages[bookState.index],el=document.getElementById("book-page");el.replaceChildren();
@@ -79,9 +82,9 @@ function renderBook(){
  const title=document.createElement("h3");title.textContent=x.title;
  const desc=document.createElement("p");desc.textContent=x.description;
  el.append(eyebrow,title);
- if(x.image_url){const img=document.createElement("img");img.src=x.image_url;img.alt="Ảnh minh họa "+x.title;img.loading="lazy";img.onerror=()=>img.replaceWith(makePlaceholder({name:x.title,category:"Mẫu tham khảo"}));el.append(img)}
+ if(x.image_url){const img=document.createElement("img");img.src=x.image_url;img.alt="Ảnh tham khảo theo nhóm "+x.title;img.loading="lazy";img.onerror=()=>img.replaceWith(makePlaceholder({name:x.title,category:"Mẫu tham khảo"}));el.append(img)}
  else el.append(makePlaceholder({name:x.title,category:"Mẫu tham khảo"}));
- el.append(desc);
+ el.append(desc);if(x.photo_note&&x.image_url){const p=document.createElement("small");p.textContent=x.photo_note;el.append(p)}
  document.getElementById("book-counter").textContent="Trang "+(bookState.index+1)+" / "+bookState.pages.length;
  document.getElementById("book-prev").disabled=bookState.index===0;document.getElementById("book-next").disabled=bookState.index===bookState.pages.length-1;
  el.style.animation="none";void el.offsetWidth;el.style.animation="";
@@ -103,7 +106,7 @@ for(const el of [search,style,sort])el.addEventListener(el===search?"input":"cha
   const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey);
   const {data,error}=await client.from("catalog_items").select("name,category,style,description,image_url").eq("published",true).order("sort_order").limit(500);
   if(error||!data?.length)return;
-  items=data.map(x=>({name:x.name,category:x.category,style:x.style||"",desc:x.description||"",photo:null,image_url:x.image_url||""}));
+  items=data.map(x=>({name:x.name,category:x.category,style:x.style||"",desc:x.description||"",photo:null,image_url:x.image_url||"",photo_note:"Ảnh do quản trị viên cung cấp"}));
   // Published entries supersede examples only when the live catalog contains content.
   show();
  }catch(error){console.warn("Catalog: giữ lại dữ liệu minh họa do chưa tải được dữ liệu trực tuyến.");}
