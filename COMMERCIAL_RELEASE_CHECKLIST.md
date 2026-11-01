@@ -13,6 +13,12 @@
   - Sau kiểm thử: báo giá, hợp đồng và nhật ký thử vẫn bằng **0**.
 - Kiểm thử bằng JWT giả lập **không thay thế** việc đăng nhập bằng tài khoản thực tế qua trình duyệt.
 
+## Bổ sung kiểm thử giao diện mô phỏng (02/11/2026)
+- Đã thêm `tests/commercial-ui.test.cjs` vào GitHub Actions; CI thành công.
+- Mock DOM và Supabase kiểm tra: khách chưa đăng nhập; tài khoản Nhân viên; tài khoản đã vô hiệu hóa; vai trò không khớp JWT; lỗi truy cập Auth.
+- Kiểm tra Quản lý tạo báo giá, giữ lựa chọn khách hàng sau tải lại; ngăn thao tác trùng; hợp đồng dùng mã phiên bản đã duyệt; xử lý đúng khi RPC lưu thành công nhưng tải lại thất bại.
+- Đây là kiểm thử mô phỏng phía trình duyệt, **không** phải thử đăng nhập thật hay thử giao diện trực quan trên điện thoại.
+
 ## Cần hoàn thành trước khi gộp/phát hành
 - [ ] Đăng nhập bằng tài khoản Admin thực, tạo và duyệt/từ chối báo giá thử; kiểm tra nhật ký và mã phiên bản.
 - [ ] Đăng nhập bằng tài khoản Quản lý thực, tạo/sửa/trình báo giá; xác nhận không thể duyệt hoặc ký.
