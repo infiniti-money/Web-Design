@@ -228,7 +228,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="field"><label for="staff-role">Vai trò</label><select id="staff-role"><option value="employee">Nhân viên</option><option value="manager">Quản lý</option><option value="admin">Admin</option></select></div>
 </div><button class="btn" type="submit" id="staff-invite-submit">Gửi lời mời qua Supabase Auth</button></form>
 <p class="hint">Supabase Auth gửi email mời thiết lập mật khẩu. Đây là email xác thực tài khoản, không phải email thông báo CRM tự động. Cần cấu hình URL chuyển hướng của Auth trùng với trang Admin.</p></div>
-<p id="staff-status" role="status" aria-live="polite" class="status"></p>
+<div class="card"><h3>Tài khoản chờ duyệt</h3><p class="hint">Chỉ hiển thị đăng ký đã xác minh email và cung cấp đủ thông tin. Duyệt cấp quyền Nhân viên, không tự cấp Admin.</p><button type="button" id="pending-refresh" class="btn ghost">Tải tài khoản chờ duyệt</button><p id="pending-status" class="status" role="status"></p><div class="table-wrap"><table><thead><tr><th>Họ tên</th><th>Email</th><th>Ngày sinh</th><th>Số điện thoại</th><th>Thao tác</th></tr></thead><tbody id="pending-table"></tbody></table></div></div><p id="staff-status" role="status" aria-live="polite" class="status"></p>
 <div class="table-wrap"><table><thead><tr><th>Nhân viên</th><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="staff-table"></tbody></table></div>
 <p class="privacy-note">Nhân viên được giao việc theo tài khoản. Công việc gán tên cũ vẫn giữ nguyên cho đến khi Admin gắn tài khoản thủ công. Các thay đổi quyền có thể cần đăng xuất/đăng nhập lại để làm mới phiên làm việc.</p>
 </section>
