@@ -271,3 +271,34 @@ test("Configured public site uses live API, demo fallback remains explicit", () 
   assert.match(index, /ATELIER_SET_PROJECTS/);
   assert.match(index, /localStorage/);
 });
+
+
+test("Commercial workflow has a protected UI and database checks", () => {
+  const commercial=read("commercial.html");
+  const actions=read("supabase/quotes-contracts-v1_17-actions.sql");
+  const link=read("supabase/quotes-contracts-v1_17-link.sql");
+  const schema=read("supabase/quotes-contracts-v1_17.sql");
+  assert.match(admin,/href="\.\/commercial\.html"/);
+  assert.match(commercial,/getUser\(\)/);
+  assert.match(commercial,/staff_profiles/);
+  assert.match(commercial,/commercial_action/);
+  assert.match(commercial,/let submitting=false/);
+  assert.match(commercial,/quoteNames/);
+  assert.match(actions,/security definer set search_path=''/);
+  assert.match(actions,/FORBIDDEN/);
+  assert.match(actions,/and v_role='admin'/);
+  assert.match(actions,/INVALID_QUOTE_TRANSITION/);
+  assert.match(actions,/INVALID_CONTRACT_TRANSITION/);
+  assert.match(actions,/insert into public\.commercial_audit/);
+  assert.match(link,/QUOTE_NOT_ACCEPTED/);
+  assert.match(link,/QUOTE_VERSION_NOT_CURRENT/);
+  assert.match(link,/QUOTE_CUSTOMER_MISMATCH/);
+  for(const table of ["customer_quotes","customer_quote_versions","customer_contracts"])
+    assert.match(schema,new RegExp("alter table public\\."+table+" enable row level security"));
+  for(const file of ["commercial.html"]){
+    for(const script of read(file).matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)){
+      if(/\\bsrc\\s*=/.test(script[1])||!script[2].trim())continue;
+      assert.doesNotThrow(()=>new vm.Script(script[2],{filename:file}));
+    }
+  }
+});
