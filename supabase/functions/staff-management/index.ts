@@ -41,6 +41,58 @@ Deno.serve(async(req:Request)=>{
     if(!body||typeof body!=="object"||Array.isArray(body))throw new Error();
   }catch{return reply(400,{error:"INVALID_JSON"})}
   const action=body.action;
+  if(action==="pending"){
+    const candidates=[];
+    for(let page=1;page<=10;page++){
+      const {data,error}=await service.auth.admin.listUsers({page,perPage:100});
+      if(error)return reply(500,{error:"ACCOUNT_LIST_FAILED"});
+      for(const user of data.users){
+        if(user.app_metadata?.role||user.app_metadata?.registration_status==="rejected")continue;
+        if(!user.email_confirmed_at)continue;
+        const meta=user.user_metadata||{};
+        if(!meta.full_name||!meta.date_of_birth||!meta.phone_number_unverified)continue;
+        candidates.push({user_id:user.id,email:user.email,full_name:String(meta.full_name).slice(0,100),
+          date_of_birth:String(meta.date_of_birth).slice(0,10),
+          phone:String(meta.phone_number_unverified).slice(0,20),created_at:user.created_at});
+      }
+      if(data.users.length<100)break;
+    }
+    return reply(200,{ok:true,accounts:candidates});
+  }
+  if(action==="review_registration"){
+    const id=String(body.user_id||"");
+    const decision=String(body.decision||"");
+    if(!uuid.test(id)||!["approve","reject"].includes(decision))return reply(422,{error:"INVALID_REVIEW"});
+    const {data,error}=await service.auth.admin.getUserById(id);
+    const target=data?.user;
+    if(error||!target)return reply(404,{error:"ACCOUNT_NOT_FOUND"});
+    if(target.app_metadata?.role||target.app_metadata?.registration_status==="rejected")
+      return reply(409,{error:"ACCOUNT_ALREADY_REVIEWED"});
+    if(!target.email_confirmed_at)return reply(409,{error:"EMAIL_NOT_CONFIRMED"});
+    const meta=target.user_metadata||{};
+    const name=String(meta.full_name||"").trim();
+    if(name.length<2||name.length>100||!meta.date_of_birth||!meta.phone_number_unverified)
+      return reply(422,{error:"REGISTRATION_INCOMPLETE"});
+    if(decision==="reject"){
+      const {error:denyError}=await service.auth.admin.updateUserById(id,{
+        app_metadata:{...target.app_metadata,registration_status:"rejected"}
+      });
+      return denyError?reply(500,{error:"REVIEW_SAVE_FAILED"}):reply(200,{ok:true});
+    }
+    // Only employee can be assigned via self-registration approval.
+    const {error:profileError}=await service.from("staff_profiles").insert({
+      user_id:id,email:target.email,full_name:name,role:"employee",active:true
+    });
+    if(profileError)return reply(409,{error:"PROFILE_CREATE_FAILED"});
+    const {error:roleError}=await service.auth.admin.updateUserById(id,{
+      app_metadata:{...target.app_metadata,role:"employee",registration_status:"approved"}
+    });
+    if(roleError){
+      await service.from("staff_profiles").delete().eq("user_id",id);
+      return reply(500,{error:"ROLE_ASSIGNMENT_FAILED"});
+    }
+    return reply(200,{ok:true});
+  }
   if(action==="invite"){
     const email=String(body.email||"").trim().toLowerCase();
     const name=String(body.full_name||"").trim();
