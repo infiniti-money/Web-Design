@@ -48,7 +48,10 @@ begin
    or (p_action='send' and v_status='approved')
    or (p_action='accept' and v_status='sent') then
     update public.customer_quotes set status=case p_action when 'submit' then 'submitted' when 'approve' then 'approved' when 'reject' then 'rejected' when 'send' then 'sent' else 'accepted' end,
-    approved_by=case when p_action='approve' then auth.uid() else approved_by end where id=p_id;
+    approved_by=case when p_action='approve' then auth.uid() else approved_by end,
+    approved_version_id=case when p_action='approve' then
+      (select v.id from public.customer_quote_versions v where v.quote_id=p_id order by v.version_no desc limit 1)
+      else approved_version_id end where id=p_id;
     v_id:=p_id;
    else raise exception 'INVALID_QUOTE_TRANSITION'; end if;
   end if;
