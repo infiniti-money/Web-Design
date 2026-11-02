@@ -41,7 +41,7 @@ const assert=require("node:assert/strict");
   await page.emulateMedia({media:"print"});
   assert.equal(await page.locator("body > div").first().isVisible(),false,"Preview banner must never print");
   assert.equal(await printable.isVisible(),true,"Only the print document should be visible");
-  await page.emulateMedia({media:"screen"});
+  // Keep print media active while Playwright generates the A4 PDF.
   const output=path.join(process.cwd(),"preview-v1-17","v1-18-quote-a4.pdf");
   const pdf=await page.pdf({path:output,format:"A4",printBackground:true});
   assert.ok(pdf.length>5000&&pdf.subarray(0,5).toString()==="%PDF-","PDF must be a real PDF");
