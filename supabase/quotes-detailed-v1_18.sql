@@ -15,8 +15,8 @@ begin
   if p_content is null or jsonb_typeof(p_content)<>'object'
      or length(p_content::text)>90000 then raise exception 'INVALID_QUOTE_ITEMS';end if;
   v_items:=p_content->'items';
-  if jsonb_typeof(v_items) is distinct from 'array'
-     or jsonb_array_length(v_items) not between 1 and 80 then raise exception 'INVALID_QUOTE_ITEMS';end if;
+  if jsonb_typeof(v_items) is distinct from 'array' then raise exception 'INVALID_QUOTE_ITEMS';end if;
+  if jsonb_array_length(v_items) not between 1 and 80 then raise exception 'INVALID_QUOTE_ITEMS';end if;
   for v_item in select value from jsonb_array_elements(v_items)
   loop
     v_count:=v_count+1;
@@ -34,7 +34,7 @@ begin
     v_qty:=v_qty_text::numeric;v_price:=v_price_text::numeric;
     if v_qty<=0 or v_qty>100000 then raise exception 'INVALID_QUOTE_QUANTITY_%',v_count;end if;
     v_subtotal:=v_subtotal+round(v_qty*v_price,0);
-    if v_subtotal>999999999999999 then raise exception 'QUOTE_TOO_LARGE';end if;
+    if v_subtotal>99999999999999 then raise exception 'QUOTE_TOO_LARGE';end if;
   end loop;
   v_discount_text:=coalesce(p_content->>'discount','0');
   v_rate_text:=coalesce(p_content->>'vat_rate','0');
@@ -44,7 +44,7 @@ begin
   if v_discount>v_subtotal then raise exception 'DISCOUNT_EXCEEDS_SUBTOTAL';end if;
   v_vat:=round((v_subtotal-v_discount)*v_rate/100,0);
   v_total:=v_subtotal-v_discount+v_vat;
-  if v_total>999999999999999 then raise exception 'QUOTE_TOO_LARGE';end if;
+  if v_total>99999999999999 then raise exception 'QUOTE_TOO_LARGE';end if;
   return jsonb_build_object('subtotal',v_subtotal,'discount',v_discount,'vat_rate',v_rate,
     'vat_amount',v_vat,'total',v_total,'line_count',v_count);
 end;
