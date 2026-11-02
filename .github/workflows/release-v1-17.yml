@@ -1,0 +1,69 @@
+name: Release Tân Design v1.17.0
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-v1-17.yml'
+      - 'RELEASE_NOTES_V1_17_0.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-tan-design-v1-17
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact main commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify all automated tests
+        run: node --test tests/*.test.cjs
+      - name: Package website source and controlled SQL migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          folder="dist/tan-design-v1.17.0"
+          mkdir -p "$folder"
+          cp ./*.html ./*.js "$folder/"
+          cp README.md SUPABASE_SETUP.md TURNSTILE_SETUP.md EMAIL_NOTIFICATIONS_SETUP.md COMMERCIAL_RELEASE_CHECKLIST.md RELEASE_NOTES_V1_17_0.md "$folder/"
+          cp -R supabase "$folder/"
+          test -f "$folder/commercial.html"
+          test -f "$folder/catalog.html"
+          test -f "$folder/admin.html"
+          test -f "$folder/supabase/quotes-contracts-v1_17-approved-snapshot.sql"
+          (cd dist && zip -qr tan-design-v1.17.0.zip tan-design-v1.17.0)
+          unzip -t dist/tan-design-v1.17.0.zip | tail -1
+      - name: Publish new version once
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v1.17.0 >/dev/null 2>&1; then
+            echo "GitHub Release v1.17.0 already exists: leaving published release unchanged"
+          else
+            gh release create v1.17.0 ./dist/tan-design-v1.17.0.zip \
+              --target "$GITHUB_SHA" \
+              --title "Tân Design v1.17.0 — Báo giá và hợp đồng" \
+              --notes-file RELEASE_NOTES_V1_17_0.md
+          fi
+          gh release view v1.17.0 --json name,tagName,url,assets
+      - name: Attach CI package for audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: tan-design-v1.17.0-source
+          path: dist/tan-design-v1.17.0.zip
+          retention-days: 30
+          if-no-files-found: error
