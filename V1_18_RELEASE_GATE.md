@@ -89,3 +89,16 @@ Chạy trên **môi trường thử nghiệm cách ly** có đủ hai migration 
 **Kết luận 02/11/2026: NO-GO / BLOCK RELEASE v1.18.0.** Các truy vấn chỉ đọc đã đạt, nhưng chưa có chứng cứ backup có thể khôi phục đầy đủ, phiên Auth thật trên v1.18 chưa được thử và vai trò Nhân viên chưa có tài khoản. Security Advisor cần rà soát bổ sung.
 
 Chỉ đánh dấu **GO** khi backup + restore độc lập, UAT ba vai trò (hoặc ngoại lệ Nhân viên được ghi nhận/phê duyệt bằng văn bản), kiểm soát Security Advisor, preflight/migration/postflight và đối chiếu dữ liệu đều có bằng chứng đạt. Giữ PR #18 ở Draft, chưa merge, chưa tag/release.
+
+## Kiểm thử lại migration trong transaction — 02/11/2026
+
+**Phạm vi:** Từ GitHub nhánh `feat/v1-18-detailed-quote-print`, thực thi nguyên văn `supabase/quotes-detailed-v1_18.sql` rồi `supabase/quotes-version-lock-v1_18.sql` trên project production `mswiegltusllzvuavjdh` trong **một phiên SQL có `BEGIN; ... ROLLBACK;`**. Đây chỉ là thử nghiệm giao dịch, **không ghi migration history, không phát hành, không thay đổi schema vĩnh viễn**.
+
+- [x] Trong giao dịch: cả 2 hàm và trigger bảo vệ được tạo; `anon` và `authenticated` không có EXECUTE trực tiếp trên `commercial_quote_totals(jsonb)`; `authenticated` có EXECUTE trên `commercial_action` theo đúng thiết kế.
+- [x] Regression `tests/quote-detail-v1_18-rollback.sql` hoàn tất không lỗi: tổng 1.427.250 VNĐ; chặn tổng tiền sai; Manager không phê duyệt; Admin phê duyệt; bản đã duyệt không sửa/xóa được; hợp đồng tham chiếu phiên bản đã duyệt.
+- [x] Sau `ROLLBACK` xác nhận `commercial_quote_totals(jsonb)` và `commercial_quote_version_append_only()` **không tồn tại**, trigger phiên bản **không tồn tại**, production vẫn có `inquiries=2`, `quotes=1`, `quote_versions=1`, `contracts=1`, `commercial_audit=11`.
+- [x] Kiểm tra trạng thái GitHub: PR #18 vẫn `open`, `draft=true`, chưa merge.
+- [ ] **CHẶN ÁP DỤNG THẬT:** chưa có bản sao lưu độc lập được khôi phục thử (bao gồm phương án bảo toàn Supabase Auth), chưa UAT Auth thật trên schema v1.18 và chưa kiểm tra đóng các cảnh báo bảo mật.
+- [ ] Khi vượt gate: chạy migration **có ghi migration history** và pre/postflight, đối chiếu snapshot, kiểm thử Auth thật, rồi mới xét merge và release. Không xem dry-run như migration production.
+
+**Kết luận:** DRY-RUN **PASS**; PRODUCTION MIGRATION **NOT APPLIED / BLOCKED**. Lưu nguyên trạng dữ liệu đang dùng.
