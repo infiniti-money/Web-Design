@@ -41,3 +41,21 @@ Supabase Free không cung cấp bản backup hằng ngày tải từ Dashboard n
 - [ ] Sau khi tất cả đạt, mới gộp PR #18 và chạy workflow phát hành v1.18 thủ công.
 
 Tài liệu chính thức: https://supabase.com/docs/guides/platform/backups
+
+## Phạm vi sao lưu và xác minh khả năng phục hồi tài khoản — kiểm tra bổ sung 02/11/2026
+
+**Lưu ý bảo vệ nhân sự:** Theo tài liệu CLI chính thức, `supabase db dump` mặc định **loại trừ schema do Supabase quản lý**, bao gồm `auth` và `storage`. Vì vậy ba lệnh ở trên bảo vệ dữ liệu nghiệp vụ và schema ứng dụng, nhưng **không đủ bằng chứng** để khẳng định phục hồi được `auth.users`, `auth.identities`, thiết lập nhà cung cấp đăng nhập hoặc các đối tượng Storage. Không đánh dấu gate backup đạt chỉ nhờ có `roles.sql`, `schema.sql` và `data.sql`.
+
+Đối chiếu production chỉ đọc lúc **22:03 ICT, 02/11/2026**: 1 Admin và 1 Quản lý đang active, đã xác minh email, `app_metadata.role` khớp `staff_profiles.role`; chưa có Nhân viên active; Storage hiện có 0 bucket. Số liệu này là **mốc đối chiếu**, không phải bản sao lưu.
+
+### Bằng chứng bắt buộc trước khi mở gate
+- [ ] Có `roles.sql`, `schema.sql`, `data.sql` lưu ngoài repository và ngoài máy chủ production. Chạy `Get-ChildItem $folder -File | Get-FileHash -Algorithm SHA256` trong PowerShell, lưu riêng bản ghi checksum và thời điểm; không đăng lên GitHub các tệp dump hoặc đường dẫn nhạy cảm.
+- [ ] Xác minh dữ liệu nghiệp vụ thật sự có trong dump, và bản dump có thể **khôi phục** trên một Postgres/Supabase *tách biệt*, không chạy restore ở production. Đối chiếu `inquiries=2`, `care_tasks=2`, `quotes=1`, `quote_versions=1`, `contracts=1`, `commercial_audit=11` theo snapshot tại 22:03 ICT (nếu có hoạt động sau mốc đó, dùng snapshot mới ngay trước dump).
+- [ ] Có phương án **khôi phục Auth** được kiểm thử riêng: dữ liệu `auth.users` và danh tính `auth.identities`, hai vai trò Admin/Quản lý cùng metadata cần được bảo toàn, hoặc có backup nền tảng/khôi phục project mới được xác minh là bao gồm Auth. Khôi phục xong phải đăng nhập thử bằng tài khoản được chủ sở hữu cho phép. Không giả định dump mặc định đã chứa Auth.
+- [ ] Kiểm tra lại danh sách và đối tượng Storage tại thời điểm backup; nếu có tệp Storage, thực hiện sao lưu đối tượng riêng (backup database chỉ có metadata), kiểm tra khả năng phục hồi tệp.
+- [ ] Lưu bản sao đã mã hóa ở nơi độc lập, kiểm tra checksum **sau khi sao chép**, lưu biên bản khôi phục (thời điểm, phạm vi, kết quả, không ghi bí mật/PII).
+- [ ] Không tạo project/branch Supabase có thể phát sinh chi phí khi chưa được chủ dự án đồng ý; không sử dụng production làm môi trường restore.
+
+**Tài liệu đối chiếu:** [Supabase CLI db dump](https://supabase.com/docs/reference/cli/supabase-db-dump), [Backup and Restore using CLI](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore), [Database Backups](https://supabase.com/docs/guides/platform/backups).
+
+**Kết luận lúc lập biên bản:** Chưa được kiểm chứng bản sao lưu độc lập có thể khôi phục cả dữ liệu nghiệp vụ và tài khoản Auth → **BLOCK RELEASE**.
