@@ -67,7 +67,7 @@ function openEditor({title,initial,onSave}){
  status.setAttribute("role","status");
  taxBox.append(total,status);dialog.append(taxBox,actions);
  overlay.append(dialog);document.body.append(overlay);
- close.onclick=()=>overlay.remove();
+ close.onclick=()=>{overlay.remove();document.removeEventListener("keydown",onEscape)};
  const onEscape=e=>{if(e.key==="Escape"){overlay.remove();document.removeEventListener("keydown",onEscape)}};
  document.addEventListener("keydown",onEscape);
  const controls=[];
@@ -106,7 +106,7 @@ function openEditor({title,initial,onSave}){
  save.onclick=async()=>{
   const calculated=recalc();if(!calculated)return;
   save.disabled=true;
-  try{await onSave({...calculated,description:String(initial?.description||"").slice(0,1000)});overlay.remove();}
+  try{await onSave({...calculated,description:String(initial?.description||"").slice(0,1000)});overlay.remove();document.removeEventListener("keydown",onEscape);}
   catch(error){status.textContent=error.message||"Không thể lưu báo giá";}
   finally{save.disabled=false}
  };
