@@ -17,13 +17,13 @@ function calculate(items,discount=0,vatRate=0){
   const quantity=Number(qtyText),price=Number(priceText);
   if(quantity<=0||quantity>100000)throw Error("Số lượng không hợp lệ ở hạng mục "+(i+1));
   subtotal+=Math.round(quantity*price);
-  if(!Number.isSafeInteger(subtotal)||subtotal>999999999999999)throw Error("Tổng báo giá vượt giới hạn.");
+  if(!Number.isSafeInteger(subtotal)||subtotal>99999999999999)throw Error("Tổng báo giá vượt giới hạn.");
  }
  const d=Number(discount),r=Number(vatRate);
  if(!Number.isSafeInteger(d)||d<0||d>subtotal)throw Error("Giảm giá phải từ 0 đến tổng trước thuế.");
  if(![0,5,8,10].includes(r))throw Error("Thuế suất không hợp lệ.");
  const vatAmount=Math.round((subtotal-d)*r/100),total=subtotal-d+vatAmount;
- if(!Number.isSafeInteger(total)||total>999999999999999)throw Error("Tổng báo giá vượt giới hạn.");
+ if(!Number.isSafeInteger(total)||total>99999999999999)throw Error("Tổng báo giá vượt giới hạn.");
  return{items,subtotal,discount:d,vat_rate:r,vat_amount:vatAmount,total,line_count:items.length};
 }
 const el=(tag,className,text)=>{
