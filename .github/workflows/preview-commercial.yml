@@ -1,0 +1,39 @@
+name: Preview v1.17 desktop/mobile (mock data)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'commercial.html'
+      - 'tests/preview-commercial.cjs'
+      - '.github/workflows/preview-commercial.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser automation
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Render desktop and mobile preview with mock auth/data
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/tan-design-preview-http.log 2>&1 &
+          node tests/preview-commercial.cjs
+          node tests/build-interactive-preview.cjs
+          node tests/check-interactive-preview.cjs
+      - name: Upload preview images and report
+        uses: actions/upload-artifact@v4
+        with:
+          name: tan-design-v1-17-preview
+          path: preview-v1-17/
+          if-no-files-found: error
+          retention-days: 14

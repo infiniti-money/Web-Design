@@ -276,3 +276,65 @@ test("Notification trigger cannot be executed directly by clients", () => {
   const hardening=read("supabase/notifications-execute-hardening-v1_15_1.sql");
   assert.match(hardening,/revoke execute on function public\.notify_task_assignment\(\) from public, anon, authenticated/);
 });
+
+
+test("Commercial workflow has a protected UI and database checks", () => {
+  const commercial=read("commercial.html");
+  const actions=read("supabase/quotes-contracts-v1_17-actions.sql");
+  const link=read("supabase/quotes-contracts-v1_17-link.sql");
+  const schema=read("supabase/quotes-contracts-v1_17.sql");
+  assert.match(admin,/href="\.\/commercial\.html"/);
+  assert.match(commercial,/getUser\(\)/);
+  assert.match(commercial,/staff_profiles/);
+  assert.match(commercial,/commercial_action/);
+  assert.match(commercial,/let submitting=false/);
+  assert.match(commercial,/quoteNames/);
+  assert.match(actions,/security definer set search_path=''/);
+  assert.match(actions,/FORBIDDEN/);
+  assert.match(actions,/and v_role='admin'/);
+  assert.match(actions,/INVALID_QUOTE_TRANSITION/);
+  assert.match(actions,/INVALID_CONTRACT_TRANSITION/);
+  assert.match(actions,/insert into public\.commercial_audit/);
+  assert.match(link,/QUOTE_NOT_ACCEPTED/);
+  assert.match(link,/QUOTE_VERSION_NOT_CURRENT/);
+  assert.match(link,/QUOTE_CUSTOMER_MISMATCH/);
+  for(const table of ["customer_quotes","customer_quote_versions","customer_contracts"])
+    assert.match(schema,new RegExp("alter table public\\."+table+" enable row level security"));
+  for(const file of ["commercial.html"]){
+    for(const script of read(file).matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)){
+      if(/\bsrc\s*=/.test(script[1])||!script[2].trim())continue;
+      assert.doesNotThrow(()=>new vm.Script(script[2],{filename:file}));
+    }
+  }
+});
+
+test("Commercial contract guard and approval audit demand evidence", () => {
+  const guard=read("supabase/quotes-contracts-v1_17-link.sql");
+  const actions=read("supabase/quotes-contracts-v1_17-actions.sql");
+  const commercial=read("commercial.html");
+  assert.doesNotMatch(guard,/if new.quote_id is null and new.quote_version_id is null then return new/);
+  assert.match(guard,/QUOTE_VERSION_REQUIRED/);
+  assert.match(guard,/q.approved_by is null/);
+  assert.match(actions,/REJECTION_REASON_REQUIRED/);
+  assert.match(actions,/CUSTOMER_ACCEPTANCE_EVIDENCE_REQUIRED/);
+  assert.match(actions,/jsonb_build_object\('amount',p_amount,'version_no',v_n/);
+  assert.match(commercial,/Ghi nhận khách chấp nhận/);
+  assert.match(commercial,/refreshContractQuoteOptions/);
+});
+
+test("A contract always requires a quote and version",()=>{const sql=read("supabase/quotes-contracts-v1_17-link.sql");assert.match(sql,/alter column quote_id set not null/);assert.match(sql,/alter column quote_version_id set not null/);});
+
+test("Commercial and catalog links remain hidden for unauthorized roles",()=>{const adminJs=read("admin.js");assert.match(admin,/id="catalog-link-card" class="card hide"/);assert.match(admin,/id="commercial-link-card" class="card hide"/);assert.match(adminJs,/catalog-link-card/);assert.match(adminJs,/commercial-link-card/);});
+
+test("Contracts bind to the exact approved quote version",()=>{
+ const schema=read("supabase/quotes-contracts-v1_17.sql");
+ const actions=read("supabase/quotes-contracts-v1_17-actions.sql");
+ const guard=read("supabase/quotes-contracts-v1_17-link.sql");
+ const html=read("commercial.html");
+ assert.match(schema,/approved_version_id uuid references/);
+ assert.match(actions,/approved_version_id=case when p_action='approve'/);
+ assert.match(guard,/QUOTE_VERSION_NOT_APPROVED/);
+ assert.match(html,/match.data.approved_version_id/);
+});
+
+test("Commercial activity includes version amounts and auditable decisions",()=>{const html=read("commercial.html");assert.match(html,/versionByQuote/);assert.match(html,/staffName/);assert.match(html,/d.reason/);assert.match(html,/d.evidence/);});
