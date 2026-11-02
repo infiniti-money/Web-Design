@@ -30,6 +30,7 @@ jobs:
           node tests/preview-commercial.cjs
           node tests/build-interactive-preview.cjs
           node tests/check-interactive-preview.cjs
+          node tests/check-quote-v1-18.cjs
       - name: Upload preview images and report
         uses: actions/upload-artifact@v4
         with:
