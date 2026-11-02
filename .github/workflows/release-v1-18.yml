@@ -1,0 +1,75 @@
+name: Release Tân Design v1.18.0 (manual gated)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Enter RELEASE_V1_18_AFTER_BACKUP_MIGRATION_AND_REAL_AUTH_UAT to release'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-tan-design-v1-18
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main' && inputs.confirmation == 'RELEASE_V1_18_AFTER_BACKUP_MIGRATION_AND_REAL_AUTH_UAT'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check release prerequisites and tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f RELEASE_NOTES_V1_18_0.md
+          test -f quote-detail.js
+          test -f quote-detail.css
+          test -f supabase/quotes-detailed-v1_18.sql
+          test -f supabase/quotes-version-lock-v1_18.sql
+          test -f supabase/v1_18-preflight.sql
+          test -f supabase/v1_18-postflight.sql
+          node --test tests/*.test.cjs
+      - name: Build versioned website source package
+        shell: bash
+        run: |
+          set -euo pipefail
+          folder="dist/tan-design-v1.18.0"
+          mkdir -p "$folder"
+          cp ./*.html ./*.js ./*.css "$folder/"
+          cp README.md SUPABASE_SETUP.md TURNSTILE_SETUP.md EMAIL_NOTIFICATIONS_SETUP.md "$folder/"
+          cp V1_18_RELEASE_GATE.md RELEASE_NOTES_V1_18_0.md "$folder/"
+          cp -R supabase "$folder/"
+          test -f "$folder/quote-detail.js"
+          test -f "$folder/quote-detail.css"
+          test -f "$folder/commercial.html"
+          (cd dist && zip -qr tan-design-v1.18.0.zip tan-design-v1.18.0)
+          unzip -t dist/tan-design-v1.18.0.zip | tail -1
+      - name: Publish immutable GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v1.18.0 >/dev/null 2>&1; then
+            echo "Release v1.18.0 exists; refusing to overwrite"
+            exit 1
+          fi
+          gh release create v1.18.0 ./dist/tan-design-v1.18.0.zip \
+            --target "$GITHUB_SHA" \
+            --title "Tân Design v1.18.0 — Báo giá chi tiết và in A4/PDF" \
+            --notes-file RELEASE_NOTES_V1_18_0.md
+      - name: Upload source package
+        uses: actions/upload-artifact@v4
+        with:
+          name: tan-design-v1.18.0-source
+          path: dist/tan-design-v1.18.0.zip
+          if-no-files-found: error
+          retention-days: 30
