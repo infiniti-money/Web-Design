@@ -45,6 +45,7 @@ async function start(role="admin",opts={}){
        },
        async limit(){
          reads++;
+         if(opts.throwRead && table==="customer_quotes")throw Error("connection lost");
          if(opts.failRead && table==="customer_quotes")return{data:null,error:{message:"network"}};
          return{data:rows[table],error:null};
        }
@@ -106,4 +107,18 @@ test("After data refresh failure, a successful RPC is not falsely reported as fu
  await s.get("create-quote").onclick();
  assert.equal(s.calls.length,1);
  assert.match(s.get("status").textContent,/chưa tải lại được dữ liệu/);
+});
+
+test("Network exceptions show a recoverable Vietnamese error instead of an unhandled rejection",async()=>{
+ const s=await start("admin",{throwRead:true});
+ assert.equal(s.get("app").hidden,false);
+ assert.match(s.get("status").textContent,/Không tải được dữ liệu/);
+ assert.equal(s.calls.length,0);
+});
+test("Commercial form uses responsive accessible labels and displays helpful empty-state guidance",async()=>{
+ assert.match(html,/class="page-kicker"/);
+ assert.match(html,/@media\(max-width:760px\)/);
+ assert.match(html,/input:focus-visible/);
+ assert.match(html,/Chưa có báo giá\. Hãy tạo báo giá nháp/);
+ assert.match(html,/Chưa có hợp đồng\. Cần báo giá/);
 });
