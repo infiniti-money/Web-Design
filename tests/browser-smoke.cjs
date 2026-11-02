@@ -32,7 +32,7 @@ async function main() {
     assert.equal(api.status(), 200, "Live project query must return HTTP 200");
     await desktop.locator("#project-grid article.project").first().waitFor({ timeout: 15000 });
     const projects = await desktop.locator("#project-grid article.project").count();
-    assert.equal(projects, 6, "Expected six published sample projects");
+    assert.ok(projects >= 6, "Expected at least six published projects; additional published projects are valid");
     assert.equal(await desktop.locator("#admin-live-link").isVisible(), true, "Admin link should show in live mode");
     assert.equal(await desktop.locator("#admin-toggle").isVisible(), false, "Publicly accessible demo lead panel must be hidden in live mode");
     assert.equal(await desktop.locator("#lead-form").count(), 1);
@@ -92,6 +92,14 @@ async function main() {
     assert.equal(await desktop.locator('footer a[href="mailto:infinitimoney@icloud.com"]').count(),1);
     assert.equal(await desktop.locator('#lead-form a[href="./privacy.html"]').count(),1);
     console.log("PRIVACY: published policy HTTP 200 and form link verified");
+
+    // Public commercial route should be deployed, with authentication enforced by its client.
+    const commercialResponse = await desktop.request.get(new URL("commercial.html", origin).toString());
+    assert.equal(commercialResponse.status(), 200, "Commercial v1.17 page must be published");
+    const commercialHtml = await commercialResponse.text();
+    assert.match(commercialHtml, /Báo giá và hợp đồng/);
+    assert.match(commercialHtml, /commercial_action/);
+    console.log("COMMERCIAL: published v1.17 route HTTP 200; live credentials not used");
 
     const admin = await browser.newPage({ viewport: { width: 1280, height: 850 }, locale: "vi-VN" });
     admin.on("pageerror", error => consoleErrors.push("admin: " + error.message));
