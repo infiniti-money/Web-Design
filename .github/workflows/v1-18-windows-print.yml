@@ -1,0 +1,60 @@
+name: v1.18 Windows quotation and A4 print
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'commercial.html'
+      - 'quote-detail.*'
+      - 'tests/check-quote-v1-18.cjs'
+      - 'tests/build-interactive-preview.cjs'
+      - 'tests/preview-server.cjs'
+      - '.github/workflows/v1-18-windows-print.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test quote calculations on Windows
+        shell: pwsh
+        run: node --test tests/quote-detail-v1_18.test.cjs
+      - name: Install Chromium (pinned Playwright)
+        shell: pwsh
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright@1.56.1
+          npx playwright install chromium
+      - name: Produce A4 PDF and phone viewport screenshots
+        shell: pwsh
+        run: |
+          $server = Start-Process -FilePath "node" -ArgumentList "tests/preview-server.cjs" -PassThru -NoNewWindow
+          try {
+            Start-Sleep -Seconds 3
+            node tests/build-interactive-preview.cjs
+            if ($LASTEXITCODE -ne 0) { throw "Build preview failed" }
+            node tests/check-quote-v1-18.cjs
+            if ($LASTEXITCODE -ne 0) { throw "Windows Chromium print test failed" }
+          } finally {
+            Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+          }
+      - name: Upload Windows A4 examples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tan-design-v1-18-windows-a4
+          path: |
+            preview-v1-17/v1-18-quote-a4.pdf
+            preview-v1-17/v1-18-quote-mobile-A4.pdf
+            preview-v1-17/v1-18-editor-desktop.png
+            preview-v1-17/v1-18-editor-mobile-390.png
+            preview-v1-17/v1-18-quote-report.json
+          if-no-files-found: warn
+          retention-days: 14
