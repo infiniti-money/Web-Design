@@ -22,9 +22,10 @@
 @media(max-width:580px){.tan-modal-backdrop{padding:0}.tan-modal{min-height:100vh;border-radius:0;padding:16px}.tan-detail-row{padding:12px;gap:8px}.tan-cost-summary{grid-template-columns:1fr}.tan-modal-header{align-items:flex-start}.tan-modal-header h2{font-size:1.16rem}}
 @page{size:A4 portrait;margin:12mm}
 @media print{
- html,body{margin:0!important;background:white!important;color:#1d2820!important}
+ html,body{margin:0!important;min-height:0!important;background:white!important;color:#1d2820!important}
+ body>*:not(.tan-print-sheet){display:none!important}
  body>main,body>.tan-modal-backdrop{display:none!important}
- body>.tan-print-sheet{display:block!important;max-width:210mm;min-height:267mm;margin:0 auto;padding:0;font:11pt/1.45 "Segoe UI",Arial,sans-serif;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ body>.tan-print-sheet{display:block!important;max-width:210mm;min-height:0;margin:0 auto;padding:0;font:11pt/1.45 "Segoe UI",Arial,sans-serif;print-color-adjust:exact;-webkit-print-color-adjust:exact}
  .tan-print-head{display:flex;justify-content:space-between;align-items:flex-start;padding:0 0 12mm;border-bottom:2px solid #365b44}
  .tan-print-brand{font-size:22pt;font-weight:800;letter-spacing:.08em;color:#315740}
  .tan-print-contact{text-align:right;font-size:9pt}
