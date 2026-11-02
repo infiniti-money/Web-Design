@@ -19,6 +19,14 @@
 - Kiểm tra Quản lý tạo báo giá, giữ lựa chọn khách hàng sau tải lại; ngăn thao tác trùng; hợp đồng dùng mã phiên bản đã duyệt; xử lý đúng khi RPC lưu thành công nhưng tải lại thất bại.
 - Đây là kiểm thử mô phỏng phía trình duyệt, **không** phải thử đăng nhập thật hay thử giao diện trực quan trên điện thoại.
 
+## Bản xem trước đã tạo (02/11/2026)
+- GitHub Actions đã chạy [Preview v1.17](https://github.com/infiniti-money/Web-Design/actions/runs/41365896771) trên runner `ubuntu-24.04`, với Chromium và Supabase giả lập.
+- Tải bộ ảnh: [tan-design-v1-17-preview](https://github.com/infiniti-money/Web-Design/actions/runs/41365896771/artifacts/13107435442), gồm 4 ảnh PNG, README và report.json.
+- Viewport được kiểm tra: Admin desktop 1440x900, Admin mobile 390x844, Manager desktop 1280x800, Employee mobile 390x844. Không phát hiện lỗi JS hoặc tràn ngang; Nhân viên bị chặn đúng trong mô phỏng.
+- **Giới hạn:** Chưa kiểm tra bằng phiên đăng nhập thực; ảnh và phản hồi đều là dữ liệu mô phỏng, không được dùng làm bằng chứng vận hành production.
+- Supabase đang có 2 tài khoản Auth (Admin và Quản lý), **0 tài khoản Nhân viên**. Mời một địa chỉ email Nhân viên hợp lệ bằng màn hình quản trị (không tạo user giả qua SQL), xác minh thư mời rồi kiểm tra đăng nhập thực.
+- Chưa phát hành v1.17 hoặc gộp PR #15 vì còn thiếu UAT qua trình duyệt với tài khoản thật.
+
 ## Cần hoàn thành trước khi gộp/phát hành
 - [ ] Đăng nhập bằng tài khoản Admin thực, tạo và duyệt/từ chối báo giá thử; kiểm tra nhật ký và mã phiên bản.
 - [ ] Đăng nhập bằng tài khoản Quản lý thực, tạo/sửa/trình báo giá; xác nhận không thể duyệt hoặc ký.
