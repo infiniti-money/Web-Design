@@ -1,0 +1,47 @@
+/* Tân Design v1.18: detailed quotation editor and print A4 */
+.tan-modal-backdrop{position:fixed;inset:0;z-index:1500;display:flex;justify-content:center;align-items:flex-start;padding:18px;background:rgba(15,35,23,.72);overflow:auto}
+.tan-modal{width:min(1020px,100%);background:#fff;border-radius:18px;padding:24px;box-shadow:0 25px 70px #0004;color:#27372e}
+.tan-modal-header{display:flex;gap:15px;justify-content:space-between;align-items:center}
+.tan-modal-header h2{margin:0;font-size:1.45rem}
+.tan-modal .tan-hint{color:#66776b}
+.tan-modal .tan-quiet{background:#f2f5f0;color:#284d37;border-color:#d1dfd2}
+.tan-modal .tan-secondary{background:#e4f0e8;color:#225138;border-color:#b9d1c0}
+.tan-detail-row{display:grid;grid-template-columns:1fr 2fr .65fr .9fr 1.2fr auto;align-items:end;gap:9px;margin:12px 0;padding:16px;border:1px solid #dbe6dc;background:#fafdfb;border-radius:12px}
+.tan-detail-row .detail-field{min-width:0;display:block;font-size:12px;margin:0}
+.tan-detail-row .detail-field span{display:block;margin-bottom:4px}
+.tan-detail-row .detail-field input{min-width:0;width:100%;margin:0;padding:8px}
+.tan-detail-row .tan-remove{background:#fff0ec;color:#852b19;border-color:#f5bfb1;margin:0}
+.tan-cost-summary{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.tan-cost-summary .detail-field{margin:0}
+.tan-cost-summary .detail-field input,.tan-cost-summary .detail-field select{width:100%}
+.tan-grand-total{grid-column:1 / -1;font-size:1.12rem;font-weight:750;padding:14px;background:#e7f3e9;border-radius:9px;margin:0}
+.tan-validation{grid-column:1/-1;color:#ab3421;margin:0}
+.tan-modal-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:12px}
+.tan-print-sheet{display:none;background:#fff;color:#202b24}
+@media(max-width:900px){.tan-detail-row{grid-template-columns:repeat(2,minmax(0,1fr))}.tan-detail-row .detail-field:nth-child(2){grid-column:1/-1}.tan-detail-row .tan-remove{justify-self:start}}
+@media(max-width:580px){.tan-modal-backdrop{padding:0}.tan-modal{min-height:100vh;border-radius:0;padding:16px}.tan-detail-row{padding:12px;gap:8px}.tan-cost-summary{grid-template-columns:1fr}.tan-modal-header{align-items:flex-start}.tan-modal-header h2{font-size:1.16rem}}
+@page{size:A4 portrait;margin:12mm}
+@media print{
+ html,body{margin:0!important;background:white!important;color:#1d2820!important}
+ body>main,body>.tan-modal-backdrop{display:none!important}
+ body>.tan-print-sheet{display:block!important;max-width:210mm;min-height:267mm;margin:0 auto;padding:0;font:11pt/1.45 "Segoe UI",Arial,sans-serif;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ .tan-print-head{display:flex;justify-content:space-between;align-items:flex-start;padding:0 0 12mm;border-bottom:2px solid #365b44}
+ .tan-print-brand{font-size:22pt;font-weight:800;letter-spacing:.08em;color:#315740}
+ .tan-print-contact{text-align:right;font-size:9pt}
+ .tan-print-title{text-align:center;font-size:19pt;margin:11mm 0 2mm}
+ .tan-print-state{text-align:center;font-size:9pt;font-weight:700;color:#675d4a;border:1px solid #d0c9bd;padding:2mm 4mm;width:max-content;margin:0 auto 9mm}
+ .tan-print-meta{display:grid;grid-template-columns:1fr 1fr;gap:2mm 8mm;margin-bottom:7mm}
+ .tan-print-pair{display:flex;justify-content:space-between;gap:8px;break-inside:avoid}
+ .tan-print-pair span{color:#58685d}
+ .tan-print-table{border-collapse:collapse;width:100%;margin:6mm 0 4mm}
+ .tan-print-table th,.tan-print-table td{border:1px solid #8a9b90;padding:2.2mm;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+ .tan-print-table th{background:#edf2ed;font-size:9pt}
+ .tan-print-table td:nth-child(1),.tan-print-table td:nth-child(4),.tan-print-table td:nth-child(5),.tan-print-table td:nth-child(6){text-align:right}
+ .tan-print-table td:nth-child(2){min-width:60mm}
+ .tan-print-table thead{display:table-header-group}
+ .tan-print-table tr{break-inside:avoid}
+ .tan-print-totals{width:82mm;margin:0 0 0 auto;display:grid;gap:2mm}
+ .tan-print-totals .tan-final{font-size:12pt;border-top:2px solid #365b44;padding-top:2mm}
+ .tan-print-note{font-size:9pt;margin-top:12mm;color:#57695d}
+ .tan-print-sign{white-space:pre-wrap;text-align:center;margin-top:16mm}
+}
