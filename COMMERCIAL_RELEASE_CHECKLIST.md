@@ -27,6 +27,14 @@
 - Supabase đang có 2 tài khoản Auth (Admin và Quản lý), **0 tài khoản Nhân viên**. Mời một địa chỉ email Nhân viên hợp lệ bằng màn hình quản trị (không tạo user giả qua SQL), xác minh thư mời rồi kiểm tra đăng nhập thực.
 - Chưa phát hành v1.17 hoặc gộp PR #15 vì còn thiếu UAT qua trình duyệt với tài khoản thật.
 
+## Bản demo ngoại tuyến có thể thao tác (02/11/2026)
+- Artifact mới: [Tải ZIP demo v1.17](https://github.com/infiniti-money/Web-Design/actions/runs/41369258618/artifacts/13108531370).
+- Trong ZIP, mở `interactive-demo.html` từ máy tính hoặc điện thoại; bản dựng chỉ sử dụng dữ liệu và tài khoản mô phỏng trong bộ nhớ, không tải SDK Supabase và không gọi dịch vụ ngoài.
+- Chromium đã chạy kiểm thử thực tế trên bản demo: tạo báo giá, Admin duyệt và gửi, ghi nhận khách chấp nhận, tạo hợp đồng bằng phiên bản được duyệt, trình xem xét và ghi nhận ký.
+- CI kiểm tra mã: [Validate ATELIER HOME](https://github.com/infiniti-money/Web-Design/actions/runs/41369258634) thành công.
+- CI kiểm thử preview: [Preview v1.17](https://github.com/infiniti-money/Web-Design/actions/runs/41369258618) thành công; ZIP có ảnh chụp các viewport và ảnh sau quy trình demo.
+- Demo không phải chữ ký số, không tạo hợp đồng thật, không phải kết quả đăng nhập tài khoản thực.
+
 ## Cần hoàn thành trước khi gộp/phát hành
 - [ ] Đăng nhập bằng tài khoản Admin thực, tạo và duyệt/từ chối báo giá thử; kiểm tra nhật ký và mã phiên bản.
 - [ ] Đăng nhập bằng tài khoản Quản lý thực, tạo/sửa/trình báo giá; xác nhận không thể duyệt hoặc ký.
