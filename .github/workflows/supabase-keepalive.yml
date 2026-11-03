@@ -1,0 +1,93 @@
+name: Keep Supabase active (every 2 days)
+
+on:
+  # Runs daily at 03:23 UTC (10:23 in Viet Nam); the gate below
+  # performs a database read on alternating UTC days, including month boundaries.
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/supabase-keepalive.yml"
+      - "app-config.js"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: false
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Decide whether to ping
+        id: gate
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          utc_day=$(( $(date -u +%s) / 86400 ))
+          if [[ "$EVENT_NAME" != "schedule" ]] || (( utc_day % 2 == 0 )); then
+            echo "run_ping=true" >> "$GITHUB_OUTPUT"
+            echo "Database read enabled (UTC day $utc_day)"
+          else
+            echo "run_ping=false" >> "$GITHUB_OUTPUT"
+            echo "Skip today; scheduled database read occurs every other UTC day"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.run_ping == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.run_ping == 'true'
+        with:
+          node-version: "22"
+
+      - name: Read public Supabase projects (no database writes)
+        if: steps.gate.outputs.run_ping == 'true'
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const vm = require("node:vm");
+
+          // Use only the already-public browser-safe configuration.
+          // Never use service_role, sb_secret_, user credentials, or database passwords.
+          const sandbox = { window: {} };
+          vm.runInNewContext(
+            fs.readFileSync("app-config.js", "utf8"),
+            sandbox,
+            { filename: "app-config.js" }
+          );
+          const { supabaseUrl, supabasePublishableKey } = sandbox.window.ATELIER_CONFIG;
+          if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(supabaseUrl) ||
+              !/^sb_publishable_[a-zA-Z0-9_-]+$/.test(supabasePublishableKey)) {
+            throw new Error("Invalid public Supabase configuration");
+          }
+
+          (async () => {
+            const url = supabaseUrl + "/rest/v1/projects?select=slug&published=eq.true&limit=1";
+            const response = await fetch(url, {
+              headers: {
+                apikey: supabasePublishableKey,
+                Accept: "application/json"
+              },
+              signal: AbortSignal.timeout(20000)
+            });
+            if (!response.ok) {
+              throw new Error("Supabase REST read failed with HTTP " + response.status);
+            }
+            const rows = await response.json();
+            if (!Array.isArray(rows)) {
+              throw new Error("Unexpected Supabase REST response");
+            }
+            console.log("Supabase read successful: HTTP " + response.status +
+              ", public rows returned: " + rows.length);
+          })().catch((error) => {
+            console.error(error.message);
+            process.exitCode = 1;
+          });
+          NODE
