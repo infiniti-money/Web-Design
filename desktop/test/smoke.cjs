@@ -6,6 +6,8 @@ const {_electron}=require("playwright"),assert=require("node:assert/strict"),fs=
   const app=await _electron.launch({...(process.env.ATELIER_EXECUTABLE?{executablePath:process.env.ATELIER_EXECUTABLE,args:[]}:{args:[path.resolve(__dirname,"..")]}),env,timeout:45000});
   try{
     const page=await app.firstWindow();const errors=[];page.on("pageerror",e=>errors.push(e.message));
+    // Hidden Windows renderers may stop producing compositor frames for screenshots.
+    await app.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];window.webContents.setBackgroundThrottling(false);window.show();});
     await page.locator("#login-panel:not(.hide)").waitFor({timeout:20000});
     assert.equal(await page.evaluate(()=>typeof require),"undefined");
     const preferences=await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.getLastWebPreferences());
@@ -20,7 +22,6 @@ const {_electron}=require("playwright"),assert=require("node:assert/strict"),fs=
     assert.equal(await page.evaluate(()=>fetch("atelier://app/main.cjs").then(response=>response.status)),404);
     const update=await page.evaluate(()=>window.atelierDesktop.getUpdateState());assert.equal(update.status,"unavailable");
     await page.screenshot({path:path.join(output,"desktop-login.png")});
-    await app.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];window.webContents.setBackgroundThrottling(false);window.show();});
     await page.goto("atelier://app/commercial.html");
     await page.waitForFunction(()=>!!window.AtelierQuoteEditor);
     await page.evaluate(()=>window.AtelierQuoteEditor.preview({quote:{title:"BÁO GIÁ KIỂM THỬ PDF",status:"draft"},customer:{full_name:"Dữ liệu kiểm thử"},version:{version_no:1,total_amount:25000,content:{schema_version:1,items:[{description:"Hạng mục kiểm thử",unit:"gói",quantity:2.5,unit_price:10000,amount:25000}],subtotal:25000,discount:0,tax_amount:0,total:25000}}}));

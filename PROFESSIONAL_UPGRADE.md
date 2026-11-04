@@ -20,6 +20,8 @@ Trang tổng quan không tải trước trang CRM 25 hồ sơ hoặc danh bạ n
 - Bộ đếm giả lập xác nhận mở tổng quan không tải trang CRM/danh bạ; kích hoạt Nhân sự liên tiếp chỉ tải danh bạ một lần.
 - CMS/quotes smoke đạt: quyền, lịch sử, chống ghi đè, phản hồi chậm, làm sạch Markdown và tổng tiền/PDF preview. Dữ liệu nghiệp vụ kiểm thử trình duyệt là giả lập, không ghi khách hàng thật.
 - Kiểm tra artifact Pages xác nhận các route và tài nguyên cần thiết tồn tại; không chứa desktop, SQL, tests, cấu hình Cloudflare hay thư mục Git.
+- Ngày 05/11/2026, triển khai Pages đầu tiên thành công ở commit `3e2df92588c7f95da0408a9ca441504bcaea3012`; `release.json` đã khớp. Hai bộ browser smoke cũng chạy đạt trực tiếp trên URL GitHub Pages sau triển khai, dữ liệu ghi vẫn được giả lập.
+- Executable Windows 1.1.0 đóng gói local chạy đạt kiểm tra sandbox, mã hóa phiên đăng nhập và xuất PDF native. Harness hiển thị cửa sổ trước khi chụp ảnh để tránh compositor Windows ngừng tạo frame cho cửa sổ ẩn.
 
 ## Triển khai và xác minh
 
