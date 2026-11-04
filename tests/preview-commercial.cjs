@@ -55,7 +55,7 @@ async function render(browser,name,width,height,role){
   const result=[];
   for(const [name,w,h,role] of [["desktop-admin-1440",1440,900,"admin"],["mobile-admin-390",390,844,"admin"],["desktop-manager-1280",1280,800,"manager"],["mobile-employee-denied-390",390,844,"employee"]])result.push(await render(browser,name,w,h,role));
   fs.writeFileSync(path.join(target,"report.json"),JSON.stringify({previewOnly:true,productionWrites:false,results:result},null,2));
-  fs.writeFileSync(path.join(target,"README.md"),"# Tân Design v1.17 - bản xem trước\n\nẢnh chụp Chromium với dữ liệu mô phỏng. Không đăng nhập thực và không ghi Supabase.\n\n"+result.map(x=>"- "+x.name+": "+x.screenshot).join("\n")+"\n");
+  fs.writeFileSync(path.join(target,"README.md"),"# ATELIER HOME v1.17 - bản xem trước\n\nẢnh chụp Chromium với dữ liệu mô phỏng. Không đăng nhập thực và không ghi Supabase.\n\n"+result.map(x=>"- "+x.name+": "+x.screenshot).join("\n")+"\n");
   console.log(result);
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

@@ -1,0 +1,13 @@
+{
+  "name": "ATELIER HOME",
+  "baseUrl": "https://infiniti-money.github.io/Web-Design/",
+  "publicPages": [
+    { "path": "", "changefreq": "monthly", "priority": "1.0" },
+    { "path": "dich-vu/", "changefreq": "monthly", "priority": "0.8" },
+    { "path": "dich-vu/thiet-ke-noi-that.html", "changefreq": "monthly", "priority": "0.7" },
+    { "path": "dich-vu/thi-cong-noi-that.html", "changefreq": "monthly", "priority": "0.7" },
+    { "path": "dich-vu/tu-van-trang-tri.html", "changefreq": "monthly", "priority": "0.7" },
+    { "path": "catalog.html", "changefreq": "monthly", "priority": "0.7" },
+    { "path": "privacy.html", "changefreq": "yearly", "priority": "0.2" }
+  ]
+}

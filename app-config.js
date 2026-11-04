@@ -6,3 +6,6 @@ window.ATELIER_CONFIG = Object.freeze({
   turnstileSiteKey: "0x4AAAAAAFtlcp2BEQh46Xxl", // Fill only after TURNSTILE_SECRET_KEY is saved securely in Supabase
   supabasePublishableKey: "sb_publishable_TFmKoVDw4iGgvozkAHsPqw_wLOZtzbX"
 });
+
+// Desktop sessions are stored by Windows-protected encrypted storage in the main process.
+window.ATELIER_CLIENT_OPTIONS = window.atelierDesktop ? { auth: { storage: window.atelierDesktop.authStorage, storageKey: "atelier-home-auth", persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } } : {};

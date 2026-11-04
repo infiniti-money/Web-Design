@@ -1,0 +1,25 @@
+{
+  "slug": "dien-slug-cong-trinh",
+  "title": "",
+  "summary": "",
+  "category": "apartment",
+  "area": "",
+  "style": "",
+  "location": "",
+  "published": false,
+  "realProjectConfirmed": false,
+  "cover": {
+    "src": "assets/projects/dien-slug-cong-trinh/cover.webp",
+    "alt": "",
+    "width": 1600,
+    "height": 1000,
+    "credit": "",
+    "rightsConfirmed": false
+  },
+  "sections": [
+    { "heading": "Nhu cầu ban đầu", "paragraphs": [""] },
+    { "heading": "Giải pháp thiết kế", "paragraphs": [""] },
+    { "heading": "Vật liệu và kết quả", "paragraphs": [""] }
+  ],
+  "gallery": []
+}

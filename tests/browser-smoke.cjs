@@ -12,7 +12,7 @@ const out = process.env.SCREENSHOT_DIR || "screenshots";
 fs.mkdirSync(out, { recursive: true });
 
 async function main() {
-  const browser = await chromium.launch({ headless: true, args: ["--no-sandbox"] });
+  const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || undefined, args: ["--no-sandbox"] });
   const consoleErrors = [];
   try {
     const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 }, locale: "vi-VN" });
@@ -28,11 +28,15 @@ async function main() {
     );
     const response = await desktop.goto(origin, { waitUntil: "domcontentloaded", timeout: 45000 });
     assert.equal(response?.status(), 200, "GitHub Pages must return HTTP 200 for homepage");
+    // Public project loading is deferred until this section approaches the viewport.
+    await desktop.locator("#projects").scrollIntoViewIfNeeded();
     const api = await projectsResponse;
     assert.equal(api.status(), 200, "Live project query must return HTTP 200");
-    await desktop.locator("#project-grid article.project").first().waitFor({ timeout: 15000 });
+    const apiRows = await api.json();
+    assert.ok(Array.isArray(apiRows));
+    await desktop.waitForFunction(expected => document.querySelectorAll("#project-grid article.project").length === expected, apiRows.length);
     const projects = await desktop.locator("#project-grid article.project").count();
-    assert.ok(projects >= 6, "Expected at least six published projects; additional published projects are valid");
+    assert.equal(projects, apiRows.length, "Public cards must match the published API rows");
     assert.equal(await desktop.locator("#admin-live-link").isVisible(), true, "Admin link should show in live mode");
     assert.equal(await desktop.locator("#admin-toggle").isVisible(), false, "Publicly accessible demo lead panel must be hidden in live mode");
     assert.equal(await desktop.locator("#lead-form").count(), 1);
@@ -40,15 +44,17 @@ async function main() {
     console.log("HOME: HTTP", response.status(), "| Supabase API", api.status(), "| projects", projects);
 
     // Verify category filter and keyboard modal interactions.
-    const apartment = desktop.locator('.filter[data-filter="apartment"]');
-    await apartment.click();
-    const filtered = await desktop.locator("#project-grid article.project").count();
-    assert.ok(filtered >= 1 && filtered < projects, "Apartment filter should narrow the results");
-    await desktop.locator("#project-grid article.project").first().press("Enter");
-    assert.equal(await desktop.locator("#project-modal").getAttribute("aria-hidden"), "false");
-    await desktop.keyboard.press("Escape");
-    assert.equal(await desktop.locator("#project-modal").getAttribute("aria-hidden"), "true");
-    console.log("INTERACTION: category filter and modal keyboard controls passed");
+    if (apiRows.length) {
+      const category = apiRows[0].category;
+      await desktop.locator(`.filter[data-filter="${category}"]`).click();
+      const filtered = await desktop.locator("#project-grid article.project").count();
+      assert.equal(filtered, apiRows.filter(row => row.category === category).length);
+      await desktop.locator("#project-grid article.project").first().press("Enter");
+      assert.equal(await desktop.locator("#project-modal").getAttribute("aria-hidden"), "false");
+      await desktop.keyboard.press("Escape");
+      assert.equal(await desktop.locator("#project-modal").getAttribute("aria-hidden"), "true");
+      console.log("INTERACTION: category filter and modal keyboard controls passed");
+    }
 
     // Exercise the real consultation form without storing synthetic customer PII.
     // Block all legacy client-side INSERTs, even when Pages serves a stale build.
@@ -85,7 +91,7 @@ async function main() {
     assert.equal(privacyResponse.status(),200,"Privacy page must be accessible");
     const privacyHtml = await privacyResponse.text();
     assert.match(privacyHtml, /Chính sách quyền riêng tư/);
-    assert.match(privacyHtml, /Tân Design/);
+    assert.match(privacyHtml, /ATELIER HOME/);
     assert.match(privacyHtml, /Tân Phú, Việt Yên, Hưng Yên/);
     assert.match(privacyHtml, /infinitimoney@icloud\.com/);
     assert.match(privacyHtml, /12 tháng kể từ lần liên hệ cuối cùng/);
@@ -115,6 +121,7 @@ async function main() {
     await adminCRUD.route("**/cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0",route=>
       route.fulfill({status:200,contentType:"application/javascript",body:`
 window.supabase={createClient:()=>{
+ window.__ci_queries=[];
  let records=[];
  let careNotes=[];
  let noteRevisions=[];
@@ -232,7 +239,7 @@ window.supabase={createClient:()=>{
        },
        lte(key,value){q.conditions.push(row=>row[key] && row[key]<=value);return q},
        or(expression){const match=/full_name\.ilike\.%([^%]*)%/.exec(expression);q.term=(match?.[1]||"").toLowerCase();return q},
-       range(start,end){const items=q.filtered();return Promise.resolve({data:items.slice(start,end+1),count:q.countRequested?items.length:null,error:null})},
+       range(start,end){window.__ci_queries.push({table,start,end});const items=q.filtered();return Promise.resolve({data:items.slice(start,end+1),count:q.countRequested?items.length:null,error:null})},
        single(){const item=q.filtered()[0];return Promise.resolve({data:item||null,error:item?null:{message:"No matching row"}})},
        then(ok,fail){const items=q.filtered();return Promise.resolve({data:q.head?null:items,count:q.countRequested?items.length:null,error:null}).then(ok,fail)},
        insert(value){
@@ -288,8 +295,26 @@ window.supabase={createClient:()=>{
 }};`}));
     await adminCRUD.goto(new URL("admin.html",origin).toString(),{waitUntil:"domcontentloaded",timeout:45000});
     await adminCRUD.locator("#dashboard:not(.hide)").waitFor({timeout:15000});
+    await adminCRUD.waitForFunction(()=>document.querySelector("#metric-projects").textContent!=="–");
+    assert.equal(await adminCRUD.evaluate(()=>window.__ci_queries.filter(q=>q.table==="inquiries"&&q.end===24).length),0,"Opening overview must defer the CRM page query");
+    assert.equal(await adminCRUD.evaluate(()=>window.__ci_queries.filter(q=>q.table==="staff_profiles").length),0,"Opening overview must defer the staff directory");
+    await adminCRUD.keyboard.press("Control+k");
+    await adminCRUD.getByRole("searchbox",{name:"Tìm chức năng"}).fill("nhan vien");
+    await adminCRUD.getByRole("searchbox",{name:"Tìm chức năng"}).press("Enter");
+    await adminCRUD.locator("#staff-table").getByText("Nhân viên A").waitFor();
     await adminCRUD.locator("#tab-staff").click();
     await adminCRUD.locator("#staff-table").getByText("Nhân viên A").waitFor();
+    assert.equal(await adminCRUD.evaluate(()=>window.__ci_queries.filter(q=>q.table==="staff_profiles").length),1,"Repeated tab activation must reuse the recent directory load");
+    await adminCRUD.getByRole("button",{name:"Thu gọn / mở rộng menu"}).click();
+    assert.equal(await adminCRUD.locator("body").evaluate(body=>body.classList.contains("workspace-collapsed")),true);
+    await adminCRUD.getByRole("button",{name:"Thu gọn / mở rộng menu"}).click();
+    await adminCRUD.getByRole("button",{name:"Ứng dụng",exact:true}).click();
+    await adminCRUD.getByRole("button",{name:"Mật độ: Thoáng"}).click();
+    assert.equal(await adminCRUD.locator("body").evaluate(body=>body.classList.contains("workspace-compact")),true);
+    await adminCRUD.getByRole("button",{name:"Mật độ: Gọn"}).click();
+    await adminCRUD.keyboard.press("Escape");
+    await adminCRUD.locator("#tab-overview").click();
+    await adminCRUD.screenshot({path:out+"/atelier-professional-overview.png",fullPage:true});
     await adminCRUD.locator("#tab-projects").click();
     await adminCRUD.waitForFunction(()=>document.querySelector("#priority-task-overdue")?.textContent==="0");
     assert.equal(await adminCRUD.locator("#priority-lead-soon").innerText(),"0");
@@ -298,6 +323,14 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#p-image").fill("https://example.com/test.jpg");
     await adminCRUD.locator("#project-save").click();
     await adminCRUD.locator("#projects-table").getByText("Thử nghiệm giao diện").waitFor();
+    await adminCRUD.locator("#project-search").fill("khong khop");
+    await adminCRUD.locator("#projects-table").getByText("Không có dự án phù hợp bộ lọc.").waitFor();
+    await adminCRUD.locator("#project-search").fill("thu nghiem");
+    await adminCRUD.locator("#projects-table").getByText("Thử nghiệm giao diện").waitFor();
+    await adminCRUD.locator("#project-visibility").selectOption("published");
+    await adminCRUD.locator("#projects-table").getByText("Không có dự án phù hợp bộ lọc.").waitFor();
+    await adminCRUD.locator("#project-visibility").selectOption("all");
+    await adminCRUD.locator("#project-search").fill("");
     await adminCRUD.locator("#projects-table button").getByText("Sửa").click();
     await adminCRUD.locator("#p-title").fill("Đã chỉnh sửa dự án");
     await adminCRUD.locator("#project-save").click();
@@ -362,6 +395,7 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#care-task-events").getByText("Chuyển tiến độ").waitFor();
     await adminCRUD.locator("#profile-close").click();
     assert.equal(await adminCRUD.locator("#lead-profile").isVisible(),false);
+    await adminCRUD.locator("#tab-overview").click();
     await adminCRUD.locator("#priority-task-soon-open").click();
     assert.equal(await adminCRUD.locator("#tasks-due-filter").inputValue(),"7");
     await adminCRUD.locator("#tasks-board-table").getByText("Gửi báo giá nội thất cập nhật").waitFor();
@@ -428,7 +462,7 @@ window.supabase={createClient:()=>{
     const downloadReady=adminCRUD.waitForEvent("download");
     await adminCRUD.locator("#lead-export-csv").click();
     const exported=await downloadReady;
-    assert.match(exported.suggestedFilename(),/tan-design-khach-hang-trang-1\.csv/);
+    assert.match(exported.suggestedFilename(),/atelier-home-khach-hang-trang-1\.csv/);
     const bytes=fs.readFileSync(await exported.path());
     assert.equal(bytes.subarray(0,3).toString("hex"),"efbbbf","CSV must include Excel UTF-8 BOM");
     assert.match(bytes.toString("utf8"),/KHÁCH KIỂM THỬ GIẢ/);
@@ -475,6 +509,7 @@ window.supabase={createClient:()=>{
       return route.fulfill({status:201,contentType:"application/json",body:'{"ok":true}'});
     });
     await turnstileTest.goto(origin,{waitUntil:"domcontentloaded",timeout:45000});
+    await turnstileTest.locator("#lead-form").scrollIntoViewIfNeeded();
     await turnstileTest.locator("#lead-form [type=submit]:not([disabled])").waitFor({timeout:20000});
     assert.equal(await turnstileTest.locator("#turnstile-container").evaluate(el => !el.hidden),true);
     await turnstileTest.locator("#full-name").fill("Người kiểm thử");
@@ -488,16 +523,26 @@ window.supabase={createClient:()=>{
     assert.equal(sentWithChallenge[0].privacy_consent,true);
     console.log("TURNSTILE: simulated challenge token sent through protected API");
 
-    // If the CDN fails on a LIVE site, never silently save a local demo lead.
+    // A failed inquiry API request must never become a successful local demo lead.
     const disconnected = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    await disconnected.route("**/cdn.jsdelivr.net/npm/@supabase/**", route => route.abort());
+    await disconnected.route("**/challenges.cloudflare.com/turnstile/v0/api.js**", route =>
+      route.fulfill({status:200,contentType:"application/javascript",body:
+        'window.turnstile={render:function(el,opts){opts.callback("outage-test-token");return "widget";},reset:function(){}};'}));
+    await disconnected.route("**/functions/v1/submit-inquiry", route => route.abort());
     await disconnected.goto(origin, { waitUntil: "domcontentloaded", timeout: 45000 });
-    await disconnected.locator("#form-feedback").getByText("Kết nối tạm gián đoạn").waitFor({ timeout: 15000 });
-    assert.equal(await disconnected.locator("#lead-form [type=submit]").isDisabled(), true,
-      "Production form must be disabled if Supabase SDK fails");
+    await disconnected.locator("#full-name").fill("Người kiểm thử mất kết nối");
+    await disconnected.locator("#phone").fill("0900000000");
+    await disconnected.locator("#service").selectOption({label:"Thiết kế nội thất"});
+    await disconnected.locator("#consent").check();
+    await disconnected.locator("#lead-form [type=submit]:not([disabled])").waitFor({timeout:15000});
+    const localBefore = await disconnected.evaluate(() => localStorage.getItem("atelier-home-demo-leads-v1"));
+    await disconnected.locator("#lead-form [type=submit]").click();
+    await disconnected.locator("#form-feedback").getByText("Gửi yêu cầu chưa thành công.", {exact:false}).waitFor({timeout:15000});
+    assert.equal(await disconnected.evaluate(() => localStorage.getItem("atelier-home-demo-leads-v1")), localBefore);
+    assert.equal(await disconnected.locator("#full-name").inputValue(), "Người kiểm thử mất kết nối");
     assert.equal(await disconnected.locator("#admin-toggle").isVisible(), false,
       "Demo leads panel must stay hidden in configured production");
-    console.log("OUTAGE: consultation submission safely disabled (no silent demo fallback)");
+    console.log("OUTAGE: failed inquiry retained for retry; no local demo write or false success");
 
     assert.deepEqual(consoleErrors, [], "Browser JavaScript exceptions: " + consoleErrors.join("; "));
     console.log("Browser smoke tests passed.");

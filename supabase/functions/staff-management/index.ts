@@ -3,6 +3,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.118.0";
 
 const siteOrigin="https://infiniti-money.github.io";
+const allowedOrigins=new Set([siteOrigin,"atelier://app"]);
 const corsHeaders={
   "Access-Control-Allow-Origin":siteOrigin,
   "Access-Control-Allow-Headers":"authorization,apikey,content-type,x-client-info",
@@ -10,16 +11,17 @@ const corsHeaders={
   "Vary":"Origin",
   "Content-Type":"application/json;charset=utf-8"
 };
-const reply=(status:number,data:unknown)=>new Response(JSON.stringify(data),{status,headers:corsHeaders});
 const roles=new Set(["admin","manager","employee"]);
 const emailPattern=/^[^\s@]{1,100}@[^\s@]{1,160}\.[^\s@]{2,30}$/;
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 Deno.serve(async(req:Request)=>{
-  if(req.method==="OPTIONS")return new Response(null,{status:204,headers:corsHeaders});
-  if(req.method!=="POST")return reply(405,{error:"METHOD_NOT_ALLOWED"});
   const origin=req.headers.get("origin");
-  if(origin && origin!==siteOrigin)return reply(403,{error:"INVALID_ORIGIN"});
+  const responseHeaders={...corsHeaders,"Access-Control-Allow-Origin":origin&&allowedOrigins.has(origin)?origin:siteOrigin};
+  const reply=(status:number,data:unknown)=>new Response(JSON.stringify(data),{status,headers:responseHeaders});
+  if(origin && !allowedOrigins.has(origin))return reply(403,{error:"INVALID_ORIGIN"});
+  if(req.method==="OPTIONS")return new Response(null,{status:204,headers:responseHeaders});
+  if(req.method!=="POST")return reply(405,{error:"METHOD_NOT_ALLOWED"});
   const auth=req.headers.get("authorization")||"";
   const token=auth.match(/^Bearer\s+(.+)$/i)?.[1];
   if(!token)return reply(401,{error:"AUTH_REQUIRED"});

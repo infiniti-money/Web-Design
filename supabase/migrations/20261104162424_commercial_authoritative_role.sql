@@ -1,0 +1,68 @@
+-- Replace only the role lookup in the current live commercial_action definition.
+-- Authoritative Auth metadata + active staff profile invalidate stale JWT role claims.
+CREATE OR REPLACE FUNCTION public.commercial_action(p_kind text, p_action text, p_id uuid DEFAULT NULL::uuid, p_inquiry uuid DEFAULT NULL::uuid, p_title text DEFAULT NULL::text, p_amount numeric DEFAULT NULL::numeric, p_content jsonb DEFAULT NULL::jsonb)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare v_role text;v_id uuid;v_status text;v_inquiry uuid;v_quote uuid;v_n integer;
+begin
+ v_role := private.current_staff_role();
+ if v_role is null or v_role not in ('admin','manager') then raise exception 'FORBIDDEN' using errcode='42501';end if;
+ if p_kind not in ('quote','contract') then raise exception 'INVALID_KIND';end if;
+ if p_kind='quote' then
+  if p_action='create' then
+   if p_inquiry is null or length(trim(coalesce(p_title,''))) not between 3 and 180 then raise exception 'INVALID_QUOTE';end if;
+   insert into public.customer_quotes(inquiry_id,title,created_by) values(p_inquiry,trim(p_title),auth.uid()) returning id into v_id;
+  elsif p_action='revise' then
+   select status into v_status from public.customer_quotes where id=p_id for update;
+   if v_status not in ('draft','rejected') then raise exception 'REVISION_NOT_ALLOWED';end if;
+   if p_amount is null or p_amount<0 or p_content is null or jsonb_typeof(p_content)<>'object' then raise exception 'INVALID_VERSION';end if;
+   select coalesce(max(version_no),0)+1 into v_n from public.customer_quote_versions where quote_id=p_id;
+   insert into public.customer_quote_versions(quote_id,version_no,total_amount,content,created_by) values(p_id,v_n,p_amount,p_content,auth.uid());
+   v_id:=p_id;
+  else
+   select status into v_status from public.customer_quotes where id=p_id for update;
+   if v_status is null then raise exception 'QUOTE_NOT_FOUND';end if;
+   if p_action='reject' and (p_content is null or length(btrim(coalesce(p_content->>'reason',''))) not between 5 and 1000)
+   then raise exception 'REJECTION_REASON_REQUIRED';end if;
+   if p_action='accept' and
+      (p_content is null or coalesce(p_content->>'method','') not in ('email','phone','in_person','other')
+       or length(btrim(coalesce(p_content->>'note',''))) not between 5 and 1000)
+   then raise exception 'CUSTOMER_ACCEPTANCE_EVIDENCE_REQUIRED';end if;
+   if (p_action='submit' and v_status in ('draft','rejected') and exists(select 1 from public.customer_quote_versions where quote_id=p_id))
+   or (p_action='approve' and v_status='submitted' and v_role='admin')
+   or (p_action='reject' and v_status='submitted' and v_role='admin')
+   or (p_action='send' and v_status='approved')
+   or (p_action='accept' and v_status='sent') then
+    update public.customer_quotes set status=case p_action when 'submit' then 'submitted' when 'approve' then 'approved' when 'reject' then 'rejected' when 'send' then 'sent' else 'accepted' end,
+    approved_by=case when p_action='approve' then auth.uid() else approved_by end,
+    approved_version_id=case when p_action='approve' then
+      (select v.id from public.customer_quote_versions v where v.quote_id=p_id order by v.version_no desc limit 1)
+      else approved_version_id end where id=p_id;
+    v_id:=p_id;
+   else raise exception 'INVALID_QUOTE_TRANSITION'; end if;
+  end if;
+ else
+  if p_action='create' then
+   if p_inquiry is null or length(trim(coalesce(p_title,''))) not between 3 and 90 then raise exception 'INVALID_CONTRACT';end if;
+   if p_content is null or p_content->>'quote_id' is null or p_content->>'quote_version_id' is null then raise exception 'ACCEPTED_QUOTE_REQUIRED';end if;
+   insert into public.customer_contracts(inquiry_id,contract_number,description,quote_id,quote_version_id,created_by)
+   values(p_inquiry,trim(p_title),left(coalesce(p_content->>'description',''),2000),(p_content->>'quote_id')::uuid,(p_content->>'quote_version_id')::uuid,auth.uid()) returning id into v_id;
+  else
+   select status into v_status from public.customer_contracts where id=p_id for update;
+   if v_status is null then raise exception 'CONTRACT_NOT_FOUND';end if;
+   if (p_action='review' and v_status='draft') or (p_action='sign' and v_status='review' and v_role='admin')
+   or (p_action='activate' and v_status='signed' and v_role='admin')
+   or (p_action='complete' and v_status='active' and v_role='admin') then
+    update public.customer_contracts set status=case p_action when 'review' then 'review' when 'sign' then 'signed' when 'activate' then 'active' else 'completed' end,
+    signed_at=case when p_action='sign' then now() else signed_at end where id=p_id;
+    v_id:=p_id;
+   else raise exception 'INVALID_CONTRACT_TRANSITION';end if;
+  end if;
+ end if;
+ insert into public.commercial_audit(entity_kind,entity_id,action,actor_id,details) values(p_kind,v_id,p_action,auth.uid(),jsonb_build_object('amount',p_amount,'version_no',v_n,'reason',case when p_action='reject' then left(p_content->>'reason',1000) end,'method',case when p_action='accept' then p_content->>'method' end,'evidence',case when p_action='accept' then left(p_content->>'note',1000) end));
+ return v_id;
+end;
+$function$

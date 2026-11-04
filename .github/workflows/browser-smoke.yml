@@ -2,7 +2,7 @@ name: Browser smoke test (deployed site)
 
 on:
   workflow_run:
-    workflows: ["Deploy Jekyll with GitHub Pages dependencies preinstalled"]
+    workflows: ["Deploy ATELIER HOME to GitHub Pages"]
     types: [completed]
   workflow_dispatch:
 
@@ -22,12 +22,16 @@ jobs:
           node-version: '22'
       - name: Install pinned browser runner
         run: |
-          npm install --no-save --no-package-lock playwright@1.56.1
+          npm install --no-save --no-package-lock playwright@1.64.1
           npx playwright install --with-deps chromium
       - name: Check deployed homepage, Supabase requests and admin login
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
         run: node tests/browser-smoke.cjs
+      - name: Check CMS, permissions and quotation UI with synthetic fixtures
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/cms-browser-smoke.cjs
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4

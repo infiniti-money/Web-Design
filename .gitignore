@@ -1,0 +1,11 @@
+node_modules/
+desktop/ui/
+desktop/dist/
+desktop/test-artifacts/
+screenshots/
+supabase/.temp/
+.env
+.env.*
+!.env.example
+*.log
+_site/

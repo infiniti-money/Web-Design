@@ -2,6 +2,24 @@
 
 Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub Pages.
 
+## Giao diện quản trị chuyên nghiệp — 05/11/2026
+
+Giao diện quản trị mới có điều hướng theo vai trò, tổng quan, CRM/nhân sự, CMS bài viết và báo giá theo hạng mục. Bản PC đóng gói cùng giao diện, dùng Supabase hiện có, lưu phiên đăng nhập mã hóa trên Windows và có kênh cập nhật riêng qua GitHub Releases.
+
+- [Hướng dẫn Windows Manager](desktop/README.md)
+- [Báo cáo triển khai và kiểm thử](ADMIN_UPGRADE_REPORT.md)
+- Windows Manager 1.1.0: menu thu gọn, mật độ gọn/thoáng, tìm chức năng không dấu với bàn phím, bộ lọc dự án và tải dữ liệu theo nhu cầu. Bộ cài local trong `desktop/dist`; bản phát hành online do workflow tag `desktop-v1.1.0` tạo.
+- Schema CMS, kiểm tra tổng báo giá và kiểm tra vai trò hiện tại đã triển khai lên Supabase; `staff-management` phiên bản 2 hỗ trợ Origin desktop và duyệt đăng ký.
+- Triển khai web tự động từ `main`: kiểm thử trước khi đóng gói, chỉ đưa tài nguyên website vào artifact. `release.json` trên website ghi commit đang chạy. [Báo cáo nâng cấp giao diện](PROFESSIONAL_UPGRADE.md) ghi phạm vi, kiểm thử và cách quay lại bản trước.
+
+## Cập nhật local — 04/11/2026
+
+- Tên hiển thị thống nhất: **ATELIER HOME**. Chủ website đã chọn URL chính tắc `https://infiniti-money.github.io/Web-Design/`.
+- Có bộ metadata SEO, sitemap, trang 404, trang dịch vụ tĩnh và kiểm thử SEO. Chi tiết ở [SEO_AUDIT.md](SEO_AUDIT.md).
+- Nội dung công trình thật được quản lý trong `content/projects.json`; lệnh `node scripts/build-project-pages.cjs` tạo trang `/du-an/<slug>/` và sitemap. [Hướng dẫn nội dung](content/README.md) có mẫu dữ liệu và cách xuất bản/gỡ xuất bản.
+- Chưa có hồ sơ công trình thật trong nguồn nội dung; chủ website sẽ cung cấp sau. Trang `/du-an/` đang `noindex` và chưa đưa vào sitemap. Admin/Supabase vẫn quản lý dữ liệu nghiệp vụ như trước.
+- Trên GitHub Pages dạng project, `robots.txt` có hiệu lực ở gốc hostname `https://infiniti-money.github.io/robots.txt`. Bản file trong repo này cần được đặt ở repo user-site gốc nếu quản lý được hostname; `/Web-Design/robots.txt` riêng lẻ không điều khiển crawl. Vẫn có thể khai báo URL sitemap trong Search Console và dùng meta `noindex` trên từng trang.
+
 ## Trạng thái hiện tại — 31/10/2026
 
 - **Website:** https://infiniti-money.github.io/Web-Design/
@@ -33,7 +51,7 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 - `supabase/customer-care-performance-v1_12.sql` — RPC hiệu suất an toàn, thống kê theo người phụ trách, tuần/tháng, hạn chế quyền và thời gian truy vấn.
 - `supabase/functions/submit-inquiry/index.ts` — mã Edge Function đang chạy tại Supabase.
 - `SUPABASE_SETUP.md` — hướng dẫn bảo mật và vận hành.
-- `privacy.html` — chính sách quyền riêng tư: đơn vị Tân Design, địa chỉ chủ website cung cấp và email tiếp nhận `infinitimoney@icloud.com`; chưa có xác minh đăng ký pháp lý, đã cấu hình giữ dữ liệu 12 tháng.
+- `privacy.html` — chính sách quyền riêng tư: đơn vị ATELIER HOME, địa chỉ chủ website cung cấp và email tiếp nhận `infinitimoney@icloud.com`; chưa có xác minh đăng ký pháp lý, đã cấu hình giữ dữ liệu 12 tháng.
 - `TURNSTILE_SETUP.md` — cấu hình Cloudflare widget và Supabase Edge secrets.
 - `EMAIL_NOTIFICATIONS_SETUP.md` — hướng dẫn kích hoạt gửi email tự động qua Resend bằng secrets phía máy chủ.
 - `tests/admin-rls-rollback.sql` — kiểm thử phân quyền admin có hoàn tác.
@@ -41,7 +59,8 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 ## Kiểm thử
 
 ```bash
-node --test tests/static.test.cjs tests/email-notification.test.cjs
+node scripts/build-project-pages.cjs --check
+node --test tests/*.test.cjs
 ```
 
 GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và thiết bị iPhone giả lập; ảnh kiểm thử được lưu có thời hạn. Không cần gửi mật khẩu quản trị cho hệ thống kiểm thử.
@@ -107,7 +126,7 @@ GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và t
 ## Lưu ý quan trọng trước khi kinh doanh
 
 - Giới hạn tốc độ và honeypot là các biện pháp chống spam cơ bản; **Turnstile đã bật và từ chối token giả**, nhưng vẫn không thể bảo đảm chặn mọi loại bot/tấn công phân tán.
-- Mã gửi email thông báo khi nhận khách mới đã triển khai trong Edge Function v6, **chưa xác minh kích hoạt gửi thực tế** do thiếu cấu hình provider được xác nhận. Đã công bố thông tin liên hệ Tân Design do chủ website cung cấp, nhưng chưa có thông tin xác minh đăng ký pháp lý, đã phê duyệt thời hạn 12 tháng và bật xóa tự động hằng ngày; vẫn cần đánh giá nghĩa vụ lưu giữ theo pháp luật.
+- Mã gửi email thông báo khi nhận khách mới đã triển khai trong Edge Function v6, **chưa xác minh kích hoạt gửi thực tế** do thiếu cấu hình provider được xác nhận. Đã công bố thông tin liên hệ ATELIER HOME do chủ website cung cấp, nhưng chưa có thông tin xác minh đăng ký pháp lý, đã phê duyệt thời hạn 12 tháng và bật xóa tự động hằng ngày; vẫn cần đánh giá nghĩa vụ lưu giữ theo pháp luật.
 - Hình ảnh Unsplash, tên công trình và các mô tả trong dữ liệu mẫu **không phải công trình đã thi công thực tế**.
 - Đã kiểm thử quyền thêm/sửa/xóa dự án và RPC ghi nhận liên hệ theo thời gian máy chủ; non-admin không thể ghi nhận, giao dịch thử được hoàn tác. Kiểm thử UI bằng Supabase mock trong Chromium; chưa thử đăng nhập bằng mật khẩu thật.
 - Không được đưa `sb_secret_`, `service_role`, mật khẩu hoặc token nhạy cảm vào frontend/GitHub.

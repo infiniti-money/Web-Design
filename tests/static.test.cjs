@@ -190,6 +190,7 @@ test("All browser scripts and inline scripts are valid JavaScript", () => {
     let n=0;
     for(const match of read(file).matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)){
       if(/\bsrc\s*=/.test(match[1])) continue;
+      if(/\btype\s*=\s*["']application\/ld\+json["']/i.test(match[1])) continue;
       if(!match[2].trim()) continue;
       assert.doesNotThrow(()=>new vm.Script(match[2],{filename:file+" inline "+(++n)}));
     }
@@ -203,7 +204,7 @@ test("Browser configuration uses only Supabase publishable credentials", () => {
   assert.match(config.supabaseUrl, /^https:\/\/[a-z0-9-]+\.supabase\.co$/);
   assert.match(config.supabasePublishableKey, /^sb_publishable_[a-zA-Z0-9_-]+$/);
   assert.doesNotMatch(config.supabasePublishableKey, /sb_secret_|eyJhbGci/);
-  assert.match(read("index.html"), /@supabase\/supabase-js@2\.118\.0/);
+  assert.doesNotMatch(read("index.html"), /@supabase\/supabase-js/);
   assert.match(read("admin.html"), /@supabase\/supabase-js@2\.118\.0/);
 });
 
@@ -225,7 +226,7 @@ test("Privacy notice and Turnstile integration are present and secrets stay serv
   assert.match(index, /href="\.\/privacy\.html"/);
   assert.match(index, /id="turnstile-container"/);
   assert.match(policy, /Chính sách quyền riêng tư/);
-  assert.match(policy, /Tân Design/);
+  assert.match(policy, /ATELIER HOME/);
   assert.match(policy, /Tân Phú, Việt Yên, Hưng Yên/);
   assert.match(policy, /mailto:infinitimoney@icloud\.com/);
   assert.match(index, /mailto:infinitimoney@icloud\.com/);
@@ -267,7 +268,8 @@ test("Privacy notice and Turnstile integration are present and secrets stay serv
 test("Configured public site uses live API, demo fallback remains explicit", () => {
   assert.match(read("site-backend.js"), /\/functions\/v1\/submit-inquiry/);
   assert.doesNotMatch(read("site-backend.js"), /from\("inquiries"\)\.insert/);
-  assert.match(read("site-backend.js"), /from\("projects"\)/);
+  assert.match(read("site-backend.js"), /\/rest\/v1\/projects/);
+  assert.match(read("site-backend.js"), /headers:\s*\{\s*apikey:\s*cfg\.supabasePublishableKey/);
   assert.match(index, /ATELIER_SET_PROJECTS/);
   assert.match(index, /localStorage/);
 });

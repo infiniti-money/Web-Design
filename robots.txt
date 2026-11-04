@@ -1,0 +1,6 @@
+# Host-level robots file must be served at https://infiniti-money.github.io/robots.txt.
+# This copy under /Web-Design/ alone does not control crawling for the hostname.
+User-agent: *
+Allow: /
+
+Sitemap: https://infiniti-money.github.io/Web-Design/sitemap.xml

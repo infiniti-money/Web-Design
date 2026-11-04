@@ -20,5 +20,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Run syntax and security-structure tests
+      - name: Check generated project HTML and sitemap
+        run: node scripts/build-project-pages.cjs --check
+      - name: Run website and security tests
         run: node --test tests/*.test.cjs

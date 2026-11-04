@@ -13,10 +13,23 @@
       "Không thể tải thư viện kết nối Supabase. Kiểm tra mạng hoặc thử lại sau.";
     return;
   }
-  const client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
+  const client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey, window.ATELIER_CLIENT_OPTIONS || {});
   const categories = { apartment:"Căn hộ", villa:"Biệt thự", house:"Nhà phố", commercial:"Thương mại" };
   const inquiryStates = { "new":"Mới", "contacted":"Đã liên hệ", "quoted":"Đã báo giá", "closed":"Hoàn thành" };
   const PAGE_SIZE = 25;
+  const tabLoads = new Map();
+  function loadTabData(name) {
+    const loaders = {tasks:()=>Promise.all([loadStaff(),refreshTasksBoard()]),reports:loadPerformanceReport,
+      "my-tasks":loadMyTasks,staff:loadStaff,inquiries:loadInquiries};
+    if(!loaders[name])return Promise.resolve();
+    const previous=tabLoads.get(name);
+    if(previous?.pending)return previous.pending;
+    if(previous?.at && Date.now()-previous.at<15000)return Promise.resolve();
+    const entry={at:0,pending:null};
+    entry.pending=Promise.resolve().then(loaders[name]).then(()=>{entry.at=Date.now();}).finally(()=>{entry.pending=null;});
+    tabLoads.set(name,entry);
+    return entry.pending;
+  }
   const state = { projects:[], inquiries:[], editingId:null, slugTouched:false, busy:false,
     leadSearch:"", leadStatus:"all", leadService:"all", leadPeriod:"all", leadPage:0, leadTotal:0,
     leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0,customerTaskSeq:0,taskBoardSeq:0,taskBoardPage:0,prioritySeq:0,taskBoardTotal:0,taskView:"table",reportSeq:0,taskReport:null,editingTask:null,staff:[],currentUser:null,currentRole:null,myTaskSeq:0,taskStatusFilter:"all",taskOwnerFilter:"",taskDueFilter:"all" };
@@ -59,15 +72,17 @@
       .replace(/^-+|-+$/g,"").slice(0,100);
   }
   function switchTab(name) {
-    for(const kind of ["projects","inquiries","tasks","reports","my-tasks","staff"]) {
+    const permitted=state.currentRole==="admin"?["overview","projects","inquiries","tasks","reports","my-tasks","staff"]:state.currentRole==="manager"?["tasks","reports","my-tasks"]:["my-tasks"];
+    if(!permitted.includes(name))return;
+    for(const kind of ["overview","projects","inquiries","tasks","reports","my-tasks","staff"]) {
       const active = kind === name;
       $("panel-"+kind).classList.toggle("hide", !active);
       $("tab-"+kind).setAttribute("aria-selected", String(active));
+      $("tab-"+kind).tabIndex=active?0:-1;
     }
-    if(name==="tasks")refreshTasksBoard();
-    if(name==="reports")loadPerformanceReport();
-    if(name==="my-tasks")loadMyTasks();
-    if(name==="staff")loadStaff();
+    history.replaceState(null,"","#"+name);
+    window.dispatchEvent(new CustomEvent("atelier:tabchange",{detail:name}));
+    loadTabData(name).catch(()=>message("dash-status","Không tải được dữ liệu. Nhấn Làm mới để thử lại.",true));
   }
   function setBusy(b) {
     state.busy=b;
@@ -75,12 +90,14 @@
     $("profile-reminder-done").disabled=b || !state.activeProfile?.follow_up_at;
   }
   function loginVisible() {
+    tabLoads.clear();
     state.activeProfile=null;
     state.currentUser=null;state.currentRole=null;state.staff=[];
     ++state.profileSeq;
     $("lead-profile").classList.add("hide");
     $("profile-note-input").value="";
     $("login-panel").classList.remove("hide");$("dashboard").classList.add("hide");
+    window.dispatchEvent(new CustomEvent("atelier:session",{detail:null}));
   }
   async function verify() {
     const {data,error}=await client.auth.getUser();
@@ -106,7 +123,7 @@
     $("dashboard").classList.remove("hide");
     $("signed-in-email").textContent=user.email || "Tài khoản";
     $("signed-in-role").textContent=profile.full_name+" · "+({admin:"Admin",manager:"Quản lý",employee:"Nhân viên"}[role]);
-    for(const tab of ["projects","inquiries","tasks","reports","my-tasks","staff"]){
+    for(const tab of ["overview","projects","inquiries","tasks","reports","my-tasks","staff"]){
       const allowed=role==="admin" || (role==="manager" && ["tasks","reports","my-tasks"].includes(tab))
         || (role==="employee" && tab==="my-tasks");
       $("tab-"+tab).classList.toggle("hide",!allowed);
@@ -115,8 +132,11 @@
     $("admin-priority-hub").classList.toggle("hide",role!=="admin");
     $("catalog-link-card").classList.toggle("hide",role!=="admin");
     $("commercial-link-card").classList.toggle("hide",role==="employee");
-    if(role==="admin"){switchTab("projects");await Promise.all([loadAll(),loadStaff()]);}
-    else if(role==="manager"){switchTab("tasks");await Promise.all([loadStaff(),loadMyTasks()]);}
+    window.dispatchEvent(new CustomEvent("atelier:session",{detail:{role,name:profile.full_name,email:user.email}}));
+    const requested=location.hash.slice(1);
+    tabLoads.clear();
+    if(role==="admin"){switchTab(["overview","projects","inquiries","tasks","reports","my-tasks","staff"].includes(requested)?requested:"overview");await loadAll();}
+    else if(role==="manager"){switchTab(["tasks","reports","my-tasks"].includes(requested)?requested:"tasks");}
     else switchTab("my-tasks");
   }
   async function loadStaff() {
@@ -515,7 +535,7 @@
   }
   async function loadAll() {
     message("dash-status","Đang tải dữ liệu...");
-    await Promise.all([loadProjects(),refreshInquiries()]);
+    await Promise.all([loadProjects(),loadLeadStats(),loadPriorityHub()]);
     if(!$("dash-status").classList.contains("error"))
       message("dash-status","Đã tải dữ liệu. Quản lý khách hàng phân trang 25 hồ sơ, thống kê toàn bộ dữ liệu.");
   }
@@ -525,11 +545,18 @@
   }
   function renderProjects() {
     const body=$("projects-table");body.replaceChildren();
+    const search=$("project-search").value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/đ/g,"d").trim();
+    const visibility=$("project-visibility").value;
+    const visible=state.projects.filter(p=>
+      (visibility==="all"||(visibility==="published")===p.published)&&
+      [p.title,p.slug,p.style,categories[p.category]||p.category].join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/đ/g,"d").includes(search));
+    $("project-match-count").textContent=`${visible.length} / ${state.projects.length} dự án đã tải (tối đa 200)`;
     if(!state.projects.length) {
       const row=el("tr"),td=el("td","Chưa có dự án. Thêm một dự án ở biểu mẫu bên phải.","empty");
       td.colSpan=4;row.append(td);body.append(row);return;
     }
-    state.projects.forEach(p=>{
+    if(!visible.length){const row=el("tr"),td=el("td","Không có dự án phù hợp bộ lọc.","empty");td.colSpan=4;row.append(td);body.append(row);return;}
+    visible.forEach(p=>{
       const row=el("tr");
       const identity=el("div");
       identity.append(el("strong",p.title),el("small",p.slug));
@@ -1181,6 +1208,9 @@
   $("p-slug").addEventListener("input",()=>{state.slugTouched=true});
   $("project-cancel").addEventListener("click",newProject);
   $("project-form").addEventListener("submit",submitProject);
+  $("tab-overview").addEventListener("click",()=>switchTab("overview"));
+  window.addEventListener("hashchange",()=>{if(state.currentRole)switchTab(location.hash.slice(1));});
+  document.querySelectorAll("[data-admin-tab]").forEach(link=>link.addEventListener("click",event=>{event.preventDefault();switchTab(link.dataset.adminTab);}));
   $("tab-projects").addEventListener("click",()=>switchTab("projects"));
   $("tab-inquiries").addEventListener("click",()=>switchTab("inquiries"));
   $("tab-tasks").addEventListener("click",()=>switchTab("tasks"));
@@ -1204,6 +1234,8 @@
   $("priority-lead-overdue-open").addEventListener("click",()=>showLeadPriority("due"));
   $("priority-lead-soon-open").addEventListener("click",()=>showLeadPriority("upcoming"));
   $("reload-projects").addEventListener("click",loadProjects);
+  $("project-search").addEventListener("input",renderProjects);
+  $("project-visibility").addEventListener("change",renderProjects);
   $("reload-inquiries").addEventListener("click",refreshInquiries);
   let searchTimer;
   const leadFilters=[
@@ -1258,7 +1290,7 @@
     const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
     const link=document.createElement("a");
     const uri=URL.createObjectURL(blob);
-    link.href=uri;link.download="tan-design-khach-hang-trang-"+(state.leadPage+1)+".csv";
+    link.href=uri;link.download="atelier-home-khach-hang-trang-"+(state.leadPage+1)+".csv";
     document.body.append(link);link.click();link.remove();
     setTimeout(()=>URL.revokeObjectURL(uri),10000);
   }

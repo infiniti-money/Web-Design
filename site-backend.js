@@ -27,18 +27,13 @@
 
   const configIsValid = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(cfg.supabaseUrl || "") &&
     /^sb_publishable_[a-zA-Z0-9_-]+$/.test(cfg.supabasePublishableKey || "");
-  const sdkReady = !!window.supabase?.createClient;
-  let client = null;
+  const backendReady = configIsValid;
 
-  if (configIsValid && sdkReady) {
-    client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
-  } else {
-    const text = configIsValid
-      ? "Kết nối tạm gián đoạn. Không thể gửi yêu cầu lúc này. Vui lòng tải lại trang sau."
-      : "Hệ thống chưa được cấu hình đúng. Chưa thể tiếp nhận yêu cầu.";
+  if (!backendReady) {
+    const text = "Hệ thống chưa được cấu hình đúng. Chưa thể tiếp nhận yêu cầu.";
     if (feedback) feedback.textContent = text;
     if (submit) submit.disabled = true;
-    console.error("Supabase consultation form is unavailable:", configIsValid ? "sdk_unavailable" : "invalid_config");
+    console.error("Supabase consultation form is unavailable: invalid_config");
   }
 
   // Turnstile is activated ONLY once a real Cloudflare sitekey is configured.
@@ -48,58 +43,89 @@
   const captchaHost = document.getElementById("turnstile-container");
   let captchaWidget = null;
   let captchaToken = "";
+  let captchaLoading = false;
   const informCaptcha = (message) => {
     if (feedback) feedback.textContent = message;
   };
-  if (captchaActive && client) {
+  if (captchaActive && backendReady) {
     if (submit) submit.disabled = true;
-    if (captchaHost) captchaHost.hidden = false;
-    informCaptcha("Đang tải xác minh chống bot...");
     if (!/^[a-zA-Z0-9_-]{8,100}$/.test(captchaSiteKey) || !captchaHost) {
       informCaptcha("Cấu hình xác minh chống bot chưa hợp lệ. Chưa thể gửi yêu cầu.");
     } else {
-      const script = document.createElement("script");
-      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-      script.async = true;
-      script.onerror = () => informCaptcha(
-        "Không thể tải xác minh chống bot. Vui lòng tải lại trang khi kết nối ổn định.");
-      script.onload = () => {
-        try {
-          captchaWidget = window.turnstile.render(captchaHost, {
-            sitekey: captchaSiteKey,
-            action: "consultation",
-            theme: "light",
-            callback: token => {
-              captchaToken = token;
-              if (submit && client && !pending) submit.disabled = false;
-              informCaptcha("");
-            },
-            "expired-callback": () => {
-              captchaToken = "";
-              if (submit) submit.disabled = true;
-              informCaptcha("Xác minh đã hết hạn. Vui lòng xác minh lại.");
-            },
-            "error-callback": () => {
-              captchaToken = "";
-              if (submit) submit.disabled = true;
-              informCaptcha("Không xác minh được. Vui lòng tải lại trang.");
-            }
-          });
-        } catch {
-          informCaptcha("Không thể khởi tạo xác minh chống bot.");
-        }
+      const loadCaptcha = () => {
+        if (captchaLoading || captchaWidget !== null || !backendReady) return;
+        captchaLoading = true;
+        captchaHost.hidden = false;
+        informCaptcha("Đang tải xác minh chống bot...");
+        const script = document.createElement("script");
+        script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+        script.async = true;
+        script.onerror = () => {
+          captchaLoading = false;
+          script.remove();
+          informCaptcha("Không thể tải xác minh chống bot. Chạm vào biểu mẫu để thử lại.");
+        };
+        script.onload = () => {
+          captchaLoading = false;
+          try {
+            captchaWidget = window.turnstile.render(captchaHost, {
+              sitekey: captchaSiteKey,
+              action: "consultation",
+              theme: "light",
+              callback: token => {
+                captchaToken = token;
+                if (submit && backendReady && !pending) submit.disabled = false;
+                informCaptcha("");
+              },
+              "expired-callback": () => {
+                captchaToken = "";
+                if (submit) submit.disabled = true;
+                informCaptcha("Xác minh đã hết hạn. Vui lòng xác minh lại.");
+              },
+              "error-callback": () => {
+                captchaToken = "";
+                if (submit) submit.disabled = true;
+                informCaptcha("Không xác minh được. Vui lòng tải lại trang.");
+              }
+            });
+          } catch {
+            informCaptcha("Không thể khởi tạo xác minh chống bot.");
+          }
+        };
+        document.head.appendChild(script);
       };
-      document.head.appendChild(script);
+
+      // Load shortly before the consultation form is needed. Form interaction remains
+      // a fallback, and the Edge Function still requires server-verified Turnstile.
+      informCaptcha("Xác minh chống bot sẽ tải khi bạn đến biểu mẫu.");
+      form?.addEventListener("focusin", loadCaptcha);
+      form?.addEventListener("pointerdown", loadCaptcha);
+      if (form && "IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(entries => {
+          if (entries.some(entry => entry.isIntersecting)) {
+            observer.disconnect();
+            loadCaptcha();
+          }
+        }, { rootMargin: "900px 0px" });
+        observer.observe(form);
+      } else {
+        loadCaptcha();
+      }
     }
   }
 
   async function loadProjects() {
-    if (!client) return;
-    const { data, error } = await client.from("projects")
-      .select("title,category,area,style,image_url,summary")
-      .eq("published", true).order("sort_order", { ascending: true });
-    if (error) {
-      console.error("Không tải được dự án trực tuyến:", error.code || "query_failed");
+    if (!backendReady) return;
+    const projectsUrl = new URL(cfg.supabaseUrl.replace(/\/$/, "") + "/rest/v1/projects");
+    projectsUrl.searchParams.set("select", "title,category,area,style,image_url,summary");
+    projectsUrl.searchParams.set("published", "eq.true");
+    projectsUrl.searchParams.set("order", "sort_order.asc");
+    const response = await fetch(projectsUrl, {
+      headers: { apikey: cfg.supabasePublishableKey },
+      cache: "no-store"
+    });
+    if (!response.ok) {
+      console.error("Không tải được dự án trực tuyến:", "http_" + response.status);
       const grid = document.getElementById("project-grid");
       if (grid && !document.getElementById("portfolio-sync-warning")) {
         const notice = document.createElement("p");
@@ -110,8 +136,9 @@
       }
       return;
     }
+    const data = await response.json();
     if (typeof window.ATELIER_SET_PROJECTS === "function") {
-      window.ATELIER_SET_PROJECTS((data || []).map(row => ({
+      window.ATELIER_SET_PROJECTS((Array.isArray(data) ? data : []).map(row => ({
         title: row.title, type: row.category,
         label: ({apartment:"Căn hộ", villa:"Biệt thự", house:"Nhà phố",
           commercial:"Thương mại"})[row.category] || "Dự án",
@@ -122,12 +149,12 @@
   }
 
   // Capture before v1.0.0's bubble-phase demo submission handler.
-  // This listener is always present for a configured LIVE site, even if SDK fails.
+  // This listener is always present for a configured LIVE site, even if project loading fails.
   let pending = false;
   form?.addEventListener("submit", async event => {
     event.preventDefault();
     event.stopImmediatePropagation();
-    if (!client) {
+    if (!backendReady) {
       if (feedback) feedback.textContent = "Không thể gửi: kết nối chưa sẵn sàng. Dữ liệu chưa được lưu.";
       return;
     }
@@ -191,11 +218,24 @@
         captchaToken = "";
         try { if (captchaWidget !== null) window.turnstile.reset(captchaWidget); } catch {}
       }
-      if (submit) submit.disabled = captchaActive || !client;
+      if (submit) submit.disabled = captchaActive || !backendReady;
     }
   }, true);
 
-  loadProjects().catch(error => {
-    console.error("Không thể đồng bộ dự án:", error?.message || "network_error");
-  });
+  const projectSection = document.getElementById("projects");
+  if (projectSection && "IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) {
+        observer.disconnect();
+        loadProjects().catch(error => {
+          console.error("Không thể đồng bộ dự án:", error?.message || "network_error");
+        });
+      }
+    }, { rootMargin: "900px 0px" });
+    observer.observe(projectSection);
+  } else {
+    loadProjects().catch(error => {
+      console.error("Không thể đồng bộ dự án:", error?.message || "network_error");
+    });
+  }
 })();

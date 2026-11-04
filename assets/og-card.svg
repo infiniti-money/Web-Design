@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">ATELIER HOME</title>
+  <desc id="desc">Thiết kế và thi công nội thất, với hình minh họa kiến trúc trừu tượng.</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8f6f0"/><stop offset="1" stop-color="#e8e6dc"/></linearGradient>
+    <linearGradient id="room" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#34483d"/><stop offset="1" stop-color="#1e2c27"/></linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#paper)"/>
+  <path d="M770 0h430v630H690V140c0-77 35-140 80-140Z" fill="url(#room)"/>
+  <path d="M852 99h232v362H852z" fill="none" stroke="#c5a574" stroke-width="3" opacity=".9"/>
+  <path d="M852 260h232M968 99v362M811 461h317M815 480h310" fill="none" stroke="#c5a574" stroke-width="2" opacity=".72"/>
+  <path d="M852 461c0-94 52-164 116-164s116 70 116 164" fill="none" stroke="#e9e2d1" stroke-width="3" opacity=".86"/>
+  <path d="M830 461h276M890 461v68m155-68v68M878 529h178" fill="none" stroke="#e9e2d1" stroke-width="3" opacity=".86"/>
+  <path d="M1084 461c0-39 13-77 37-105m-22 105c-8-31-23-58-47-79m61 79c3-28 15-52 34-70" fill="none" stroke="#9ead91" stroke-width="5" stroke-linecap="round"/>
+  <path d="M1073 466h79l-10 29h-60z" fill="#b18e60"/>
+  <text x="78" y="177" fill="#9a805a" font-family="Arial,sans-serif" font-size="21" font-weight="700" letter-spacing="5">ATELIER HOME</text>
+  <text x="75" y="270" fill="#24332e" font-family="Georgia,serif" font-size="59" letter-spacing="2">Không gian sống</text>
+  <path d="M80 310h140" stroke="#b18e60" stroke-width="3"/>
+  <text x="80" y="369" fill="#425249" font-family="Arial,sans-serif" font-size="27">Thiết kế &amp; thi công nội thất</text>
+  <text x="80" y="415" fill="#68756b" font-family="Arial,sans-serif" font-size="20">Ý tưởng cho không gian sống của bạn</text>
+  <text x="80" y="556" fill="#7c857d" font-family="Arial,sans-serif" font-size="16" letter-spacing="2">THIẾT KẾ · VẬT LIỆU · TƯ VẤN</text>
+</svg>

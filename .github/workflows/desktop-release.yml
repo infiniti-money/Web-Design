@@ -1,0 +1,73 @@
+name: Build and release Windows Manager
+on:
+  push:
+    tags: ['desktop-v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - name: Verify release version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $version=(Get-Content desktop/package.json -Raw | ConvertFrom-Json).version
+          if($env:GITHUB_REF_NAME -ne "desktop-v$version"){throw 'Tag must match the desktop package version'}
+      - name: Install pinned dependencies
+        working-directory: desktop
+        run: npm ci
+      - name: Install Electron runtime
+        working-directory: desktop
+        run: node node_modules/electron/install.js
+      - name: Run checks
+        shell: pwsh
+        run: |
+          node --test tests/*.test.cjs
+          if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+          npm --prefix desktop test
+          if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+          npm --prefix desktop run prepare:ui
+          if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+          npm --prefix desktop run test:smoke
+      - name: Build Windows installers
+        working-directory: desktop
+        env:
+          CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+        run: npm run dist:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: atelier-home-manager-windows
+          path: |
+            desktop/dist/*.exe
+            desktop/dist/*.blockmap
+            desktop/dist/latest.yml
+      - name: Publish version and update feed
+        if: startsWith(github.ref, 'refs/tags/desktop-v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $files=@(Get-ChildItem desktop/dist -File | Where-Object {$_.Extension -in '.exe','.blockmap'} | Select-Object -ExpandProperty FullName)
+          gh release view $env:GITHUB_REF_NAME *> $null
+          if($LASTEXITCODE -eq 0){
+            gh release upload $env:GITHUB_REF_NAME @files desktop/dist/latest.yml --clobber
+          }else{
+            gh release create $env:GITHUB_REF_NAME @files desktop/dist/latest.yml --verify-tag --title "ATELIER HOME Manager $env:GITHUB_REF_NAME" --notes 'Windows Manager: projects, staff, articles and quotations.'
+          }
+          if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+          gh release view desktop-stable *> $null
+          if($LASTEXITCODE -ne 0){gh release create desktop-stable --target $env:GITHUB_SHA --title 'ATELIER HOME Manager update channel' --notes 'Stable desktop update feed. Versioned releases retain each installer.' --prerelease}
+          if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+          # Upload binaries first; update metadata last so clients never see an incomplete release.
+          gh release upload desktop-stable @files --clobber
+          if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
+          gh release upload desktop-stable desktop/dist/latest.yml --clobber

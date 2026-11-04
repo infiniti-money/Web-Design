@@ -26,7 +26,7 @@ test("Unconfigured mail provider does not send or log personal data",async()=>{
   assert.deepEqual(x.errors,[]);
 });
 test("Configured provider sends privacy-minimized idempotent notification",async()=>{
-  const x=setup({RESEND_API_KEY:"re_TEST_NOT_REAL",NOTIFY_FROM_EMAIL:"Tân Design <notify@example.test>"});
+  const x=setup({RESEND_API_KEY:"re_TEST_NOT_REAL",NOTIFY_FROM_EMAIL:"ATELIER HOME <notify@example.test>"});
   await x.notify(id,"Thiết kế nội thất");
   assert.equal(x.calls.length,1);
   assert.equal(x.calls[0].url,"https://api.resend.com/emails");
