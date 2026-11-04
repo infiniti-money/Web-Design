@@ -15,6 +15,8 @@
 
 Mở tệp `dist/ATELIER-HOME-Manager-1.1.0-x64-Setup.exe`, cài theo từng bước và đăng nhập bằng tài khoản đã được cấp quyền. Tài khoản mới vẫn cần Admin duyệt. Đăng ký/khôi phục mật khẩu mở trang xác thực của website bằng trình duyệt; ứng dụng PC đăng nhập bằng email và mật khẩu.
 
+Bản 1.1.0 đã phát hành ngày 05/11/2026: [Tải bộ cài Windows](https://github.com/infiniti-money/Web-Design/releases/download/desktop-v1.1.0/ATELIER-HOME-Manager-1.1.0-x64-Setup.exe) · [Tất cả tệp phát hành](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.0). Feed `desktop-stable/latest.yml` đã được kiểm tra trả đúng phiên bản; bộ cài tải qua feed đã được đối chiếu SHA-512. Chưa kiểm thử việc cài nâng cấp trên một máy người dùng đã cài bản cũ.
+
 Phiên đăng nhập được mã hóa bằng Electron `safeStorage` (DPAPI trên Windows), lưu trong thư mục dữ liệu riêng của người dùng. Đăng xuất xóa phiên đã lưu. Không có service-role key hoặc khóa quản trị trong ứng dụng.
 
 ## Phát triển và kiểm tra
@@ -56,4 +58,4 @@ Không nhúng GitHub token vào ứng dụng. Feed đọc công khai qua HTTPS v
 
 CMS và trigger kiểm tra tổng báo giá đã được thêm bằng migration trong `supabase/migrations`. `staff-management` hỗ trợ Origin desktop `atelier://app` và tiếp tục yêu cầu JWT cùng tài khoản Admin đang hoạt động.
 
-Các trang bài viết công khai hiện đọc Supabase và giữ `noindex` trong khi chưa có luồng xuất HTML tĩnh cho nội dung CMS. Website/nguồn code mới cần được triển khai lên GitHub Pages để dùng các route bài viết mới trên domain công khai; phần soạn thảo/xem trước trong ứng dụng hoạt động từ UI đóng gói.
+Các trang bài viết công khai hiện đọc Supabase và giữ `noindex` trong khi chưa có luồng xuất HTML tĩnh cho nội dung CMS. Giao diện web mới và các route bài viết đã được triển khai lên GitHub Pages ngày 05/11/2026; phần soạn thảo/xem trước trong ứng dụng PC hoạt động từ UI đóng gói. Xem [báo cáo nâng cấp](../PROFESSIONAL_UPGRADE.md) để đối chiếu kiểm thử và triển khai.

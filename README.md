@@ -9,6 +9,7 @@ Giao diện quản trị mới có điều hướng theo vai trò, tổng quan, 
 - [Hướng dẫn Windows Manager](desktop/README.md)
 - [Báo cáo triển khai và kiểm thử](ADMIN_UPGRADE_REPORT.md)
 - Windows Manager 1.1.0: menu thu gọn, mật độ gọn/thoáng, tìm chức năng không dấu với bàn phím, bộ lọc dự án và tải dữ liệu theo nhu cầu. Bộ cài local trong `desktop/dist`; bản phát hành online do workflow tag `desktop-v1.1.0` tạo.
+- Đã triển khai: [Quản trị web](https://infiniti-money.github.io/Web-Design/admin.html) · [Tải Windows Manager 1.1.0](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.0). Feed cập nhật đã phát hành và kiểm tra checksum bộ cài tải về thành công.
 - Schema CMS, kiểm tra tổng báo giá và kiểm tra vai trò hiện tại đã triển khai lên Supabase; `staff-management` phiên bản 2 hỗ trợ Origin desktop và duyệt đăng ký.
 - Triển khai web tự động từ `main`: kiểm thử trước khi đóng gói, chỉ đưa tài nguyên website vào artifact. `release.json` trên website ghi commit đang chạy. [Báo cáo nâng cấp giao diện](PROFESSIONAL_UPGRADE.md) ghi phạm vi, kiểm thử và cách quay lại bản trước.
 

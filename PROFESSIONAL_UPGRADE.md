@@ -25,6 +25,16 @@ Trang tổng quan không tải trước trang CRM 25 hồ sơ hoặc danh bạ n
 
 ## Triển khai và xác minh
 
+Đã xác minh ngày 05/11/2026:
+
+- [Pages deployment](https://github.com/infiniti-money/Web-Design/actions/runs/41936221230) thành công; nguồn giao diện đang chạy là `6d96a0674189141c61cc497e7783242ce98f351f` theo `release.json`.
+- [Kiểm thử trình duyệt sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/41936331775) thành công.
+- [Workflow Windows](https://github.com/infiniti-money/Web-Design/actions/runs/41936229861) thành công, gồm kiểm thử Electron trên máy dựng Windows, dựng installer và tải lên Release.
+- [Release desktop-v1.1.0](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.0) có Setup, Portable, blockmap và metadata. Feed stable trả HTTP 200, version 1.1.0; Setup và blockmap cũng trả HTTP 200. Đã tải toàn bộ Setup qua feed, 121.547.850 byte, SHA-512 khớp metadata.
+- Bản dựng local có thể khác byte với artifact CI do thời điểm đóng gói; đối chiếu checksum với đúng nguồn tải. Không dùng checksum bản local để kiểm tra installer từ CI.
+
+Các cập nhật tài liệu sau commit giao diện không cần thay đổi artifact website hoặc tag desktop đã phát hành.
+
 Workflow `Deploy ATELIER HOME to GitHub Pages` chạy khi cập nhật `main`: kiểm tra trang dự án, chạy tests, tạo artifact từ danh sách tài nguyên cho phép rồi triển khai. Không còn bước dựng Jekyll cho website HTML tĩnh.
 
 Sau khi workflow thành công, kiểm tra `https://infiniti-money.github.io/Web-Design/release.json` khớp commit phát hành; mở `admin.html`, `admin-posts.html`, các trang dịch vụ, CSS/JS và sitemap. Workflow browser smoke chạy tiếp sau deploy.
