@@ -24,6 +24,8 @@ jobs:
         run: node scripts/build-project-pages.cjs --check
       - name: Run website and security tests
         run: node --test tests/*.test.cjs
+      - name: Check Windows protocol and packaged route allowlist
+        run: node --test desktop/test/security.test.cjs
 
   quote-history-postgres:
     name: PostgreSQL 17 quote history immutability
