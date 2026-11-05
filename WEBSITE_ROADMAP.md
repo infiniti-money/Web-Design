@@ -35,6 +35,8 @@ Tiến độ đợt v1.19: đã lập lộ trình; đã dựng danh mục/bài k
 
 ## Cách đánh giá hoàn thành
 
+Đợt v1.22 tiếp tục chặng 2/5 với Catalog công khai: REST nhẹ, URL chia sẻ/khôi phục bộ lọc, phân trang và trạng thái lỗi rõ. Sửa policy làm anon bị 401 do tham chiếu staff_profiles; giữ bảng nhân sự riêng tư và kiểm tra Admin hiện hành. SQL rollback, API public thực tế và browser fixture đã đạt. Xem CATALOG_PUBLIC_ACCEPTANCE.md; dữ liệu sản phẩm/ảnh thật và trang SEO độc lập còn mở.
+
 Đợt v1.21 tiếp tục chặng 4: khóa biểu mẫu khi gửi, xác nhận thành công/bắt đầu yêu cầu mới, giữ nội dung khi lỗi, timeout không tự gửi lại, khôi phục xác minh và CTA không che liên hệ. Xem [bảng nghiệm thu tư vấn](CONSULTATION_ACCEPTANCE.md). Kiểm thử bằng fixture đạt; việc tiếp nhận thật của doanh nghiệp và thiết bị thật vẫn chưa đánh dấu hoàn thành.
 
 Bản tích hợp v1.21.1 giữ các nâng cấp main song song về Operations/CRM/CMS/Catalog, thống nhất timeout 15 giây; tổng 85/86 bài Node đạt (1 bài gửi thật bỏ qua). Tag v1.21.0 lưu nguồn trước hợp nhất; bản triển khai nhánh chính dùng v1.21.1. Xem RELEASE_NOTES_V1_21_1.md để phân biệt phạm vi của hai gói.
