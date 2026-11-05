@@ -70,7 +70,7 @@ async function open(browser,role){
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
     await page.close();
     const employee=await open(browser,"employee");
-    await employee.locator("#status").filter({hasText:/cần đăng nhập bằng tài khoản Admin/}).waitFor();
+    await employee.locator("#status").filter({hasText:/không có quyền quản lý Catalog/}).waitFor();
     assert.equal(await employee.locator("#workspace").isVisible(),false);
     await employee.close();
     console.log("CATALOG PASS: role gate, accent search, draft/published, unsaved warning, publish confirmation, confirmed save, mobile.");
