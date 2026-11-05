@@ -4,7 +4,7 @@ Tên thương hiệu hiện tại: **ATELIER HOME**. Các tài liệu cũ dùng 
 
 ## Mốc hiện tại
 
-- Web: [v1.19.0](RELEASE_NOTES_V1_19_0.md): lộ trình sáu chặng, kiến thức HTML, ba bài gốc và đồng bộ CMS công khai. v1.18 trước đó hoàn thiện tìm CRM không dấu và chuẩn hóa gói phát hành.
+- Web: [v1.20.0](RELEASE_NOTES_V1_20_0.md): phông chữ không chặn render, ảnh responsive, nhãn truy cập và nhánh liên hệ không JavaScript. v1.19 hoàn thiện kiến thức HTML; v1.18 bổ sung tìm CRM không dấu.
 - PC: `desktop-v1.1.1`, bản vá tìm CRM tương ứng. Số phiên bản PC và web độc lập.
 - Đã phát hành: [web v1.18.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.18.0) · [PC 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1).
 - Bản nâng cấp giao diện trước đó: [báo cáo triển khai](PROFESSIONAL_UPGRADE.md). Bản nền tảng CMS/desktop: [báo cáo kiểm thử](ADMIN_UPGRADE_REPORT.md).
@@ -40,6 +40,7 @@ Kiểm chứng phát hành 05/11/2026: [triển khai Pages](https://github.com/i
 - [v1.17](RELEASE_NOTES_V1_17_0.md): báo giá và hợp đồng.
 - [v1.18](RELEASE_NOTES_V1_18_0.md): CRM không dấu và hợp nhất nền tảng quản trị mới.
 - [v1.19](RELEASE_NOTES_V1_19_0.md): kiến thức HTML, nội dung nền và [lộ trình chuyên nghiệp](WEBSITE_ROADMAP.md).
+- [v1.20](RELEASE_NOTES_V1_20_0.md): hiệu suất/khả năng sử dụng trang chủ, tiếp tục chặng 4/6.
 
 Không tạo ghi chú v1.14–v1.16 hoặc tag lịch sử giả chỉ để lấp số thứ tự. Các module tương ứng đã có trong nguồn; chỉ ghi nhận release khi có bằng chứng phát hành.
 

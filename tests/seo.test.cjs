@@ -131,7 +131,7 @@ test("Hero and project images use priority and lazy-loading appropriately", () =
   assert.match(html, /id="turnstile-container"[^>]*role="group"/);
   assert.match(html, /img\.loading="lazy";img\.decoding="async"/);
   assert.match(html, /url\.hostname!=="images\.unsplash\.com"/);
-  assert.match(html, /url\.searchParams\.set\("q","76"\)/);
+  assert.match(html, /url\.searchParams\.set\("q","70"\)/);
 });
 
 test("Turnstile script waits until visitors approach or interact with the form", () => {

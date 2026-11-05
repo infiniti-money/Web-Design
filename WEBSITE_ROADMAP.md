@@ -35,4 +35,6 @@ Tiến độ đợt v1.19: đã lập lộ trình; đã dựng danh mục/bài k
 
 ## Cách đánh giá hoàn thành
 
+Đợt v1.20 xử lý phông chữ chặn hiển thị, ảnh responsive và nhãn truy cập trên trang chủ; bổ sung nhánh liên hệ khi JavaScript tắt. Kiểm thử 69/70 bài đạt (1 bài gửi dữ liệu thật chủ động bỏ qua), browser smoke và home experience đạt. So sánh local cho thấy font không còn nằm trong danh sách tài nguyên chặn render và lỗi nhãn đã hết; số đo online ghi sau triển khai.
+
 Mỗi đợt có ghi chú phạm vi, kiểm thử, URL đang chạy và giới hạn còn lại. Cập nhật bảng này theo bằng chứng thực tế. Các chặng 4–6 và nghiệm thu doanh nghiệp chưa tự động được xem là hoàn tất khi chỉ có giao diện hoặc build thành công.
