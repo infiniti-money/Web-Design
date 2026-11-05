@@ -79,7 +79,7 @@
               callback: token => {
                 captchaToken = token;
                 if (submit && backendReady && !pending) submit.disabled = false;
-                informCaptcha("");
+                if (!["warning", "error", "success"].includes(feedback?.dataset.state)) informCaptcha("");
               },
               "expired-callback": () => {
                 captchaToken = "";
@@ -205,7 +205,7 @@
           return;
         }
         if (response.status === 403) {
-          informCaptcha("Xác minh chống bot không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.");
+          showFeedback("Xác minh chống bot không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.", "warning");
           return;
         }
         throw new Error("gateway_http_" + response.status);

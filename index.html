@@ -68,7 +68,7 @@ const projects=[
 {title:"The Creative Studio",type:"commercial",label:"Thương mại",area:"150 m²",style:"Creative Space",img:"photo-1600607687644-c7171b42498f",desc:"Không gian truyền cảm hứng với bố cục linh hoạt, phục vụ sự tập trung và kết nối."}
 ];
 const $=id=>document.getElementById(id);let lastFocus=null;
-const requestedService=({design:"Thiết kế nội thất",build:"Thi công trọn gói",styling:"Tư vấn & trang trí"})[new URLSearchParams(location.search).get("service")];if(requestedService&&$("service")){const selected=$("requested-service-note");$("service").value=requestedService;if(selected){selected.hidden=false;selected.textContent="Dịch vụ bạn đang quan tâm: "+requestedService+".";}}
+const requestedService=({design:"Thiết kế nội thất",build:"Thi công trọn gói",styling:"Tư vấn & trang trí"})[new URLSearchParams(location.search).get("service")];if(requestedService&&$("service")){const selected=$("requested-service-note");$("service").value=requestedService;if(selected){selected.hidden=false;selected.textContent="Dịch vụ bạn đang quan tâm: "+requestedService+".";}}$("service")?.addEventListener("change",()=>{const selected=$("requested-service-note"),value=$("service").value;if(selected){selected.hidden=!value;selected.textContent=value?"Dịch vụ bạn đang quan tâm: "+value+".":"";}});$("lead-form")?.addEventListener("reset",()=>{const selected=$("requested-service-note");if(selected)selected.hidden=true;});
 const photo=(id,w)=>{
   const value=String(id||"");let url;
   if(/^https:\/\/[^\s"\x27<>]+$/i.test(value)){
