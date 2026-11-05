@@ -44,6 +44,10 @@ jobs:
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
         run: node tests/consultation-browser-smoke.cjs
+      - name: Check Catalog admin role, filters and publish with synthetic fixtures
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/catalog-browser-smoke.cjs
       - name: Check homepage font, keyboard and contact fallbacks
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
