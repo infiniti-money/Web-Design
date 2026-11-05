@@ -4,7 +4,7 @@
 BEGIN;
 CREATE TABLE IF NOT EXISTS public.delivery_workspaces (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  inquiry_id uuid NOT NULL REFERENCES public.inquiries(id) ON DELETE RESTRICT,
+  inquiry_id uuid NOT NULL REFERENCES public.inquiries(id) ON DELETE CASCADE, -- honor existing 12-month CRM retention
   portfolio_project_id uuid REFERENCES public.projects(id) ON DELETE SET NULL,
   title text NOT NULL CHECK (char_length(btrim(title)) BETWEEN 3 AND 180),
   stage text NOT NULL DEFAULT 'planning'
