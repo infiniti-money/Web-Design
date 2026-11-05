@@ -17,6 +17,8 @@ Không có lưu bản nháp chứa thông tin cá nhân trên ổ đĩa trình d
 
 ## Nghiệm thu cần doanh nghiệp
 
+Đã triển khai ngày 05/11/2026, revision online `3fa98aef3b794145f262ecbeb45ee5def354a80f`. [Validate](https://github.com/infiniti-money/Web-Design/actions/runs/42027827497), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42027827558), [browser smoke sau deploy](https://github.com/infiniti-money/Web-Design/actions/runs/42027903703) và [Release](https://github.com/infiniti-money/Web-Design/actions/runs/42027835810) đều thành công. Hai bộ consultation recovery/context cũng chạy đạt trực tiếp trên URL công khai với POST giả lập. Source hiện có 86 bài Node, 85 đạt và 1 bài gửi thật bỏ qua. Không dùng kết quả fixture để đánh dấu các mục nghiệm thu thật bên dưới hoàn tất.
+
 - Thực hiện một yêu cầu hợp lệ do chủ website chỉ định, kiểm tra nó có trong CRM và người phụ trách liên hệ được.
 - Kiểm tra trên điện thoại thật, mạng di động và trình đọc màn hình đang sử dụng.
 - Xác nhận thông tin liên hệ, khung giờ tiếp nhận và quy trình phản hồi nội bộ.
