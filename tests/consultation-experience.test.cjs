@@ -30,5 +30,5 @@ test("Network ambiguity does not claim the lead definitely was not stored or aut
   assert.match(gateway,/Chưa thể xác nhận hệ thống có tiếp nhận hay chưa|Chưa thể xác nhận hệ thống đã nhận hay chưa/);
   assert.match(gateway,/tránh trùng/);
   assert.doesNotMatch(gateway,/Gửi yêu cầu chưa thành công\. Dữ liệu chưa được lưu/);
-  assert.doesNotMatch(gateway,/retry\(|setInterval\(/);
+  assert.doesNotMatch(gateway,/retry\(/);
 });

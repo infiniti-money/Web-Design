@@ -40,7 +40,7 @@ async function view(browser,role,opts){
   return page;
 }
 (async()=>{
-  const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
+  const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||undefined,args:["--no-sandbox"]});
   try{
     const admin=await view(browser,"admin");
     await admin.locator("#ops-app").waitFor({state:"visible",timeout:10000});

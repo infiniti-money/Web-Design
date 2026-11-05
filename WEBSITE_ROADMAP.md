@@ -35,6 +35,14 @@ Tiến độ đợt v1.19: đã lập lộ trình; đã dựng danh mục/bài k
 
 ## Cách đánh giá hoàn thành
 
+Đợt v1.22 tiếp tục chặng 2/5 với Catalog công khai: REST nhẹ, URL chia sẻ/khôi phục bộ lọc, phân trang và trạng thái lỗi rõ. Sửa policy làm anon bị 401 do tham chiếu staff_profiles; giữ bảng nhân sự riêng tư và kiểm tra Admin hiện hành. SQL rollback, API public thực tế và browser fixture đã đạt. Xem CATALOG_PUBLIC_ACCEPTANCE.md; dữ liệu sản phẩm/ảnh thật và trang SEO độc lập còn mở.
+
+Đợt v1.21 tiếp tục chặng 4: khóa biểu mẫu khi gửi, xác nhận thành công/bắt đầu yêu cầu mới, giữ nội dung khi lỗi, timeout không tự gửi lại, khôi phục xác minh và CTA không che liên hệ. Xem [bảng nghiệm thu tư vấn](CONSULTATION_ACCEPTANCE.md). Kiểm thử bằng fixture đạt; việc tiếp nhận thật của doanh nghiệp và thiết bị thật vẫn chưa đánh dấu hoàn thành.
+
+Bản tích hợp v1.21.1 giữ các nâng cấp main song song về Operations/CRM/CMS/Catalog, thống nhất timeout 15 giây; tổng 85/86 bài Node đạt (1 bài gửi thật bỏ qua). Tag v1.21.0 lưu nguồn trước hợp nhất; bản triển khai nhánh chính dùng v1.21.1. Xem RELEASE_NOTES_V1_21_1.md để phân biệt phạm vi của hai gói.
+
+Đã xác minh v1.21.1 online ở revision `3fa98aef3b794145f262ecbeb45ee5def354a80f`; kiểm thử CI và trực tiếp trên trang công khai đều đạt bằng dữ liệu giả lập. Bằng chứng trong CONSULTATION_ACCEPTANCE.md. Chặng 4 đã bổ sung trạng thái/khôi phục lỗi, còn nghiệm thu tiếp nhận thật và thiết bị thật; không bổ sung theo dõi người dùng hoặc bật email ngoài phạm vi đã cho phép.
+
 Đợt v1.20 xử lý phông chữ chặn hiển thị, ảnh responsive và nhãn truy cập trên trang chủ; bổ sung nhánh liên hệ khi JavaScript tắt. Kiểm thử 69/70 bài đạt (1 bài gửi dữ liệu thật chủ động bỏ qua), browser smoke và home experience đạt. So sánh local cho thấy font không còn nằm trong danh sách tài nguyên chặn render và lỗi nhãn đã hết; số đo online ghi sau triển khai.
 
 Đã triển khai v1.20, đối chiếu revision `9d338249fc0aae4147a815c7e80297fe5b43d8b4`; CI triển khai và browser smoke đều thành công. Online đo 93 hiệu suất / 100 Accessibility / 100 Best Practices / 100 SEO. Đây là cải thiện cấu trúc tải và nhãn, chưa có bằng chứng tăng tốc tổng thể ổn định so với lần đo cũ; xem số đo đầy đủ trong PERFORMANCE_BASELINE.md. Chặng 4 và 6 tiếp tục mở cho nghiệm thu thật/CWV, không tự đánh dấu hoàn thành toàn bộ.

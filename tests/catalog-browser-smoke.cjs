@@ -42,7 +42,7 @@ async function open(browser,role){
   return page;
 }
 (async()=>{
-  const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
+  const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||undefined,args:["--no-sandbox"]});
   try{
     const page=await open(browser,"admin");
     await page.locator("#workspace:not(.hide)").waitFor();

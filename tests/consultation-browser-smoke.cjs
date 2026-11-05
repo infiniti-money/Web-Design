@@ -8,7 +8,7 @@ const config=fs.readFileSync("app-config.js","utf8")
 assert.match(config,/turnstileSiteKey: "1x00000000000000000000AA"/);
 
 (async()=>{
- const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
+ const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||undefined,args:["--no-sandbox"]});
  try{
   const page=await browser.newPage({viewport:{width:390,height:844},locale:"vi-VN"});
   await page.route("**/app-config.js",route=>route.fulfill({status:200,contentType:"application/javascript",body:config}));

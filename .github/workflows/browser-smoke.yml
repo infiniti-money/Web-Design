@@ -52,6 +52,14 @@ jobs:
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
         run: node tests/home-experience.cjs
+      - name: Check consultation recovery with synthetic requests
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/consultation-browser.cjs
+      - name: Check public Catalog links, filters and recovery
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/catalog-public-browser.cjs
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4

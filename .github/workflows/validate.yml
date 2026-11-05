@@ -93,4 +93,3 @@ jobs:
         env:
           SITE_URL: http://127.0.0.1:4173/
         run: node tests/catalog-browser-smoke.cjs
-

@@ -2,7 +2,7 @@
 
 Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub Pages.
 
-Bản web hiện tại: [v1.20.0 — tải trang chủ và khả năng sử dụng](RELEASE_NOTES_V1_20_0.md). [Kết quả đo và các điểm tiếp tục tối ưu](PERFORMANCE_BASELINE.md).
+Bản web hiện tại: [v1.21.1 — luồng tư vấn và tích hợp quản trị](RELEASE_NOTES_V1_21_1.md). [Nghiệm thu tư vấn](CONSULTATION_ACCEPTANCE.md) · [Kết quả đo và các điểm tiếp tục tối ưu](PERFORMANCE_BASELINE.md).
 
 [Lộ trình website chuyên nghiệp](WEBSITE_ROADMAP.md) · [Web v1.19: kiến thức HTML và nội dung gốc](RELEASE_NOTES_V1_19_0.md) · [Hướng dẫn biên tập](content/KNOWLEDGE_PUBLISHING.md).
 

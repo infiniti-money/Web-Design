@@ -4,7 +4,7 @@ Tên thương hiệu hiện tại: **ATELIER HOME**. Các tài liệu cũ dùng 
 
 ## Mốc hiện tại
 
-- Web: [v1.20.0](RELEASE_NOTES_V1_20_0.md): phông chữ không chặn render, ảnh responsive, nhãn truy cập và nhánh liên hệ không JavaScript. v1.19 hoàn thiện kiến thức HTML; v1.18 bổ sung tìm CRM không dấu.
+- Web: [v1.22.0](RELEASE_NOTES_V1_22_0.md): Catalog public, đường dẫn chia sẻ, khôi phục bộ lọc và sửa quyền đọc anon. v1.21.1 hợp nhất luồng tư vấn và quản trị.
 - PC: `desktop-v1.1.1`, bản vá tìm CRM tương ứng. Số phiên bản PC và web độc lập.
 - Đã phát hành: [web v1.18.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.18.0) · [PC 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1).
 - Bản nâng cấp giao diện trước đó: [báo cáo triển khai](PROFESSIONAL_UPGRADE.md). Bản nền tảng CMS/desktop: [báo cáo kiểm thử](ADMIN_UPGRADE_REPORT.md).
@@ -41,6 +41,9 @@ Kiểm chứng phát hành 05/11/2026: [triển khai Pages](https://github.com/i
 - [v1.18](RELEASE_NOTES_V1_18_0.md): CRM không dấu và hợp nhất nền tảng quản trị mới.
 - [v1.19](RELEASE_NOTES_V1_19_0.md): kiến thức HTML, nội dung nền và [lộ trình chuyên nghiệp](WEBSITE_ROADMAP.md).
 - [v1.20](RELEASE_NOTES_V1_20_0.md): hiệu suất/khả năng sử dụng trang chủ, tiếp tục chặng 4/6.
+- [v1.21](RELEASE_NOTES_V1_21_0.md): trạng thái gửi tư vấn và [nghiệm thu chuyển đổi](CONSULTATION_ACCEPTANCE.md).
+- [v1.21.1](RELEASE_NOTES_V1_21_1.md): bản tích hợp main; giữ tag/gói nguồn v1.21.0 đã tạo trước hợp nhất.
+- [v1.22](RELEASE_NOTES_V1_22_0.md): Catalog công khai và [nghiệm thu quyền đọc/chia sẻ](CATALOG_PUBLIC_ACCEPTANCE.md).
 
 Không tạo ghi chú v1.14–v1.16 hoặc tag lịch sử giả chỉ để lấp số thứ tự. Các module tương ứng đã có trong nguồn; chỉ ghi nhận release khi có bằng chứng phát hành.
 
