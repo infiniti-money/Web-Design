@@ -227,7 +227,7 @@
         captchaToken = "";
         try { if (captchaWidget !== null) window.turnstile.reset(captchaWidget); } catch {}
       }
-      if (submit) submit.disabled = captchaActive || !backendReady;
+      if (submit) submit.disabled = !backendReady || (captchaActive && !captchaToken);
     }
   }, true);
 
