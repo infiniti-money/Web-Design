@@ -44,7 +44,7 @@ test("Proposed schema is RLS gated, respects CRM retention and enforces same-cus
    assert.match(sql,new RegExp("REVOKE ALL ON[\\s\\S]*"+table,"i"));
  }
  assert.match(sql,/private\.current_staff_role\(\)/);
- assert.match(sql,/ON DELETE CASCADE; -- honor existing 12-month CRM retention/);
+ assert.match(sql,/ON DELETE CASCADE, -- honor existing 12-month CRM retention/);
  assert.match(sql,/JOIN public\.inquiry_care_tasks t ON t\.inquiry_id=w\.inquiry_id/);
  assert.match(sql,/delivery_workspace_version_guard/);
  assert.doesNotMatch(sql,/SERVICE_ROLE|sb_secret_/i);
