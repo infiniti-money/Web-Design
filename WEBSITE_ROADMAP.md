@@ -55,3 +55,10 @@ Mỗi đợt có ghi chú phạm vi, kiểm thử, URL đang chạy và giới h
 - Yêu cầu gửi đến Edge Function có giới hạn thời gian chờ 15 giây, khóa nút gửi khi đang xử lý và dùng `aria-busy` cho biểu mẫu. Khi API xác nhận `ok:true`, mới hiển thị tiếp nhận thành công và xóa form.
 - Khi timeout/lỗi mạng/không có phản hồi xác nhận, giao diện không khẳng định dữ liệu chắc chắn chưa được ghi; bảo toàn form và hướng dẫn liên hệ kiểm tra trước khi gửi lại để tránh trùng. Không tự động gửi lại, không thay đổi API/Turnstile/Supabase.
 - Ghi nhận kiểm thử Node/Playwright, giao diện di động, lỗi 429/403/mạng không ổn định và bản Pages triển khai. Nghiệm thu khách hàng thật và phép đo conversion/CWV vẫn là việc riêng, không đánh dấu đạt nếu chưa có bằng chứng.
+
+## Đợt CRM, điều phối công việc và CMS
+
+- CRM: khi truy vấn hồ sơ lỗi, ẩn dữ liệu trang cũ và khóa xuất CSV; thống kê lỗi hiển thị “—” thay vì giữ số cũ hoặc báo 0.
+- Công việc: sau khi đổi tiến độ, đọc lại `status` theo RLS trước khi báo thành công, tránh PostgREST UPDATE 0 hàng không lỗi; yêu cầu xác nhận khi mở lại việc đã hoàn thành. Bảng/đếm lỗi không được coi là dữ liệu hợp lệ.
+- CMS: thêm bộ kiểm tra trước xuất bản, lối tắt bài chờ duyệt, xác nhận xuất bản, đổi liên kết kiểm tra HTML sang đường dẫn thật `kien-thuc/<slug>/`. Bài hẹn giờ/chưa triển khai chưa được tuyên bố đã hiện trên Pages.
+- Không tăng quyền dữ liệu, không thay schema/RLS, không xuất bản bài mới hoặc thao tác khách hàng thật từ CI. Kiểm thử trình duyệt dùng fixture Supabase trong bộ nhớ; UAT tài khoản thật vẫn cần nghiệm thu riêng.

@@ -294,6 +294,7 @@
       renderInquiries();
     } catch(error) {
       if(seq===state.leadQuerySeq) {
+        state.inquiries=[];state.leadTotal=0;renderInquiries();
         message("dash-status","Không đọc được yêu cầu tư vấn: "+(error.message||"Lỗi truy vấn"),true);
         $("lead-match-count").textContent="Không tải được hồ sơ. Nhấn Làm mới để thử lại.";
       }
@@ -312,11 +313,12 @@
     ];
     const results=await Promise.all(requests);
     if(seq!==state.leadStatsSeq)return;
-    if(results.some(x=>x.error)){
-      message("dash-status","Không tải được thống kê tư vấn.",true);
+    if(results.some(x=>x.error||!Number.isSafeInteger(x.count)||x.count<0)){
+      for(const id of ["crm-total","crm-today","crm-contacted","crm-quoted","metric-inquiries","crm-due"])$(id).textContent="—";
+      message("dash-status","Không tải được thống kê tư vấn; dấu “—” không có nghĩa là 0.",true);
       return;
     }
-    const [total,today,contacted,quoted,newCount,due]=results.map(x=>Number(x.count)||0);
+    const [total,today,contacted,quoted,newCount,due]=results.map(x=>x.count);
     $("crm-total").textContent=total;
     $("crm-today").textContent=today;
     $("crm-contacted").textContent=contacted;
@@ -638,8 +640,12 @@
     control.addEventListener("change",async()=>{
       const old=task.status;control.disabled=true;
       try{
-        const {error}=await client.from("inquiry_care_tasks").update({status:control.value}).eq("id",task.id);
+        const next=control.value;
+        if(old==="done"&&next!=="done"&&!confirm("Mở lại công việc đã hoàn thành: "+task.title+"?")){control.value=old;return;}
+        const {error}=await client.from("inquiry_care_tasks").update({status:next}).eq("id",task.id);
         if(error)throw error;
+        const check=await client.from("inquiry_care_tasks").select("id,status").eq("id",task.id).single();
+        if(check.error||check.data?.status!==next)throw new Error("Máy chủ chưa xác nhận trạng thái mới; kiểm tra quyền rồi tải lại.");
         await Promise.all([refreshTasksBoard(),loadCustomerTasks(),loadMyTasks()]);
         message("dash-status","Đã cập nhật tiến độ công việc và ghi nhật ký.");
       }catch(error){
@@ -657,8 +663,11 @@
     updatingTasks.add(task.id);
     message("tasks-board-status","Đang cập nhật: "+task.title+"...");
     try{
+      if(task.status==="done"&&!confirm("Mở lại công việc đã hoàn thành: "+task.title+"?"))return;
       const {error}=await client.from("inquiry_care_tasks").update({status:next}).eq("id",task.id);
       if(error)throw error;
+      const check=await client.from("inquiry_care_tasks").select("id,status").eq("id",task.id).single();
+      if(check.error||check.data?.status!==next)throw new Error("Máy chủ chưa xác nhận trạng thái mới; kiểm tra quyền rồi tải lại.");
       await Promise.all([refreshTasksBoard(),loadCustomerTasks()]);
       message("tasks-board-status","Đã cập nhật: "+task.title+" → "+taskStatuses[next]+".");
     }catch(error){
@@ -894,7 +903,13 @@
       $("tasks-next").disabled=(state.taskBoardPage+1)*taskPageSize>=state.taskBoardTotal;
       message("tasks-board-status","Hiển thị "+(data||[]).length+" / "+state.taskBoardTotal+" công việc phù hợp (25 việc/trang).");
     }catch(error){
-      if(seq===state.taskBoardSeq)message("tasks-board-status","Lỗi tải công việc: "+(error.message||"Lỗi hệ thống"),true);
+      if(seq===state.taskBoardSeq){
+        state.taskBoardTotal=0;renderTaskKanban([]);
+        const body=$("tasks-board-table");body.replaceChildren();
+        const row=el("tr"),cell=el("td","Không thể tải công việc. Nhấn Làm mới để truy vấn lại.","empty");cell.colSpan=5;row.append(cell);body.append(row);
+        $("tasks-page-label").textContent="Chưa có dữ liệu xác nhận";$("tasks-prev").disabled=true;$("tasks-next").disabled=true;
+        message("tasks-board-status","Lỗi tải công việc: "+(error.message||"Lỗi hệ thống"),true);
+      }
     }
   }
   async function loadTaskKpis(){
@@ -903,8 +918,11 @@
       head(),head().eq("status","todo"),head().eq("status","in_progress"),
       head().eq("status","done"),head().neq("status","done").lt("due_at",new Date().toISOString())
     ]);
-    if(res.some(r=>r.error)){message("tasks-board-status","Không đọc được thống kê công việc.",true);return;}
-    const vals=res.map(r=>r.count||0);
+    if(res.some(r=>r.error||!Number.isSafeInteger(r.count)||r.count<0)){
+      for(const id of ["tasks-total","tasks-todo","tasks-progress","tasks-done","tasks-overdue"])$(id).textContent="—";
+      message("tasks-board-status","Không đọc được thống kê công việc; dấu “—” không phải 0.",true);return;
+    }
+    const vals=res.map(r=>r.count);
     for(const [id,count] of [["tasks-total",vals[0]],["tasks-todo",vals[1]],["tasks-progress",vals[2]],["tasks-done",vals[3]],["tasks-overdue",vals[4]]])$(id).textContent=count;
   }
   async function refreshTasksBoard(){

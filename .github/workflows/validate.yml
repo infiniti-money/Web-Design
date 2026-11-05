@@ -85,4 +85,8 @@ jobs:
         env:
           SITE_URL: http://127.0.0.1:4173/
         run: node tests/consultation-browser-smoke.cjs
+      - name: Verify CMS roles, approvals, revisions and quote UI with fixtures
+        env:
+          SITE_URL: http://127.0.0.1:4173/
+        run: node tests/cms-browser-smoke.cjs
 

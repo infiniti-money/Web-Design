@@ -10,14 +10,28 @@
   function lockEditor(locked){$("post-form").querySelectorAll("input,select,textarea,button").forEach(control=>control.disabled=locked);$("post-new").disabled=locked;document.querySelectorAll(".cms-post,#post-history button").forEach(control=>control.disabled=locked);$("post-history-load").disabled=locked||!editing;}
   function canLeave(){return !dirty||confirm("Nội dung chưa lưu. Rời khỏi bản chỉnh sửa này?");}
   function preview(show){$("post-edit-area").classList.toggle("hide",show);$("post-preview").classList.toggle("hide",!show);$("post-preview-tab").setAttribute("aria-pressed",String(show));$("post-edit-tab").setAttribute("aria-pressed",String(!show));if(show)window.AtelierMarkdown.render($("post-preview"),$("post-body").value);}
+  function publicationCheck(){
+    const problems=[];
+    if($("post-title").value.trim().length<2)problems.push("tiêu đề");
+    if($("post-excerpt").value.trim().length<40)problems.push("mô tả ngắn ≥ 40 ký tự");
+    if($("post-body").value.trim().length<80)problems.push("nội dung ≥ 80 ký tự");
+    if($("post-cover").value.trim()&&(!$("post-image-rights").checked||!$("post-alt").value.trim()))problems.push("quyền và mô tả ảnh");
+    const scheduled=$("post-published-at").value;
+    if(scheduled&&!Number.isFinite(Date.parse(scheduled)))problems.push("lịch xuất bản");
+    const publish=$("post-status").value==="published";
+    $("post-publish-checklist").textContent=publish?(problems.length?"Chưa đủ điều kiện xuất bản: "+problems.join(", ")+".":"Đủ điều kiện nội dung để gửi yêu cầu xuất bản. Cần xác nhận quyền, lịch và kết quả GitHub Pages."):"Kiểm tra trước khi xuất bản: "+(problems.length?problems.join(", ")+".":"Các mục cơ bản đã có; chọn Xuất bản để kiểm tra.");
+    return problems.length===0;
+  }
   function fill(post,restored=false){
     for(const [key,id] of Object.entries(fields))$(id).value=post[key]??(key==="category"?"Kinh nghiệm":key==="status"?"draft":"");
     $("post-image-rights").checked=!!post.image_rights_confirmed;
     const date=post.published_at?new Date(post.published_at):null;
     $("post-published-at").value=date&&!Number.isNaN(date.getTime())?new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16):"";
     $("post-editor-title").textContent=editing?"Chỉnh sửa bài viết":"Bài viết mới";$("post-history-load").disabled=!editing;
-    $("post-view-live").classList.toggle("hide",post.status!=="published");$("post-view-live").href="https://infiniti-money.github.io/Web-Design/bai-viet.html?slug="+encodeURIComponent(post.slug||"");
-    $("post-history").replaceChildren();slugTouched=!!post.slug;preview(false);setDirty(restored);
+    const published=post.status==="published"&&post.published_at&&Date.parse(post.published_at)<=Date.now()&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(post.slug||"");
+    $("post-view-live").classList.toggle("hide",!published);
+    $("post-view-live").href=published?"https://infiniti-money.github.io/Web-Design/kien-thuc/"+post.slug+"/":"#";
+    $("post-history").replaceChildren();slugTouched=!!post.slug;preview(false);setDirty(restored);publicationCheck();
   }
   function fresh(){if(pending||!canLeave())return;++openRequest;editing=null;fill({status:"draft",category:"Kinh nghiệm"});$("post-title").focus();}
   async function open(id){
@@ -45,6 +59,8 @@
     if(role==="admin"){const value=$("post-published-at").value;payload.published_at=value?new Date(value).toISOString():null;}
     if(payload.status==="published"&&(payload.excerpt.length<40||payload.body_markdown.length<80)){status("Khi xuất bản, cần mô tả ngắn ít nhất 40 ký tự và nội dung ít nhất 80 ký tự.",true);return;}
     if(payload.status==="published"&&payload.cover_image_url&&(!payload.image_rights_confirmed||!payload.image_alt)){status("Hãy bổ sung mô tả ảnh và xác nhận quyền sử dụng trước khi xuất bản.",true);return;}
+    if(payload.status==="published"&&!publicationCheck()){status("Chưa đủ điều kiện nội dung để xuất bản. Kiểm tra danh sách phía trên.",true);return;}
+    if(payload.status==="published"&&!confirm("Bạn đã kiểm tra nội dung, quyền ảnh, lịch và muốn gửi trạng thái Xuất bản? Bài chỉ xuất hiện trên website sau khi hệ thống dựng HTML thành công."))return;
     pending=true;++openRequest;lockEditor(true);status("Đang lưu bài viết…");
     try{const query=editing?db.from("cms_posts").update(payload).eq("id",editing.id).eq("version",editing.version).select().maybeSingle():db.from("cms_posts").insert(payload).select().single();const {data,error}=await query;if(error)throw error;if(!data){status("Bài viết đã được người khác thay đổi. Nội dung của bạn vẫn còn trong trình soạn thảo; tải lại bản mới trước khi lưu.",true);return;}editing=data;fill(data);status("Đã lưu bài viết · "+statusNames[data.status]+" · phiên bản "+data.version);await list();}
     catch(error){status(error?.code==="23505"?"Slug này đã được sử dụng. Chọn đường dẫn khác.":error?.code==="42501"?"Tài khoản không có quyền thực hiện thay đổi này.":"Chưa lưu được bài viết. Nội dung vẫn còn; kiểm tra kết nối và thử lại.",true);}
@@ -54,7 +70,7 @@
     if(pending||!editing)return;const id=editing.id;status("Đang tải lịch sử…");
     try{const {data,error}=await db.from("cms_post_revisions").select("version,created_at,snapshot").eq("post_id",id).order("version",{ascending:false}).limit(30);if(error)throw error;if(editing?.id!==id)return;const target=$("post-history");target.replaceChildren();for(const revision of data||[]){const button=document.createElement("button");button.type="button";button.textContent="Dùng nội dung phiên bản "+revision.version+" · "+new Date(revision.created_at).toLocaleString("vi-VN");button.onclick=()=>{if(!canLeave())return;fill({...revision.snapshot,status:"draft",published_at:null},true);status("Đã đưa nội dung phiên bản cũ vào bản nháp. Bấm Lưu để tạo phiên bản mới.");};target.append(button);}status("Hiển thị tối đa 30 phiên bản gần nhất.");}catch{status("Không tải được lịch sử bài viết.",true);}
   }
-  $("post-form").addEventListener("submit",save);$("post-form").addEventListener("input",()=>setDirty(true));$("post-new").onclick=fresh;$("post-reload").onclick=list;$("post-history-load").onclick=history;$("post-edit-tab").onclick=()=>preview(false);$("post-preview-tab").onclick=()=>preview(true);
+  $("post-form").addEventListener("submit",save);$("post-form").addEventListener("input",()=>{setDirty(true);publicationCheck();});$("post-form").addEventListener("change",publicationCheck);$("post-new").onclick=fresh;$("post-reload").onclick=list;$("post-review-queue").onclick=()=>{page=0;$("post-filter").value="review";list();};$("post-history-load").onclick=history;$("post-edit-tab").onclick=()=>preview(false);$("post-preview-tab").onclick=()=>preview(true);
   $("post-title").oninput=()=>{if(!slugTouched)$("post-slug").value=slugify($("post-title").value);};$("post-slug").oninput=()=>slugTouched=true;
   let searchTimer;$("post-search").oninput=()=>{clearTimeout(searchTimer);page=0;searchTimer=setTimeout(list,300);};$("post-filter").onchange=()=>{page=0;list();};$("post-prev").onclick=()=>{if(page>0){page--;list();}};$("post-next").onclick=()=>{if((page+1)*pageSize<total){page++;list();}};
   document.querySelectorAll("[data-format]").forEach(button=>button.onclick=()=>{const textarea=$("post-body"),start=textarea.selectionStart,end=textarea.selectionEnd,selected=textarea.value.slice(start,end)||"Nội dung",format=button.dataset.format;const text=format==="heading"?"\n## "+selected+"\n":format==="bold"?"**"+selected+"**":format==="list"?"\n- "+selected+"\n":"["+selected+"](https://)";textarea.setRangeText(text,start,end,"end");textarea.focus();setDirty(true);});
