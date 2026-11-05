@@ -39,6 +39,7 @@
   const configIsValid = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(cfg.supabaseUrl || "") &&
     /^sb_publishable_[a-zA-Z0-9_-]+$/.test(cfg.supabasePublishableKey || "");
   const backendReady = configIsValid;
+  const REQUEST_TIMEOUT_MS = 15000;
 
   if (!backendReady) {
     const text = "Hệ thống chưa được cấu hình đúng. Chưa thể tiếp nhận yêu cầu.";
@@ -57,7 +58,7 @@
   let captchaLoading = false;
   const refreshSubmit=()=>{if(submit)submit.disabled=pending||complete||!backendReady||Date.now()<cooldownUntil||(captchaActive&&!captchaToken);};
   const informCaptcha = (message) => {
-    if(!pending&&!complete&&Date.now()>=cooldownUntil&&!(message===""&&feedback?.dataset.state==="error"))showFeedback(message);
+    if(!pending&&!complete&&Date.now()>=cooldownUntil&&!(message===""&&["error","warning","success"].includes(feedback?.dataset.state)))showFeedback(message);
   };
   if (captchaActive && backendReady) {
     if (submit) submit.disabled = true;
@@ -207,14 +208,14 @@
     pending = true;
     const disabledBefore=controls().map(control=>[control,control.disabled]);
     for(const [control] of disabledBefore)control.disabled=true;
-    form.setAttribute("aria-busy","true");refreshSubmit();
+    form.setAttribute("aria-busy", "true");refreshSubmit();
     showFeedback("Đang gửi yêu cầu. Vui lòng chờ xác nhận…");
-    const controller=new AbortController();
-    const requestTimeout=setTimeout(()=>controller.abort(),25000);
+    const requestController=new AbortController();
+    const timeout=setTimeout(()=>requestController.abort(),REQUEST_TIMEOUT_MS);
     try {
       const response = await fetch(cfg.supabaseUrl.replace(/\/$/,"") + "/functions/v1/submit-inquiry", {
         method: "POST",
-        signal: controller.signal,
+        signal: requestController.signal,
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({...inquiry, privacy_consent: document.getElementById("consent")?.checked === true, website: String(values.get("website") || ""), ...(captchaActive ? {turnstile_token: captchaToken} : {})}),
       });
@@ -224,8 +225,8 @@
           const wait=raw&&/^[0-9]+$/.test(raw)?Number(raw)*1000:raw?Date.parse(raw)-Date.now():0;
           if(Number.isFinite(wait)&&wait>0&&wait<=86400000){
             cooldownUntil=Date.now()+wait;clearInterval(cooldownTimer);
-            const tick=()=>{const seconds=Math.ceil((cooldownUntil-Date.now())/1000);if(seconds<=0){clearInterval(cooldownTimer);cooldownTimer=null;showFeedback("Bạn có thể thử lại sau khi hoàn tất xác minh mới.");refreshSubmit();}else showFeedback("Bạn đã gửi nhiều yêu cầu. Vui lòng chờ "+seconds+" giây. Nội dung vẫn được giữ lại.","error");};tick();cooldownTimer=setInterval(tick,1000);
-          }else showFeedback("Bạn đã gửi nhiều yêu cầu. Nội dung vẫn được giữ lại. Vui lòng thử lại sau hoặc liên hệ qua email.","error");
+            const tick=()=>{const seconds=Math.ceil((cooldownUntil-Date.now())/1000);if(seconds<=0){clearInterval(cooldownTimer);cooldownTimer=null;showFeedback("Bạn có thể thử lại sau khi hoàn tất xác minh mới.");refreshSubmit();}else showFeedback("Bạn đã gửi quá nhiều yêu cầu. Vui lòng chờ "+seconds+" giây. Nội dung vẫn được giữ lại.","warning");};tick();cooldownTimer=setInterval(tick,1000);
+          }else showFeedback("Bạn đã gửi quá nhiều yêu cầu. Nội dung vẫn được giữ lại. Vui lòng thử lại sau hoặc liên hệ qua email.","warning");
           return;
         }
         if (response.status === 403) {
@@ -243,12 +244,12 @@
       showFeedback("Yêu cầu đã được hệ thống ghi nhận. Chúng tôi sẽ liên hệ theo số điện thoại bạn cung cấp. Bạn không cần gửi lại cùng yêu cầu.","success");
     } catch (error) {
       console.error("Không thể ghi nhận yêu cầu:", error.code || "network_error");
-      showFeedback("Gửi yêu cầu chưa thành công. Chưa nhận được xác nhận từ hệ thống; yêu cầu có thể đã được tiếp nhận. Vui lòng không gửi lặp ngay. Nội dung vẫn được giữ lại để bạn kiểm tra hoặc liên hệ qua email.","error");
+      showFeedback("Gửi yêu cầu chưa thành công. Chưa thể xác nhận hệ thống đã nhận hay chưa; yêu cầu có thể đã được tiếp nhận. Nội dung vẫn được giữ lại để bạn kiểm tra hoặc liên hệ qua email trước khi gửi lại để tránh trùng.","warning");
     } finally {
-      clearTimeout(requestTimeout);
+      clearTimeout(timeout);
       pending = false;
       for(const [control,disabled] of disabledBefore)control.disabled=disabled;
-      form.setAttribute("aria-busy","false");
+      form.setAttribute("aria-busy", "false");
       if (captchaActive) {
         captchaToken = "";
         try { if (captchaWidget !== null) window.turnstile.reset(captchaWidget); } catch {}

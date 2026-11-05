@@ -37,8 +37,38 @@ Tiến độ đợt v1.19: đã lập lộ trình; đã dựng danh mục/bài k
 
 Đợt v1.21 tiếp tục chặng 4: khóa biểu mẫu khi gửi, xác nhận thành công/bắt đầu yêu cầu mới, giữ nội dung khi lỗi, timeout không tự gửi lại, khôi phục xác minh và CTA không che liên hệ. Xem [bảng nghiệm thu tư vấn](CONSULTATION_ACCEPTANCE.md). Kiểm thử bằng fixture đạt; việc tiếp nhận thật của doanh nghiệp và thiết bị thật vẫn chưa đánh dấu hoàn thành.
 
+Bản tích hợp v1.21.1 giữ các nâng cấp main song song về Operations/CRM/CMS/Catalog, thống nhất timeout 15 giây; tổng 85/86 bài Node đạt (1 bài gửi thật bỏ qua). Tag v1.21.0 lưu nguồn trước hợp nhất; bản triển khai nhánh chính dùng v1.21.1. Xem RELEASE_NOTES_V1_21_1.md để phân biệt phạm vi của hai gói.
+
 Đợt v1.20 xử lý phông chữ chặn hiển thị, ảnh responsive và nhãn truy cập trên trang chủ; bổ sung nhánh liên hệ khi JavaScript tắt. Kiểm thử 69/70 bài đạt (1 bài gửi dữ liệu thật chủ động bỏ qua), browser smoke và home experience đạt. So sánh local cho thấy font không còn nằm trong danh sách tài nguyên chặn render và lỗi nhãn đã hết; số đo online ghi sau triển khai.
 
 Đã triển khai v1.20, đối chiếu revision `9d338249fc0aae4147a815c7e80297fe5b43d8b4`; CI triển khai và browser smoke đều thành công. Online đo 93 hiệu suất / 100 Accessibility / 100 Best Practices / 100 SEO. Đây là cải thiện cấu trúc tải và nhãn, chưa có bằng chứng tăng tốc tổng thể ổn định so với lần đo cũ; xem số đo đầy đủ trong PERFORMANCE_BASELINE.md. Chặng 4 và 6 tiếp tục mở cho nghiệm thu thật/CWV, không tự đánh dấu hoàn thành toàn bộ.
 
 Mỗi đợt có ghi chú phạm vi, kiểm thử, URL đang chạy và giới hạn còn lại. Cập nhật bảng này theo bằng chứng thực tế. Các chặng 4–6 và nghiệm thu doanh nghiệp chưa tự động được xem là hoàn tất khi chỉ có giao diện hoặc build thành công.
+
+## Chặng 5 — Đợt điều phối vận hành (05/11/2026)
+
+- Bổ sung `operations.html` (Trung tâm vận hành) cho Admin và Quản lý, sử dụng Auth hiện tại và kiểm soát dữ liệu bằng RLS; không tạo bảng mới.
+- Hàng đợi chỉ đọc: công việc quá hạn, đến hạn trong 7 ngày, báo giá chờ duyệt, bài chờ duyệt, số nhân sự hoạt động chỉ với Admin. Tổng số theo phạm vi tài khoản có thể đọc, không giả định tất cả hồ sơ trong doanh nghiệp.
+- Không đưa dữ liệu khách hàng lên dashboard, không ghi trạng thái hoặc gửi thông báo; lỗi tải số liệu hiển thị `–`, không bị quy thành 0. Thao tác xử lý vẫn đặt tại các trang nghiệp vụ sẵn có.
+- Bộ kiểm thử gồm Node cho Auth/role/count/filter, GitHub Pages package và desktop allowlist, Chromium smoke trên bản Pages sau triển khai. Các giới hạn nghiệm thu thật và kiểm thử khôi phục được ghi tại `OPERATIONS_RUNBOOK.md`.
+- Các hạng mục chưa xác nhận: đăng nhập UAT với Admin/Quản lý/Nhân viên thật; backup/restore độc lập; kích hoạt migration quote history riêng; số liệu CWV/Search Console. Không đánh dấu hoàn thành chặng 5 chỉ vì deploy trang thành công.
+
+## Chặng 4 — Trải nghiệm tư vấn an toàn (đợt tiếp theo, 05/11/2026)
+
+- Trang chủ bổ sung hướng dẫn ba bước tư vấn và nhắc dịch vụ đã chọn từ trang dịch vụ (`?service=design|build|styling`); không bổ sung trường nhạy cảm vào URL hay lưu thông tin người dùng trên trình duyệt.
+- Yêu cầu gửi đến Edge Function có giới hạn thời gian chờ 15 giây, khóa nút gửi khi đang xử lý và dùng `aria-busy` cho biểu mẫu. Khi API xác nhận `ok:true`, mới hiển thị tiếp nhận thành công và xóa form.
+- Khi timeout/lỗi mạng/không có phản hồi xác nhận, giao diện không khẳng định dữ liệu chắc chắn chưa được ghi; bảo toàn form và hướng dẫn liên hệ kiểm tra trước khi gửi lại để tránh trùng. Không tự động gửi lại, không thay đổi API/Turnstile/Supabase.
+- Ghi nhận kiểm thử Node/Playwright, giao diện di động, lỗi 429/403/mạng không ổn định và bản Pages triển khai. Nghiệm thu khách hàng thật và phép đo conversion/CWV vẫn là việc riêng, không đánh dấu đạt nếu chưa có bằng chứng.
+
+## Đợt nâng cấp quản trị công trình & Catalog
+
+- Catalog: tìm không dấu, lọc nháp/công khai, cảnh báo giới hạn 500 kết quả, xác nhận trước khi công khai/xóa, cảnh báo thay đổi chưa lưu, kiểm chứng kết quả ghi/xóa với ID từ Supabase. Không tự xuất bản mục nào.
+- Công trình: sắp xếp thứ tự quản trị/ngày tạo/tên, báo rõ giới hạn 200 bản ghi, kiểm tra đường dẫn ảnh HTTPS và số thứ tự hợp lệ, xác nhận trước khi công khai.
+- Trang công trình tĩnh vẫn dùng nguồn nội dung có xác minh ảnh riêng; xuất bản danh sách dự án không được đồng nhất với việc có hồ sơ dự án HTML. Không thay schema, tài khoản, RLS hay dữ liệu production.
+
+## Đợt CRM, điều phối công việc và CMS
+
+- CRM: khi truy vấn hồ sơ lỗi, ẩn dữ liệu trang cũ và khóa xuất CSV; thống kê lỗi hiển thị “—” thay vì giữ số cũ hoặc báo 0.
+- Công việc: sau khi đổi tiến độ, đọc lại `status` theo RLS trước khi báo thành công, tránh PostgREST UPDATE 0 hàng không lỗi; yêu cầu xác nhận khi mở lại việc đã hoàn thành. Bảng/đếm lỗi không được coi là dữ liệu hợp lệ.
+- CMS: thêm bộ kiểm tra trước xuất bản, lối tắt bài chờ duyệt, xác nhận xuất bản, đổi liên kết kiểm tra HTML sang đường dẫn thật `kien-thuc/<slug>/`. Bài hẹn giờ/chưa triển khai chưa được tuyên bố đã hiện trên Pages.
+- Không tăng quyền dữ liệu, không thay schema/RLS, không xuất bản bài mới hoặc thao tác khách hàng thật từ CI. Kiểm thử trình duyệt dùng fixture Supabase trong bộ nhớ; UAT tài khoản thật vẫn cần nghiệm thu riêng.

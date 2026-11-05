@@ -36,6 +36,18 @@ jobs:
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
         run: node tests/knowledge-browser.cjs
+      - name: Check operations hub RBAC/counts using synthetic browser fixtures
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/operations-browser-smoke.cjs
+      - name: Check consultation resilience using synthetic responses
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/consultation-browser-smoke.cjs
+      - name: Check Catalog admin role, filters and publish with synthetic fixtures
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/catalog-browser-smoke.cjs
       - name: Check homepage font, keyboard and contact fallbacks
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/

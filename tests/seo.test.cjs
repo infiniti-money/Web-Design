@@ -84,13 +84,13 @@ test("robots.txt and sitemap expose only canonical public routes", () => {
   assert.match(sitemap, /<urlset\b[^>]*xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9"/);
   const locations = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => match[1]);
   assert.deepEqual(locations, pages.map(page => page.url));
-  for (const file of ["admin.html", "admin-catalog.html", "commercial.html", "register.html", "reset-password.html", "set-password.html", "notifications.html", "reports-advanced.html", "complete-profile.html"]) {
+  for (const file of ["admin.html", "admin-catalog.html", "commercial.html", "operations.html", "register.html", "reset-password.html", "set-password.html", "notifications.html", "reports-advanced.html", "complete-profile.html"]) {
     assert.ok(!locations.some(url => url.endsWith(`/${file}`)), `${file} must stay out of the sitemap`);
   }
 });
 
 test("Authentication and administration pages request no indexing", () => {
-  const privatePages = ["admin.html", "admin-catalog.html", "commercial.html", "register.html", "reset-password.html", "set-password.html", "notifications.html", "reports-advanced.html", "complete-profile.html"];
+  const privatePages = ["admin.html", "admin-catalog.html", "commercial.html", "operations.html", "register.html", "reset-password.html", "set-password.html", "notifications.html", "reports-advanced.html", "complete-profile.html"];
   for (const file of privatePages) {
     const html = read(file);
     assert.match(html, /<meta\s+name=["']robots["']\s+content=["']noindex,nofollow["']/i, `${file} must be noindex`);

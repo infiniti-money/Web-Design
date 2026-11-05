@@ -1,4 +1,4 @@
-# Nghiệm thu luồng tư vấn — v1.21
+# Nghiệm thu luồng tư vấn — v1.21.1
 
 | Trường hợp | Hành vi | Kiểm chứng |
 | --- | --- | --- |
@@ -9,7 +9,7 @@
 | Sai dữ liệu/xác minh | Giữ thông tin và đồng ý; cho xác minh lại | Fixture 400/403 đạt |
 | Giới hạn gửi | Giữ thông tin; áp dụng Retry-After nếu trình duyệt đọc được | Fixture đạt; backend hiện không có header này |
 | Lỗi 503/mạng/JSON hỏng | Không báo thành công, không tự POST lại, không khẳng định chưa ghi | Fixture đạt |
-| Chờ quá 25 giây | Hủy chờ phía client, thông báo trạng thái chưa xác nhận | Đồng hồ giả lập trình duyệt đạt |
+| Chờ quá 15 giây | Hủy chờ phía client, thông báo trạng thái chưa xác nhận | Đồng hồ giả lập trình duyệt đạt |
 | Widget tải lỗi | Có nút thử lại; chưa xác minh thì không gửi được | Fixture đạt |
 | Mobile | Không tràn ngang; CTA nổi không che khu vực liên hệ | Viewport 390px đạt, chưa thay thế thiết bị thật |
 

@@ -1,6 +1,7 @@
 .form-secondary{display:inline-flex;align-items:center;justify-content:center;padding:11px 17px;margin:12px 10px 0 0;background:#fff;border:1px solid #819381;color:#284c36;font:inherit;font-size:12px;font-weight:600;line-height:1.5;border-radius:4px;cursor:pointer;min-height:44px}
 .form-secondary[hidden]{display:none}.form-secondary:hover{background:#eef3ec}.form-secondary:focus-visible,#form-feedback:focus-visible{outline:3px solid #a78a5a;outline-offset:4px}
 .consultation-visible .floating{display:none}
+#form-feedback[data-state="warning"]{display:block;padding:14px 16px;background:#fff6df;color:#6a4c1e;border-left:3px solid #ba934b}
 #form-feedback{line-height:1.65;overflow-wrap:anywhere}#form-feedback[data-state="error"]{display:block;padding:14px 16px;background:#fff2e9;color:#7e3726;border-left:3px solid #bc7551}
 #form-feedback[data-state="success"]{display:block;padding:18px;background:#edf4e9;color:#244d32;border-left:3px solid #567b4c;font-size:14px}
 .consult-card[aria-busy="true"]{cursor:progress}.consult-card[aria-busy="true"] input,.consult-card[aria-busy="true"] select,.consult-card[aria-busy="true"] textarea{opacity:.65}.consult-card[aria-busy="true"] button{cursor:wait}
