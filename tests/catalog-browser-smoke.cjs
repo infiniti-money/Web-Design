@@ -59,6 +59,7 @@ async function open(browser,role){
     assert.equal(await page.locator("#name").inputValue(),"Bàn gỗ kiểm thử");
     page.once("dialog",async dialog=>dialog.accept());
     await page.locator("#reset").click();
+    await page.waitForFunction(()=>document.querySelector("#name").value==="",{timeout:5000});
     assert.equal(await page.locator("#name").inputValue(),"");
     await page.locator("#search").fill("");
     await page.locator('#items button:has-text("Sửa")').click();
