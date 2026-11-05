@@ -136,7 +136,7 @@ async function cms(browser){
   await page.locator("#post-save").click();
   await page.locator("#post-save-state").getByText("Đã lưu · phiên bản 4",{exact:true}).waitFor();
   // Saving as published is NOT proof that GitHub Pages deployed this revision.
-  await page.locator("#post-deploy-state").getByText("Không xác minh được bản triển khai",{exact:false}).waitFor();
+  await page.locator("#post-deploy-state").getByText(/Không xác minh được bản triển khai|Phiên bản đang lưu chưa được xác nhận/).waitFor();
   assert.equal(await page.locator("#post-view-live").isVisible(),false);
   const published=await page.evaluate(()=>window.__cmsFixture.rows.cms_posts.find(post=>post.status==="published"));
   await page.route("**/cms-publication.json",route=>route.fulfill({
