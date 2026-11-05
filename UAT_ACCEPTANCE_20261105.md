@@ -2,6 +2,10 @@
 
 **Trạng thái: CHƯA ĐỦ ĐIỀU KIỆN NGHIỆM THU PRODUCTION.** Trang này là checklist; không tự khẳng định UAT đã chạy hoặc cơ sở dữ liệu đã sao lưu. Xem [Issue #24](https://github.com/infiniti-money/Web-Design/issues/24).
 
+## Bổ sung kết quả production schema (05/11/2026)
+
+Theo chỉ đạo trực tiếp, migration **additive** `20261105082144_delivery_workspaces_crm_catalog_20261105` đã được áp dụng lên Supabase hiện tại sau khi 3 nhóm CI thành công. Kiểm chứng sau triển khai xác nhận 3 bảng mới có RLS, trống dữ liệu; số lượng công trình/CRM/Catalog cũ không đổi. **Đây KHÔNG phải UAT đạt và KHÔNG phải xác nhận backup**. Migration lịch sử báo giá vẫn chưa áp dụng. Xem [báo cáo triển khai](SUPABASE_DELIVERY_DEPLOYMENT_20261105.md).
+
 ## Phạm vi và kết quả chỉ-đọc
 
 - GitHub main `a2be922abc681b6fffb89ca7584621c76e1cdb73`: CI, Pages và browser smoke đạt; các browser fixtures **không phải** kiểm tra bằng tài khoản thật.
