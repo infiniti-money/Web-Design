@@ -1,7 +1,7 @@
 "use strict";
 const path=require("node:path");
 const SITE="https://infiniti-money.github.io/Web-Design/";
-const pages=new Set(["admin.html","admin-posts.html","admin-catalog.html","commercial.html","operations.html","notifications.html","reports-advanced.html"]);
+const pages=new Set(["admin.html","admin-posts.html","admin-catalog.html","commercial.html","operations.html","delivery.html","notifications.html","reports-advanced.html"]);
 function trustedPage(value){try{const url=new URL(value);return url.protocol==="atelier:"&&url.hostname==="app"&&!url.port&&!url.username&&!url.password&&pages.has(url.pathname.slice(1));}catch{return false;}}
 function resolveAsset(value,root){
   let url;try{url=new URL(value);}catch{return null;}
