@@ -61,3 +61,10 @@ Mỗi đợt có ghi chú phạm vi, kiểm thử, URL đang chạy và giới h
 - Catalog: tìm không dấu, lọc nháp/công khai, cảnh báo giới hạn 500 kết quả, xác nhận trước khi công khai/xóa, cảnh báo thay đổi chưa lưu, kiểm chứng kết quả ghi/xóa với ID từ Supabase. Không tự xuất bản mục nào.
 - Công trình: sắp xếp thứ tự quản trị/ngày tạo/tên, báo rõ giới hạn 200 bản ghi, kiểm tra đường dẫn ảnh HTTPS và số thứ tự hợp lệ, xác nhận trước khi công khai.
 - Trang công trình tĩnh vẫn dùng nguồn nội dung có xác minh ảnh riêng; xuất bản danh sách dự án không được đồng nhất với việc có hồ sơ dự án HTML. Không thay schema, tài khoản, RLS hay dữ liệu production.
+
+## Đợt CRM, điều phối công việc và CMS
+
+- CRM: khi truy vấn hồ sơ lỗi, ẩn dữ liệu trang cũ và khóa xuất CSV; thống kê lỗi hiển thị “—” thay vì giữ số cũ hoặc báo 0.
+- Công việc: sau khi đổi tiến độ, đọc lại `status` theo RLS trước khi báo thành công, tránh PostgREST UPDATE 0 hàng không lỗi; yêu cầu xác nhận khi mở lại việc đã hoàn thành. Bảng/đếm lỗi không được coi là dữ liệu hợp lệ.
+- CMS: thêm bộ kiểm tra trước xuất bản, lối tắt bài chờ duyệt, xác nhận xuất bản, đổi liên kết kiểm tra HTML sang đường dẫn thật `kien-thuc/<slug>/`. Bài hẹn giờ/chưa triển khai chưa được tuyên bố đã hiện trên Pages.
+- Không tăng quyền dữ liệu, không thay schema/RLS, không xuất bản bài mới hoặc thao tác khách hàng thật từ CI. Kiểm thử trình duyệt dùng fixture Supabase trong bộ nhớ; UAT tài khoản thật vẫn cần nghiệm thu riêng.
