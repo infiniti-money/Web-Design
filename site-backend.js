@@ -28,6 +28,12 @@
   const configIsValid = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(cfg.supabaseUrl || "") &&
     /^sb_publishable_[a-zA-Z0-9_-]+$/.test(cfg.supabasePublishableKey || "");
   const backendReady = configIsValid;
+  const REQUEST_TIMEOUT_MS = 15000;
+  const showFeedback = (message, kind = "info") => {
+    if (!feedback) return;
+    feedback.textContent = message;
+    feedback.dataset.state = kind;
+  };
 
   if (!backendReady) {
     const text = "Hệ thống chưa được cấu hình đúng. Chưa thể tiếp nhận yêu cầu.";
@@ -44,9 +50,7 @@
   let captchaWidget = null;
   let captchaToken = "";
   let captchaLoading = false;
-  const informCaptcha = (message) => {
-    if (feedback) feedback.textContent = message;
-  };
+  const informCaptcha = (message) => showFeedback(message);
   if (captchaActive && backendReady) {
     if (submit) submit.disabled = true;
     if (!/^[a-zA-Z0-9_-]{8,100}$/.test(captchaSiteKey) || !captchaHost) {
@@ -75,7 +79,7 @@
               callback: token => {
                 captchaToken = token;
                 if (submit && backendReady && !pending) submit.disabled = false;
-                informCaptcha("");
+                if (!["warning", "error", "success"].includes(feedback?.dataset.state)) informCaptcha("");
               },
               "expired-callback": () => {
                 captchaToken = "";
@@ -183,22 +187,25 @@
       return;
     }
     pending = true;
+    form.setAttribute("aria-busy", "true");
     if (submit) submit.disabled = true;
-    if (feedback) feedback.textContent = "Đang gửi yêu cầu...";
+    showFeedback("Đang gửi yêu cầu...", "info");
+    const requestController = new AbortController();
+    const timeout = setTimeout(() => requestController.abort(), REQUEST_TIMEOUT_MS);
     try {
       const response = await fetch(cfg.supabaseUrl.replace(/\/$/,"") + "/functions/v1/submit-inquiry", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
+        signal: requestController.signal,
         body: JSON.stringify({...inquiry, privacy_consent: document.getElementById("consent")?.checked === true, website: String(values.get("website") || ""), ...(captchaActive ? {turnstile_token: captchaToken} : {})}),
       });
       if (!response.ok) {
         if (response.status === 429) {
-          if (feedback) feedback.textContent =
-            "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.";
+          showFeedback("Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.", "warning");
           return;
         }
         if (response.status === 403) {
-          informCaptcha("Xác minh chống bot không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.");
+          showFeedback("Xác minh chống bot không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.", "warning");
           return;
         }
         throw new Error("gateway_http_" + response.status);
@@ -206,19 +213,21 @@
       const receipt = await response.json();
       if (receipt?.ok !== true) throw new Error("invalid_gateway_receipt");
       form.reset();
-      if (feedback) feedback.textContent =
-        "Yêu cầu đã được hệ thống ghi nhận. Chúng tôi sẽ liên hệ theo số điện thoại bạn cung cấp.";
+      showFeedback("Yêu cầu đã được hệ thống ghi nhận. Chúng tôi sẽ liên hệ theo số điện thoại bạn cung cấp.", "success");
     } catch (error) {
-      console.error("Không thể ghi nhận yêu cầu:", error.code || "network_error");
-      if (feedback) feedback.textContent =
-        "Gửi yêu cầu chưa thành công. Dữ liệu chưa được lưu. Vui lòng thử lại sau.";
+      console.error("Không thể xác nhận tiếp nhận yêu cầu:", error?.name === "AbortError" ? "request_timeout" : error?.code || "network_error");
+      showFeedback(error?.name === "AbortError"
+        ? "Yêu cầu chưa có phản hồi sau 15 giây. Chưa thể xác nhận hệ thống đã nhận hay chưa. Nội dung vẫn được giữ trên biểu mẫu; vui lòng liên hệ email để kiểm tra trước khi gửi lại."
+        : "Gửi yêu cầu chưa thành công. Chưa thể xác nhận hệ thống đã nhận hay chưa. Nội dung vẫn được giữ trên biểu mẫu; vui lòng kiểm tra trước khi gửi lại để tránh trùng.", "warning");
     } finally {
+      clearTimeout(timeout);
       pending = false;
+      form.setAttribute("aria-busy", "false");
       if (captchaActive) {
         captchaToken = "";
         try { if (captchaWidget !== null) window.turnstile.reset(captchaWidget); } catch {}
       }
-      if (submit) submit.disabled = captchaActive || !backendReady;
+      if (submit) submit.disabled = !backendReady || (captchaActive && !captchaToken);
     }
   }, true);
 

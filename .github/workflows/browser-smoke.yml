@@ -40,6 +40,10 @@ jobs:
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
         run: node tests/operations-browser-smoke.cjs
+      - name: Check consultation resilience using synthetic responses
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/consultation-browser-smoke.cjs
       - name: Check homepage font, keyboard and contact fallbacks
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/

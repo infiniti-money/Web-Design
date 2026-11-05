@@ -56,3 +56,33 @@ jobs:
           fi
           psql -h 127.0.0.1 -U ci -d quote_guard_test -v ON_ERROR_STOP=1 -f tests/quote-version-guard-isolated.sql
 
+
+
+  consultation-browser:
+    name: Public consultation UX (isolated Playwright)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Playwright Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.64.1
+          npx playwright install --with-deps chromium
+      - name: Start isolated preview (no production writes)
+        run: |
+          node scripts/serve-local.cjs > /tmp/atelier-preview.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/atelier-preview.log
+          exit 1
+      - name: Test service selection, error handling and receipt confirmation
+        env:
+          SITE_URL: http://127.0.0.1:4173/
+        run: node tests/consultation-browser-smoke.cjs
+

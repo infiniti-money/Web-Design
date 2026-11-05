@@ -48,3 +48,10 @@ Mỗi đợt có ghi chú phạm vi, kiểm thử, URL đang chạy và giới h
 - Không đưa dữ liệu khách hàng lên dashboard, không ghi trạng thái hoặc gửi thông báo; lỗi tải số liệu hiển thị `–`, không bị quy thành 0. Thao tác xử lý vẫn đặt tại các trang nghiệp vụ sẵn có.
 - Bộ kiểm thử gồm Node cho Auth/role/count/filter, GitHub Pages package và desktop allowlist, Chromium smoke trên bản Pages sau triển khai. Các giới hạn nghiệm thu thật và kiểm thử khôi phục được ghi tại `OPERATIONS_RUNBOOK.md`.
 - Các hạng mục chưa xác nhận: đăng nhập UAT với Admin/Quản lý/Nhân viên thật; backup/restore độc lập; kích hoạt migration quote history riêng; số liệu CWV/Search Console. Không đánh dấu hoàn thành chặng 5 chỉ vì deploy trang thành công.
+
+## Chặng 4 — Trải nghiệm tư vấn an toàn (đợt tiếp theo, 05/11/2026)
+
+- Trang chủ bổ sung hướng dẫn ba bước tư vấn và nhắc dịch vụ đã chọn từ trang dịch vụ (`?service=design|build|styling`); không bổ sung trường nhạy cảm vào URL hay lưu thông tin người dùng trên trình duyệt.
+- Yêu cầu gửi đến Edge Function có giới hạn thời gian chờ 15 giây, khóa nút gửi khi đang xử lý và dùng `aria-busy` cho biểu mẫu. Khi API xác nhận `ok:true`, mới hiển thị tiếp nhận thành công và xóa form.
+- Khi timeout/lỗi mạng/không có phản hồi xác nhận, giao diện không khẳng định dữ liệu chắc chắn chưa được ghi; bảo toàn form và hướng dẫn liên hệ kiểm tra trước khi gửi lại để tránh trùng. Không tự động gửi lại, không thay đổi API/Turnstile/Supabase.
+- Ghi nhận kiểm thử Node/Playwright, giao diện di động, lỗi 429/403/mạng không ổn định và bản Pages triển khai. Nghiệm thu khách hàng thật và phép đo conversion/CWV vẫn là việc riêng, không đánh dấu đạt nếu chưa có bằng chứng.
