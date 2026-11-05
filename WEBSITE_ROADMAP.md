@@ -56,6 +56,12 @@ Mỗi đợt có ghi chú phạm vi, kiểm thử, URL đang chạy và giới h
 - Khi timeout/lỗi mạng/không có phản hồi xác nhận, giao diện không khẳng định dữ liệu chắc chắn chưa được ghi; bảo toàn form và hướng dẫn liên hệ kiểm tra trước khi gửi lại để tránh trùng. Không tự động gửi lại, không thay đổi API/Turnstile/Supabase.
 - Ghi nhận kiểm thử Node/Playwright, giao diện di động, lỗi 429/403/mạng không ổn định và bản Pages triển khai. Nghiệm thu khách hàng thật và phép đo conversion/CWV vẫn là việc riêng, không đánh dấu đạt nếu chưa có bằng chứng.
 
+## Đợt nâng cấp quản trị công trình & Catalog
+
+- Catalog: tìm không dấu, lọc nháp/công khai, cảnh báo giới hạn 500 kết quả, xác nhận trước khi công khai/xóa, cảnh báo thay đổi chưa lưu, kiểm chứng kết quả ghi/xóa với ID từ Supabase. Không tự xuất bản mục nào.
+- Công trình: sắp xếp thứ tự quản trị/ngày tạo/tên, báo rõ giới hạn 200 bản ghi, kiểm tra đường dẫn ảnh HTTPS và số thứ tự hợp lệ, xác nhận trước khi công khai.
+- Trang công trình tĩnh vẫn dùng nguồn nội dung có xác minh ảnh riêng; xuất bản danh sách dự án không được đồng nhất với việc có hồ sơ dự án HTML. Không thay schema, tài khoản, RLS hay dữ liệu production.
+
 ## Đợt CRM, điều phối công việc và CMS
 
 - CRM: khi truy vấn hồ sơ lỗi, ẩn dữ liệu trang cũ và khóa xuất CSV; thống kê lỗi hiển thị “—” thay vì giữ số cũ hoặc báo 0.

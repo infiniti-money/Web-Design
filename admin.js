@@ -552,7 +552,9 @@
     const visible=state.projects.filter(p=>
       (visibility==="all"||(visibility==="published")===p.published)&&
       [p.title,p.slug,p.style,categories[p.category]||p.category].join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/đ/g,"d").includes(search));
-    $("project-match-count").textContent=`${visible.length} / ${state.projects.length} dự án đã tải (tối đa 200)`;
+    if($("project-sort").value==="name")visible.sort((a,b)=>a.title.localeCompare(b.title,"vi"));
+    if($("project-sort").value==="newest")visible.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+    $("project-match-count").textContent=`${visible.length} / ${state.projects.length} dự án đã tải`+(state.projects.length>=200?" (giới hạn 200; bộ lọc có thể chưa bao gồm mọi dự án)":"");
     if(!state.projects.length) {
       const row=el("tr"),td=el("td","Chưa có dự án. Thêm một dự án ở biểu mẫu bên phải.","empty");
       td.colSpan=4;row.append(td);body.append(row);return;
@@ -956,15 +958,19 @@
     const title=$("p-title").value.trim();
     const slug=$("p-slug").value.trim().toLowerCase();
     const url=$("p-image").value.trim();
-    if(title.length<2 || !/^[a-z0-9-]{2,100}$/.test(slug) ||
-      !/^https:\/\/[^\s]+$/i.test(url)) {
+    let validImage=false;
+    try{const parsed=new URL(url);validImage=parsed.protocol==="https:"&&!parsed.username&&!parsed.password&&!!parsed.hostname&&!/[\s<>"\x27]/.test(url);}catch{validImage=false;}
+    const sortOrder=Number($("p-order").value);
+    if(title.length<2 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length>100 ||
+      !validImage || !Number.isSafeInteger(sortOrder) || sortOrder< -99999 || sortOrder>99999) {
       message("dash-status","Tên, slug hoặc địa chỉ ảnh HTTPS không hợp lệ.",true);return;
     }
     const payload={title,slug,category:$("p-category").value,
       area:$("p-area").value.trim(),style:$("p-style").value.trim(),
       image_url:url,summary:$("p-summary").value.trim(),
-      sort_order:Number($("p-order").value)||0,published:$("p-published").checked,
+      sort_order:sortOrder,published:$("p-published").checked,
       updated_at:new Date().toISOString()};
+    if(payload.published && !confirm("Xác nhận thông tin công trình, quyền sử dụng ảnh đã được kiểm tra và muốn công khai trên danh sách website?"))return;
     setBusy(true);
     try {
       const request=state.editingId
@@ -1254,6 +1260,7 @@
   $("reload-projects").addEventListener("click",loadProjects);
   $("project-search").addEventListener("input",renderProjects);
   $("project-visibility").addEventListener("change",renderProjects);
+  $("project-sort").addEventListener("change",renderProjects);
   $("reload-inquiries").addEventListener("click",refreshInquiries);
   let searchTimer;
   const leadFilters=[
