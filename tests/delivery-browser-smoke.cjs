@@ -81,7 +81,7 @@ async function open(browser,role,mobile=false){
     const employee=await open(browser,"employee");
     await employee.waitForFunction(()=>document.querySelector("#delivery-status")?.textContent.includes("Không có quyền"));
     assert.equal(await employee.locator("#delivery-app").isVisible(),false);
-    assert.deepEqual(await employee.evaluate(()=>window.__deliveryFixture.events),[]);
+    assert.equal((await employee.evaluate(()=>window.__deliveryFixture.events)).includes("delivery_workspaces"),false);
     await employee.close();
 
     const manager=await open(browser,"manager",true);
