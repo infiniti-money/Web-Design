@@ -22,15 +22,36 @@
     $("post-publish-checklist").textContent=publish?(problems.length?"Chưa đủ điều kiện xuất bản: "+problems.join(", ")+".":"Đủ điều kiện nội dung để gửi yêu cầu xuất bản. Cần xác nhận quyền, lịch và kết quả GitHub Pages."):"Kiểm tra trước khi xuất bản: "+(problems.length?problems.join(", ")+".":"Các mục cơ bản đã có; chọn Xuất bản để kiểm tra.");
     return problems.length===0;
   }
+  let deploymentCheck=0;
+  async function verifyDeployment(post){
+    const seq=++deploymentCheck,link=$("post-view-live"),notice=$("post-deploy-state");
+    link.classList.add("hide");link.href="#";
+    const eligible=post.status==="published"&&post.published_at&&Date.parse(post.published_at)<=Date.now()
+      &&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(post.slug||"");
+    if(!eligible){notice.textContent=post.status==="published"?"Bài đang hẹn giờ hoặc chưa đến lúc hiển thị.":"";return;}
+    notice.textContent="Đang đối chiếu phiên bản với GitHub Pages…";
+    try{
+      const response=await fetch("./cms-publication.json",{cache:"no-store"});
+      if(!response.ok)throw new Error("No deployment receipt");
+      const receipt=await response.json();
+      if(seq!==deploymentCheck||editing?.id!==post.id)return;
+      const deployed=receipt?.schema===1&&Array.isArray(receipt.posts)&&typeof post.updated_at==="string"
+        &&receipt.posts.some(row=>row.slug===post.slug&&row.updated_at===post.updated_at);
+      if(!deployed){notice.textContent="Phiên bản đang lưu chưa được xác nhận trong gói website. Kiểm tra Pages sau khi triển khai thành công.";return;}
+      link.href="https://infiniti-money.github.io/Web-Design/kien-thuc/"+post.slug+"/";
+      link.classList.remove("hide");
+      notice.textContent="Đã tìm thấy đúng phiên bản trong gói GitHub Pages; mở liên kết để kiểm tra nội dung công khai.";
+    }catch{
+      if(seq===deploymentCheck&&editing?.id===post.id)notice.textContent="Không xác minh được bản triển khai; chưa hiển thị liên kết để tránh báo thành công nhầm.";
+    }
+  }
   function fill(post,restored=false){
     for(const [key,id] of Object.entries(fields))$(id).value=post[key]??(key==="category"?"Kinh nghiệm":key==="status"?"draft":"");
     $("post-image-rights").checked=!!post.image_rights_confirmed;
     const date=post.published_at?new Date(post.published_at):null;
     $("post-published-at").value=date&&!Number.isNaN(date.getTime())?new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16):"";
     $("post-editor-title").textContent=editing?"Chỉnh sửa bài viết":"Bài viết mới";$("post-history-load").disabled=!editing;
-    const published=post.status==="published"&&post.published_at&&Date.parse(post.published_at)<=Date.now()&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(post.slug||"");
-    $("post-view-live").classList.toggle("hide",!published);
-    $("post-view-live").href=published?"https://infiniti-money.github.io/Web-Design/kien-thuc/"+post.slug+"/":"#";
+    verifyDeployment(post);
     $("post-history").replaceChildren();slugTouched=!!post.slug;preview(false);setDirty(restored);publicationCheck();
   }
   function fresh(){if(pending||!canLeave())return;++openRequest;editing=null;fill({status:"draft",category:"Kinh nghiệm"});$("post-title").focus();}

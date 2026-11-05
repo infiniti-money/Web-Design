@@ -135,6 +135,24 @@ async function cms(browser){
   await page.locator("#post-image-rights").check();
   await page.locator("#post-save").click();
   await page.locator("#post-save-state").getByText("Đã lưu · phiên bản 4",{exact:true}).waitFor();
+  // Saving as published is NOT proof that GitHub Pages deployed this revision.
+  await page.locator("#post-deploy-state").getByText("Không xác minh được bản triển khai",{exact:false}).waitFor();
+  assert.equal(await page.locator("#post-view-live").isVisible(),false);
+  const published=await page.evaluate(()=>window.__cmsFixture.rows.cms_posts.find(post=>post.status==="published"));
+  await page.route("**/cms-publication.json",route=>route.fulfill({
+    status:200,contentType:"application/json",
+    body:JSON.stringify({schema:1,posts:[{slug:published.slug,updated_at:"stale-version"}]})
+  }));
+  await page.locator(".cms-post").filter({hasText:published.title}).click();
+  await page.locator("#post-deploy-state").getByText("chưa được xác nhận",{exact:false}).waitFor();
+  assert.equal(await page.locator("#post-view-live").isVisible(),false);
+  await page.unroute("**/cms-publication.json");
+  await page.route("**/cms-publication.json",route=>route.fulfill({
+    status:200,contentType:"application/json",
+    body:JSON.stringify({schema:1,posts:[{slug:published.slug,updated_at:published.updated_at}]})
+  }));
+  await page.locator(".cms-post").filter({hasText:published.title}).click();
+  await page.locator("#post-view-live:not(.hide)").waitFor();
   assert.equal(await page.locator("#post-view-live").isVisible(),true);
   await page.locator("#post-preview-tab").click();
   await page.evaluate(()=>window.scrollTo(0,0));

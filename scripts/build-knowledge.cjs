@@ -46,7 +46,8 @@ function buildKnowledge({root,output,cmsPosts=[],now=Date.now()}){
   const local=JSON.parse(fs.readFileSync(path.join(root,"content/articles.json"))).articles;
   const entries=new Map();
   for(const post of visiblePosts(local,now)){validate(post);if(entries.has(post.slug))throw Error("Duplicate local article slug");entries.set(post.slug,post);}
-  for(const post of visiblePosts(cmsPosts,now)){validate(post);if(entries.has(post.slug))throw Error("CMS slug conflicts with local article: "+post.slug);entries.set(post.slug,post);}
+  const deployedCms=visiblePosts(cmsPosts,now);
+  for(const post of deployedCms){validate(post);if(entries.has(post.slug))throw Error("CMS slug conflicts with local article: "+post.slug);entries.set(post.slug,post);}
   const posts=[...entries.values()].sort((a,b)=>Date.parse(b.published_at)-Date.parse(a.published_at)||a.slug.localeCompare(b.slug));
   const indexUrl=new URL("kien-thuc.html",base).href;
   const articleUrl=post=>new URL(`kien-thuc/${post.slug}/`,base).href;
@@ -67,6 +68,9 @@ function buildKnowledge({root,output,cmsPosts=[],now=Date.now()}){
   const sitemap=path.join(output,"sitemap.xml"),xml=fs.readFileSync(sitemap,"utf8");
   const urls=[indexUrl,...posts.map(articleUrl)];
   fs.writeFileSync(sitemap,xml.replace("</urlset>",urls.map(url=>`  <url><loc>${escape(url)}</loc></url>`).join("\n")+"\n</urlset>"));
+  // Public deployment receipt: only the CMS slug and exact published edit timestamp.
+  // This file is generated only after all public HTML validations pass.
+  fs.writeFileSync(path.join(output,"cms-publication.json"),JSON.stringify({schema:1,posts:deployedCms.map(post=>({slug:post.slug,updated_at:post.updated_at||null}))},null,2)+"\n");
   return {articles:posts.length,urls};
 }
 module.exports={buildKnowledge,fetchPublicPosts,markdown,visiblePosts};
