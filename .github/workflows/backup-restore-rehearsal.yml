@@ -1,0 +1,48 @@
+name: Isolated backup and quote restore rehearsal
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/backup-restore-rehearsal.yml'
+      - 'supabase/migrations/20261105093000_quote_version_immutability.sql'
+      - 'tests/backup-restore-rehearsal.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  rehearsal:
+    name: PostgreSQL 17 synthetic dump/restore + quote guard
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: isolated-ci-only
+          POSTGRES_DB: rehearsal_source
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d rehearsal_source"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install matching PostgreSQL client if needed
+        run: |
+          if ! command -v pg_dump >/dev/null || ! command -v pg_restore >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql-client
+          fi
+      - name: Rehearse encrypted-offline backup procedure with synthetic records only
+        env:
+          PGPASSWORD: isolated-ci-only
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGUSER: ci
+        run: bash tests/backup-restore-rehearsal.sh
