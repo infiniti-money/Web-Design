@@ -4,6 +4,8 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 
 Theo dõi [lịch sử phiên bản và việc còn thiếu](RELEASE_HISTORY.md). Bản web [v1.18.0](RELEASE_NOTES_V1_18_0.md) hoàn thiện tìm CRM tiếng Việt không dấu; phiên bản PC độc lập với phiên bản web.
 
+Bản hiện tại: [web v1.18.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.18.0) · [Windows Manager 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1). Các mục 1.1.0 bên dưới ghi lại đợt nâng cấp giao diện trước bản vá tìm kiếm.
+
 ## Giao diện quản trị chuyên nghiệp — 05/11/2026
 
 Giao diện quản trị mới có điều hướng theo vai trò, tổng quan, CRM/nhân sự, CMS bài viết và báo giá theo hạng mục. Bản PC đóng gói cùng giao diện, dùng Supabase hiện có, lưu phiên đăng nhập mã hóa trên Windows và có kênh cập nhật riêng qua GitHub Releases.

@@ -13,6 +13,8 @@
 
 ## Cài đặt và sử dụng
 
+Bản vá hiện tại: [Windows Manager 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1), bổ sung tìm CRM không dấu. Feed cập nhật stable đã chuyển sang 1.1.1; các đường dẫn 1.1.0 dưới đây là bản nâng cấp giao diện trước đó.
+
 Mở tệp `dist/ATELIER-HOME-Manager-1.1.0-x64-Setup.exe`, cài theo từng bước và đăng nhập bằng tài khoản đã được cấp quyền. Tài khoản mới vẫn cần Admin duyệt. Đăng ký/khôi phục mật khẩu mở trang xác thực của website bằng trình duyệt; ứng dụng PC đăng nhập bằng email và mật khẩu.
 
 Bản 1.1.0 đã phát hành ngày 05/11/2026: [Tải bộ cài Windows](https://github.com/infiniti-money/Web-Design/releases/download/desktop-v1.1.0/ATELIER-HOME-Manager-1.1.0-x64-Setup.exe) · [Tất cả tệp phát hành](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.0). Feed `desktop-stable/latest.yml` đã được kiểm tra trả đúng phiên bản; bộ cài tải qua feed đã được đối chiếu SHA-512. Chưa kiểm thử việc cài nâng cấp trên một máy người dùng đã cài bản cũ.

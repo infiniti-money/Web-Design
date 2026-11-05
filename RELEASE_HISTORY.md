@@ -6,6 +6,7 @@ Tên thương hiệu hiện tại: **ATELIER HOME**. Các tài liệu cũ dùng 
 
 - Web: [v1.18.0](RELEASE_NOTES_V1_18_0.md), nối tiếp v1.17; hoàn thiện tìm CRM không dấu và chuẩn hóa gói phát hành.
 - PC: `desktop-v1.1.1`, bản vá tìm CRM tương ứng. Số phiên bản PC và web độc lập.
+- Đã phát hành: [web v1.18.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.18.0) · [PC 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1).
 - Bản nâng cấp giao diện trước đó: [báo cáo triển khai](PROFESSIONAL_UPGRADE.md). Bản nền tảng CMS/desktop: [báo cáo kiểm thử](ADMIN_UPGRADE_REPORT.md).
 
 ## Đối chiếu những hạn chế trong ghi chú cũ
@@ -24,6 +25,8 @@ Tên thương hiệu hiện tại: **ATELIER HOME**. Các tài liệu cũ dùng 
 
 ## Các ghi chú theo thứ tự phiên bản
 
+Kiểm chứng phát hành 05/11/2026: [triển khai Pages](https://github.com/infiniti-money/Web-Design/actions/runs/41938181600), [browser smoke sau deploy](https://github.com/infiniti-money/Web-Design/actions/runs/41938359037), [gói nguồn web](https://github.com/infiniti-money/Web-Design/actions/runs/41938190521) và [bộ cài Windows](https://github.com/infiniti-money/Web-Design/actions/runs/41938190526) đều thành công. `release.json` trên website khớp commit `4c2d8d63a726ddc6a3683b18c12eb3c57423cb27`. Gói nguồn web tải về đã khớp SHA-256; feed PC trả version 1.1.1. Kiểm thử SQL không thay thế đăng nhập bằng tài khoản nhân viên thực.
+
 - [v1.0](RELEASE_NOTES.md): website demo ban đầu.
 - [v1.1](RELEASE_NOTES_V1_1.md), [v1.1.1](RELEASE_NOTES_V1_1_1.md), [v1.1.2](RELEASE_NOTES_V1_1_2.md): nền tảng Admin và Supabase.
 - [v1.2](RELEASE_NOTES_V1_2.md): API tư vấn được bảo vệ.
@@ -38,3 +41,5 @@ Tên thương hiệu hiện tại: **ATELIER HOME**. Các tài liệu cũ dùng 
 - [v1.18](RELEASE_NOTES_V1_18_0.md): CRM không dấu và hợp nhất nền tảng quản trị mới.
 
 Không tạo ghi chú v1.14–v1.16 hoặc tag lịch sử giả chỉ để lấp số thứ tự. Các module tương ứng đã có trong nguồn; chỉ ghi nhận release khi có bằng chứng phát hành.
+
+Đã tải trọn bộ cài PC 1.1.1 qua feed stable (121.547.909 byte) và đối chiếu SHA-512 khớp metadata. Đây là kiểm tra tải và tính toàn vẹn, chưa phải nghiệm thu cài nâng cấp trên máy người dùng đang có bản cũ. Bản cài tiếp tục chưa ký số.
