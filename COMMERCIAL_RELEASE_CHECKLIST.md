@@ -1,5 +1,7 @@
 # Tân Design v1.17 — Kiểm thử và phát hành an toàn
 
+> Tài liệu lịch sử chuẩn bị nghiệm thu ngày 02/11/2026. v1.17 sau đó đã phát hành theo RELEASE_NOTES_V1_17_0.md; các checkbox dưới đây không phải trạng thái phát hành hiện tại. Kiểm thử giả lập/SQL không thay thế nghiệm thu tài khoản thật. Xem [bảng theo dõi hiện tại](RELEASE_HISTORY.md).
+
 ## Đã xác minh (02/11/2026)
 - GitHub Actions `Validate ATELIER HOME` thành công trên nhánh tích hợp.
 - Supabase project hiện tại: `atelier-home-web-design` (`mswiegltusllzvuavjdh`). Không tạo project/database mới.

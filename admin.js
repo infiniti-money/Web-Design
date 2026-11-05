@@ -267,9 +267,9 @@
     else if(["7","30","90"].includes(state.leadPeriod))
       query=query.gte("created_at",new Date(Date.now()-Number(state.leadPeriod)*86400000).toISOString());
     // Escape PostgREST filter grammar: user text cannot add extra OR clauses.
-    const term=state.leadSearch.slice(0,90).replace(/[^\p{L}\p{N}\s-]/gu,"").trim();
-    if(term) query=query.or(["full_name","phone","details","service","space"]
-      .map(column=>column+".ilike.%"+term+"%").join(","));
+    const term=state.leadSearch.slice(0,90).normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .toLowerCase().replace(/đ/g,"d").replace(/[^\p{L}\p{N}\s-]/gu,"").trim();
+    if(term) query=query.ilike("search_text","%"+term+"%");
     return query;
   }
   async function loadInquiries() {

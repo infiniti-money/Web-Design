@@ -234,12 +234,13 @@ window.supabase={createClient:()=>{
        lt(key,value){q.conditions.push(row=>row[key]!=null && row[key]<value);return q},
        neq(key,value){q.conditions.push(row=>row[key]!==value);return q},
        ilike(key,value){
+         q.searchFilter={key,value};
          const term=String(value).replace(/%/g,"").toLowerCase();
-         q.conditions.push(row=>String(row[key]||"").toLowerCase().includes(term));return q;
+         q.conditions.push(row=>{const text=key==="search_text"?[row.full_name,row.phone,row.details,row.service,row.space].join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/đ/g,"d"):String(row[key]||"").toLowerCase();return text.includes(term);});return q;
        },
        lte(key,value){q.conditions.push(row=>row[key] && row[key]<=value);return q},
        or(expression){const match=/full_name\.ilike\.%([^%]*)%/.exec(expression);q.term=(match?.[1]||"").toLowerCase();return q},
-       range(start,end){window.__ci_queries.push({table,start,end});const items=q.filtered();return Promise.resolve({data:items.slice(start,end+1),count:q.countRequested?items.length:null,error:null})},
+       range(start,end){window.__ci_queries.push({table,start,end,search:q.searchFilter});const items=q.filtered();return Promise.resolve({data:items.slice(start,end+1),count:q.countRequested?items.length:null,error:null})},
        single(){const item=q.filtered()[0];return Promise.resolve({data:item||null,error:item?null:{message:"No matching row"}})},
        then(ok,fail){const items=q.filtered();return Promise.resolve({data:q.head?null:items,count:q.countRequested?items.length:null,error:null}).then(ok,fail)},
        insert(value){
@@ -438,6 +439,12 @@ window.supabase={createClient:()=>{
     await adminCRUD.locator("#tab-inquiries").click();
 
     assert.equal(await adminCRUD.locator("#crm-contacted").innerText(),"0");
+    for(const term of ["khach kiem thu gia","KHÁCH KIỂM THỬ GIẢ".normalize("NFD")]){
+      const before=await adminCRUD.evaluate(()=>window.__ci_queries.length);
+      await adminCRUD.locator("#lead-search").fill(term);
+      await adminCRUD.waitForFunction(offset=>window.__ci_queries.slice(offset).some(q=>q.search?.key==="search_text"&&q.search.value==="%khach kiem thu gia%"),before);
+      await adminCRUD.locator("#inquiries-table").getByText("KHÁCH KIỂM THỬ GIẢ").waitFor();
+    }
     await adminCRUD.locator("#lead-search").fill("0900000000");
     assert.match(await adminCRUD.locator("#lead-match-count").innerText(),/Hiển thị 1–1 \/ 1/);
     await adminCRUD.locator("#lead-search").fill("KHONG TON TAI");

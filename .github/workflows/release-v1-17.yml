@@ -1,11 +1,6 @@
 name: Release Tân Design v1.17.0
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/release-v1-17.yml'
-      - 'RELEASE_NOTES_V1_17_0.md'
   workflow_dispatch:
 
 permissions:
@@ -23,6 +18,7 @@ jobs:
       - name: Check out exact main commit
         uses: actions/checkout@v4
         with:
+          ref: v1.17.0
           persist-credentials: true
       - name: Set up Node
         uses: actions/setup-node@v4

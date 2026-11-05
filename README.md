@@ -2,6 +2,8 @@
 
 Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub Pages.
 
+Theo dõi [lịch sử phiên bản và việc còn thiếu](RELEASE_HISTORY.md). Bản web [v1.18.0](RELEASE_NOTES_V1_18_0.md) hoàn thiện tìm CRM tiếng Việt không dấu; phiên bản PC độc lập với phiên bản web.
+
 ## Giao diện quản trị chuyên nghiệp — 05/11/2026
 
 Giao diện quản trị mới có điều hướng theo vai trò, tổng quan, CRM/nhân sự, CMS bài viết và báo giá theo hạng mục. Bản PC đóng gói cùng giao diện, dùng Supabase hiện có, lưu phiên đăng nhập mã hóa trên Windows và có kênh cập nhật riêng qua GitHub Releases.

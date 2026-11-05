@@ -1,46 +1,49 @@
-name: Publish ATELIER HOME
-
+name: Release ATELIER HOME website
 on:
   push:
-    branches: [main]
+    tags: ['v*']
   workflow_dispatch:
-
 permissions:
   contents: write
-
 concurrency:
-  group: "publish-atelier-home"
+  group: website-release-${{ github.ref }}
   cancel-in-progress: false
-
 jobs:
   release:
-    name: GitHub Release v1.13.1
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-      - name: Verify source
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify version and notes
         run: |
-          node --test tests/static.test.cjs tests/email-notification.test.cjs
-      - name: Package v1.13.1
+          node -e 'const m=require("./website-release.json");if(process.env.GITHUB_REF_TYPE==="tag"&&process.env.GITHUB_REF_NAME!=="v"+m.version)throw Error("Tag must match website-release.json");'
+      - name: Validate website
         run: |
-          mkdir -p dist/atelier-home-v1.13.1/supabase/functions/submit-inquiry dist/atelier-home-v1.13.1/supabase/functions/staff-management
-          cp index.html admin.html admin.js app-config.js site-backend.js privacy.html README.md SUPABASE_SETUP.md TURNSTILE_SETUP.md EMAIL_NOTIFICATIONS_SETUP.md RELEASE_NOTES_V1_13_1.md dist/atelier-home-v1.13.1/
-          cp supabase/schema.sql supabase/inquiry-rate-limit.sql supabase/privacy-consent.sql supabase/inquiry-retention-12m.sql supabase/admin-contact-rpc.sql supabase/customer-care-v1_6.sql supabase/customer-care-audit-v1_6.sql supabase/customer-care-edit-v1_7.sql supabase/customer-care-tasks-v1_8.sql supabase/customer-care-task-edit-v1_10.sql supabase/customer-care-performance-v1_12.sql supabase/staff-roles-v1_13.sql supabase/staff-manager-report-v1_13.sql supabase/staff-role-hardening-v1_13_1.sql supabase/staff-report-hardening-v1_13_1.sql dist/atelier-home-v1.13.1/supabase/
-          cp supabase/functions/submit-inquiry/index.ts dist/atelier-home-v1.13.1/supabase/functions/submit-inquiry/
-          cp supabase/functions/staff-management/index.ts dist/atelier-home-v1.13.1/supabase/functions/staff-management/
-          cd dist
-          zip -qr atelier-home-v1.13.1.zip atelier-home-v1.13.1
-      - name: Create Release if not yet published
+          node scripts/build-project-pages.cjs --check
+          node --test tests/*.test.cjs
+      - name: Package exact committed source
+        run: |
+          node scripts/package-release.cjs
+          unzip -t dist/web-release/*.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: atelier-home-website-source
+          path: dist/web-release/
+          if-no-files-found: error
+      - name: Publish immutable website release
+        if: github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v1.13.1 >/dev/null 2>&1; then
-            echo "Existing v1.13.1 release remains unchanged."
+          set -euo pipefail
+          VERSION=$(node -p 'require("./website-release.json").version')
+          NOTES=$(node -p 'require("./website-release.json").notes')
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Published release remains unchanged."
           else
-            gh release create v1.13.1 ./dist/atelier-home-v1.13.1.zip \
-              --target "$GITHUB_SHA" \
-              --title "ATELIER HOME v1.13.1 — Hardened Staff Roles and Secure Work Access" \
-              --notes-file RELEASE_NOTES_V1_13_1.md
+            gh release create "$GITHUB_REF_NAME" dist/web-release/* --verify-tag --title "ATELIER HOME web $VERSION" --notes-file "$NOTES" --latest=false
           fi
 

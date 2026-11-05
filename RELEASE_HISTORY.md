@@ -1,0 +1,40 @@
+# Lịch sử phát hành và việc còn thiếu
+
+Tên thương hiệu hiện tại: **ATELIER HOME**. Các tài liệu cũ dùng Tân Design được giữ làm lịch sử tại thời điểm phát hành; không phải xác nhận pháp nhân hiện tại.
+
+## Mốc hiện tại
+
+- Web: [v1.18.0](RELEASE_NOTES_V1_18_0.md), nối tiếp v1.17; hoàn thiện tìm CRM không dấu và chuẩn hóa gói phát hành.
+- PC: `desktop-v1.1.1`, bản vá tìm CRM tương ứng. Số phiên bản PC và web độc lập.
+- Bản nâng cấp giao diện trước đó: [báo cáo triển khai](PROFESSIONAL_UPGRADE.md). Bản nền tảng CMS/desktop: [báo cáo kiểm thử](ADMIN_UPGRADE_REPORT.md).
+
+## Đối chiếu những hạn chế trong ghi chú cũ
+
+| Hạng mục | Hiện trạng / bước tiếp theo |
+| --- | --- |
+| v1.5: tìm CRM chưa khớp tiếng Việt không dấu | Hoàn thiện trong v1.18; kiểm thử SQL rollback và trình duyệt. |
+| v1.1–1.3: chưa có database, Pages hoặc CAPTCHA | Là trạng thái lịch sử; backend/website đã triển khai ở các phiên bản sau. Không dùng các dòng này để kết luận hệ thống hiện chưa kết nối. |
+| v1.12: thống kê theo tên, chưa có tài khoản nhân viên | Hệ thống tài khoản/phân quyền và giao việc theo user đã có từ v1.13; vẫn cần nghiệm thu tài khoản Nhân viên thực. |
+| v1.6–1.13: nghiệm thu bằng tài khoản thật | Cần doanh nghiệp cung cấp email nhân viên và thực hiện luồng thư mời/đăng nhập. Không tự mời người dùng hoặc dùng tài khoản SQL giả làm bằng chứng. |
+| v1.4: email CRM; v1.6–1.9: email/thông báo đẩy | Tiếp tục hoãn theo lựa chọn đã ghi nhận; không tự bật gửi thông báo. |
+| v1.17: phê duyệt và phiên bản hợp đồng | Đã có snapshot được duyệt và kiểm thử; trạng thái ký là ghi nhận bên ngoài, không phải chữ ký số. Checklist cũ là tài liệu chuẩn bị nghiệm thu, không phủ nhận việc release v1.17 đã phát hành. |
+| Nội dung công trình, ảnh và pháp nhân | Chờ tài liệu thật/xác nhận của chủ website. Không tự tạo hồ sơ công trình minh họa thành công trình thật. |
+| CMS công khai phục vụ SEO | Đã có soạn/xuất bản; trang công khai còn noindex trước khi có xuất HTML tĩnh. Đây là công việc triển khai tiếp theo, chưa đánh dấu hoàn tất. |
+| Windows | Đã có feed cập nhật; chưa ký số, chưa nghiệm thu nâng cấp trên máy người dùng cài phiên bản cũ. |
+
+## Các ghi chú theo thứ tự phiên bản
+
+- [v1.0](RELEASE_NOTES.md): website demo ban đầu.
+- [v1.1](RELEASE_NOTES_V1_1.md), [v1.1.1](RELEASE_NOTES_V1_1_1.md), [v1.1.2](RELEASE_NOTES_V1_1_2.md): nền tảng Admin và Supabase.
+- [v1.2](RELEASE_NOTES_V1_2.md): API tư vấn được bảo vệ.
+- [v1.3](RELEASE_NOTES_V1_3.md), [v1.3.1](RELEASE_NOTES_V1_3_1.md), [v1.3.2](RELEASE_NOTES_V1_3_2.md), [v1.3.3](RELEASE_NOTES_V1_3_3.md), [v1.3.4](RELEASE_NOTES_V1_3_4.md): CAPTCHA, consent, lưu giữ và ghi nhận liên hệ.
+- [v1.4](RELEASE_NOTES_V1_4_0.md): nền tảng email CRM.
+- [v1.5](RELEASE_NOTES_V1_5_0.md): phân trang/tìm/lọc CRM.
+- [v1.6](RELEASE_NOTES_V1_6_0.md), [v1.7](RELEASE_NOTES_V1_7_0.md): lịch chăm sóc, ghi chú và lịch sử chỉnh sửa.
+- [v1.8](RELEASE_NOTES_V1_8_0.md), [v1.9](RELEASE_NOTES_V1_9_0.md), [v1.10](RELEASE_NOTES_V1_10_0.md): giao việc, Kanban và chỉnh sửa nhiệm vụ.
+- [v1.11](RELEASE_NOTES_V1_11_0.md), [v1.12](RELEASE_NOTES_V1_12_0.md): ưu tiên và hiệu suất.
+- [v1.13](RELEASE_NOTES_V1_13_0.md), [v1.13.1](RELEASE_NOTES_V1_13_1.md): tài khoản và bảo mật vai trò.
+- [v1.17](RELEASE_NOTES_V1_17_0.md): báo giá và hợp đồng.
+- [v1.18](RELEASE_NOTES_V1_18_0.md): CRM không dấu và hợp nhất nền tảng quản trị mới.
+
+Không tạo ghi chú v1.14–v1.16 hoặc tag lịch sử giả chỉ để lấp số thứ tự. Các module tương ứng đã có trong nguồn; chỉ ghi nhận release khi có bằng chứng phát hành.

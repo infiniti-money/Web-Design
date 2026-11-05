@@ -9,3 +9,4 @@ supabase/.temp/
 !.env.example
 *.log
 _site/
+dist/
