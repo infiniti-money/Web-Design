@@ -2,6 +2,8 @@
 
 Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub Pages.
 
+Bản web hiện tại: [v1.20.0 — tải trang chủ và khả năng sử dụng](RELEASE_NOTES_V1_20_0.md). [Kết quả đo và các điểm tiếp tục tối ưu](PERFORMANCE_BASELINE.md).
+
 [Lộ trình website chuyên nghiệp](WEBSITE_ROADMAP.md) · [Web v1.19: kiến thức HTML và nội dung gốc](RELEASE_NOTES_V1_19_0.md) · [Hướng dẫn biên tập](content/KNOWLEDGE_PUBLISHING.md).
 
 Theo dõi [lịch sử phiên bản và việc còn thiếu](RELEASE_HISTORY.md). Bản web [v1.18.0](RELEASE_NOTES_V1_18_0.md) hoàn thiện tìm CRM tiếng Việt không dấu; phiên bản PC độc lập với phiên bản web.
