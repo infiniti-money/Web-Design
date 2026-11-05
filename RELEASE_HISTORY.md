@@ -4,7 +4,7 @@ Tên thương hiệu hiện tại: **ATELIER HOME**. Các tài liệu cũ dùng 
 
 ## Mốc hiện tại
 
-- Web: [v1.18.0](RELEASE_NOTES_V1_18_0.md), nối tiếp v1.17; hoàn thiện tìm CRM không dấu và chuẩn hóa gói phát hành.
+- Web: [v1.19.0](RELEASE_NOTES_V1_19_0.md): lộ trình sáu chặng, kiến thức HTML, ba bài gốc và đồng bộ CMS công khai. v1.18 trước đó hoàn thiện tìm CRM không dấu và chuẩn hóa gói phát hành.
 - PC: `desktop-v1.1.1`, bản vá tìm CRM tương ứng. Số phiên bản PC và web độc lập.
 - Đã phát hành: [web v1.18.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.18.0) · [PC 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1).
 - Bản nâng cấp giao diện trước đó: [báo cáo triển khai](PROFESSIONAL_UPGRADE.md). Bản nền tảng CMS/desktop: [báo cáo kiểm thử](ADMIN_UPGRADE_REPORT.md).
@@ -20,7 +20,7 @@ Tên thương hiệu hiện tại: **ATELIER HOME**. Các tài liệu cũ dùng 
 | v1.4: email CRM; v1.6–1.9: email/thông báo đẩy | Tiếp tục hoãn theo lựa chọn đã ghi nhận; không tự bật gửi thông báo. |
 | v1.17: phê duyệt và phiên bản hợp đồng | Đã có snapshot được duyệt và kiểm thử; trạng thái ký là ghi nhận bên ngoài, không phải chữ ký số. Checklist cũ là tài liệu chuẩn bị nghiệm thu, không phủ nhận việc release v1.17 đã phát hành. |
 | Nội dung công trình, ảnh và pháp nhân | Chờ tài liệu thật/xác nhận của chủ website. Không tự tạo hồ sơ công trình minh họa thành công trình thật. |
-| CMS công khai phục vụ SEO | Đã có soạn/xuất bản; trang công khai còn noindex trước khi có xuất HTML tĩnh. Đây là công việc triển khai tiếp theo, chưa đánh dấu hoàn tất. |
+| CMS công khai phục vụ SEO | v1.19 có HTML tĩnh theo slug, schema, sitemap và đồng bộ bài đã duyệt qua API công khai. Kiểm thử bài tổng hợp trong CMS dùng fixture; chưa ghi bài thử production. |
 | Windows | Đã có feed cập nhật; chưa ký số, chưa nghiệm thu nâng cấp trên máy người dùng cài phiên bản cũ. |
 
 ## Các ghi chú theo thứ tự phiên bản
@@ -39,6 +39,7 @@ Kiểm chứng phát hành 05/11/2026: [triển khai Pages](https://github.com/i
 - [v1.13](RELEASE_NOTES_V1_13_0.md), [v1.13.1](RELEASE_NOTES_V1_13_1.md): tài khoản và bảo mật vai trò.
 - [v1.17](RELEASE_NOTES_V1_17_0.md): báo giá và hợp đồng.
 - [v1.18](RELEASE_NOTES_V1_18_0.md): CRM không dấu và hợp nhất nền tảng quản trị mới.
+- [v1.19](RELEASE_NOTES_V1_19_0.md): kiến thức HTML, nội dung nền và [lộ trình chuyên nghiệp](WEBSITE_ROADMAP.md).
 
 Không tạo ghi chú v1.14–v1.16 hoặc tag lịch sử giả chỉ để lấp số thứ tự. Các module tương ứng đã có trong nguồn; chỉ ghi nhận release khi có bằng chứng phát hành.
 

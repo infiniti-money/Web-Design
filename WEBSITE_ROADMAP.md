@@ -23,6 +23,10 @@ Kiểm chứng bắt buộc: loại nháp/bài hẹn giờ; chống chèn HTML/s
 
 Tiến độ đợt v1.19: đã lập lộ trình; đã dựng danh mục/bài kiến thức HTML, ba bài gốc, metadata/schema/sitemap và luồng đọc bài CMS công khai; kiểm thử Node và trình duyệt khi tắt JavaScript đạt. Việc triển khai thực tế được xác nhận sau khi Actions hoàn tất. Các chặng còn lại tiếp tục theo tiêu chí trong bảng, không đánh dấu hoàn thành chung.
 
+Đã triển khai và đối chiếu `release.json` online ở commit `4f3c9e4aeab4c0bcb40edbf2deed232f217f1c92`. [Pages deployment](https://github.com/infiniti-money/Web-Design/actions/runs/41940468321) và [gói phát hành v1.19](https://github.com/infiniti-money/Web-Design/actions/runs/41940476601) thành công. Đã đo Lighthouse trang chủ/mục Kiến thức; xem [kết quả và việc còn phải tối ưu](PERFORMANCE_BASELINE.md). Chặng 6 mới hoàn thành đo ban đầu, chưa có Search Console/CWV thực địa.
+
+[Browser smoke sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/41940527081) thành công, gồm kiểm tra Kiến thức không JavaScript và chuyển URL cũ. Không coi toàn bộ lộ trình đã hoàn tất; các đầu vào doanh nghiệp ở dưới và những điểm tối ưu trong báo cáo vẫn còn mở.
+
 - Xác nhận tên pháp lý, thông tin liên hệ và khu vực phục vụ để công khai chính xác.
 - Hồ sơ công trình thật, nội dung mô tả và ảnh có quyền sử dụng; đã ghi nhận chủ website sẽ gửi.
 - Email nhân viên và cho phép gửi lời mời để nghiệm thu đăng nhập thực; không dùng fixture SQL làm bằng chứng.
