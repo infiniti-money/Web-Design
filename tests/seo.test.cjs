@@ -136,11 +136,11 @@ test("Hero and project images use priority and lazy-loading appropriately", () =
 
 test("Turnstile script waits until visitors approach or interact with the form", () => {
   const backend = read("site-backend.js");
-  assert.match(backend, /const loadCaptcha = \(\) =>/);
+  assert.match(backend, /const loadCaptcha = \(event\) =>/);
   assert.match(backend, /new IntersectionObserver/);
   assert.match(backend, /form\?\.addEventListener\("focusin", loadCaptcha\)/);
   assert.match(backend, /form\?\.addEventListener\("pointerdown", loadCaptcha\)/);
-  assert.ok(backend.indexOf("document.head.appendChild(script)") > backend.indexOf("const loadCaptcha = () =>"));
+  assert.ok(backend.indexOf("document.head.appendChild(script)") > backend.indexOf("const loadCaptcha = (event) =>"));
 });
 
 test("Public Supabase project reads use the lightweight REST API and wait until the portfolio nears view", () => {

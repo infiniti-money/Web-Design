@@ -35,6 +35,8 @@ Tiến độ đợt v1.19: đã lập lộ trình; đã dựng danh mục/bài k
 
 ## Cách đánh giá hoàn thành
 
+Đợt v1.21 tiếp tục chặng 4: khóa biểu mẫu khi gửi, xác nhận thành công/bắt đầu yêu cầu mới, giữ nội dung khi lỗi, timeout không tự gửi lại, khôi phục xác minh và CTA không che liên hệ. Xem [bảng nghiệm thu tư vấn](CONSULTATION_ACCEPTANCE.md). Kiểm thử bằng fixture đạt; việc tiếp nhận thật của doanh nghiệp và thiết bị thật vẫn chưa đánh dấu hoàn thành.
+
 Đợt v1.20 xử lý phông chữ chặn hiển thị, ảnh responsive và nhãn truy cập trên trang chủ; bổ sung nhánh liên hệ khi JavaScript tắt. Kiểm thử 69/70 bài đạt (1 bài gửi dữ liệu thật chủ động bỏ qua), browser smoke và home experience đạt. So sánh local cho thấy font không còn nằm trong danh sách tài nguyên chặn render và lỗi nhãn đã hết; số đo online ghi sau triển khai.
 
 Đã triển khai v1.20, đối chiếu revision `9d338249fc0aae4147a815c7e80297fe5b43d8b4`; CI triển khai và browser smoke đều thành công. Online đo 93 hiệu suất / 100 Accessibility / 100 Best Practices / 100 SEO. Đây là cải thiện cấu trúc tải và nhãn, chưa có bằng chứng tăng tốc tổng thể ổn định so với lần đo cũ; xem số đo đầy đủ trong PERFORMANCE_BASELINE.md. Chặng 4 và 6 tiếp tục mở cho nghiệm thu thật/CWV, không tự đánh dấu hoàn thành toàn bộ.
