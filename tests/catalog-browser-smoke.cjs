@@ -54,10 +54,10 @@ async function open(browser,role){
     await page.locator('#items button:has-text("Sửa")').click();
     await page.locator("#name").fill("Bàn gỗ kiểm thử");
     await page.evaluate(()=>{window.__catalogConfirmations=[];window.confirm=message=>{window.__catalogConfirmations.push(message);return false;};});
-    await page.locator("#reset").click();
+    await page.locator("#catalog-new").click();
     assert.equal(await page.locator("#name").inputValue(),"Bàn gỗ kiểm thử");
     await page.evaluate(()=>window.confirm=message=>{window.__catalogConfirmations.push(message);return true;});
-    await page.locator("#reset").click();
+    await page.locator("#catalog-new").click();
     assert.equal(await page.locator("#name").inputValue(),"");
     assert.equal(await page.evaluate(()=>window.__catalogConfirmations.length),2);
     await page.locator("#search").fill("");
