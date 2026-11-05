@@ -1,6 +1,6 @@
--- PROPOSAL / STAGING ONLY. DO NOT run on production until UAT + restorable backup.
--- When approved, generate a timestamped migration with Supabase CLI and reconcile migration history.
--- Separate private delivery operations from public portfolio projects.
+-- ISOLATED TEST COPY ONLY. Production applied as migration 20261105082144 on 2026-11-05.
+-- DO NOT rerun this test copy on production; canonical history is in supabase/migrations/.
+-- No live Auth UAT or verified full-production restore is implied by deployment.
 BEGIN;
 CREATE TABLE IF NOT EXISTS public.delivery_workspaces (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
