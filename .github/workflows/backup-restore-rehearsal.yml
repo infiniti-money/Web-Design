@@ -1,0 +1,41 @@
+name: Isolated backup and quote restore rehearsal
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/backup-restore-rehearsal.yml'
+      - 'supabase/migrations/20261105093000_quote_version_immutability.sql'
+      - 'tests/backup-restore-rehearsal.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  rehearsal:
+    name: PostgreSQL 17 synthetic dump/restore + quote guard
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: isolated-ci-only
+          POSTGRES_DB: rehearsal_source
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d rehearsal_source"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rehearse dump and restore using PostgreSQL 17 client (fixture data only)
+        run: |
+          docker run --rm --network host \
+            -e PGHOST=127.0.0.1 -e PGPORT=5432 -e PGUSER=ci -e PGPASSWORD=isolated-ci-only \
+            -v "$PWD:/work" -w /work postgres:17 \
+            bash tests/backup-restore-rehearsal.sh

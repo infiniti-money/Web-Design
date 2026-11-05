@@ -56,6 +56,10 @@ jobs:
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
         run: node tests/consultation-browser.cjs
+      - name: Check delivery authorization and synthetic CRUD after deployment
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/delivery-browser-smoke.cjs
       - name: Check public Catalog links, filters and recovery
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/

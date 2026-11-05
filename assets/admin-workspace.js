@@ -2,7 +2,7 @@
 (() => {
   "use strict";
   const tabs = [["overview","Tổng quan","admin"],["projects","Dự án","admin"],["inquiries","Khách hàng","admin"],["tasks","Công việc nhóm","manager"],["my-tasks","Công việc của tôi","employee"],["reports","Báo cáo","manager"],["staff","Nhân sự & tài khoản","admin"]];
-  const modules = [["operations.html","Trung tâm vận hành","manager"],["admin-posts.html","Bài viết","manager"],["admin-catalog.html","Catalog & vật liệu","admin"],["commercial.html","Báo giá & hợp đồng","manager"],["notifications.html","Thông báo nội bộ","employee"]];
+  const modules = [["operations.html","Trung tâm vận hành","manager"],["delivery.html","Điều phối công trình","manager"],["admin-posts.html","Bài viết","manager"],["admin-catalog.html","Catalog & vật liệu","admin"],["commercial.html","Báo giá & hợp đồng","manager"],["notifications.html","Thông báo nội bộ","employee"]];
   const level = { admin:3, manager:2, employee:1 };
   const roleNames = { admin:"Quản trị viên", manager:"Quản lý", employee:"Nhân viên" };
   const rootAdmin = !!document.getElementById("dashboard");
@@ -15,7 +15,7 @@
     const paths={overview:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',projects:'<path d="M3 21V6l9-3 9 3v15M8 8v2m8-2v2M8 14v2m8-2v2M10 21v-3h4v3"/>',inquiries:'<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3m2-16a3 3 0 0 1 0 6m4 10v-3a6 6 0 0 0-3-5"/>',tasks:'<rect x="4" y="4" width="16" height="17" rx="2"/><path d="M9 3h6v4H9zm-2 9 2 2 4-4m-6 8h10"/>',reports:'<path d="M4 3v17h17M8 16v-5m5 5V6m5 10V9"/>',staff:'<circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>',posts:'<path d="M5 3h10l4 4v14H5zM14 3v5h5M8 12h8m-8 4h6"/>',catalog:'<path d="m12 3 9 5-9 5-9-5zm-9 9 9 5 9-5m-18 5 9 5 9-5"/>',operations:'<path d="M3 3h18v18H3zM7 15l3-3 3 2 4-5M7 7h10"/>',commercial:'<rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18m-12 5h3m4 0h2"/>',notifications:'<path d="M6 9a6 6 0 0 1 12 0c0 7 3 7 3 8H3c0-1 3-1 3-8m3 11a3 3 0 0 0 6 0"/>'};
     const span=node("span",undefined,"workspace-icon");span.setAttribute("aria-hidden","true");span.innerHTML='<svg viewBox="0 0 24 24">'+(paths[key]||paths.tasks)+'</svg>';return span;
   };
-  const moduleKey=file=>({"operations.html":"operations","admin-posts.html":"posts","admin-catalog.html":"catalog","commercial.html":"commercial","notifications.html":"notifications"}[file]);
+  const moduleKey=file=>({"operations.html":"operations","delivery.html":"projects","admin-posts.html":"posts","admin-catalog.html":"catalog","commercial.html":"commercial","notifications.html":"notifications"}[file]);
   const currentFile = () => location.pathname.split("/").pop() || "admin.html";
   function setDrawer(open){
     const mobile=matchMedia("(max-width:760px)").matches;

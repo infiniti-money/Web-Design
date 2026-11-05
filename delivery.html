@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Điều phối công trình | ATELIER HOME</title>
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./assets/admin-workspace.css">
+<link rel="stylesheet" href="./assets/delivery.css">
+</head>
+<body>
+<main class="delivery-main" id="workspace-main">
+  <a href="./operations.html" class="delivery-back">← Trung tâm vận hành</a>
+  <header class="delivery-heading">
+    <div><p class="delivery-eyebrow">ATELIER HOME / QUẢN LÝ THI CÔNG</p><h1>Điều phối công trình</h1>
+      <p class="delivery-muted">Theo dõi từ nhu cầu khách hàng đến nghiệm thu; tách biệt dữ liệu vận hành riêng tư với công trình công khai.</p></div>
+    <button id="delivery-reload" class="delivery-button" type="button" disabled>Làm mới</button>
+  </header>
+  <p id="delivery-status" class="delivery-status" role="status" aria-live="polite">Đang xác minh tài khoản và dữ liệu…</p>
+  <section id="delivery-app" hidden>
+    <div class="delivery-metrics" aria-label="Trạng thái công trình theo phạm vi tải">
+      <article><strong id="delivery-total">–</strong><span>Hồ sơ đang hiển thị</span></article>
+      <article><strong id="delivery-progress">–</strong><span>Đang triển khai</span></article>
+      <article><strong id="delivery-overdue">–</strong><span>Quá hạn</span></article>
+      <article><strong id="delivery-week">–</strong><span>Đến hạn trong 7 ngày</span></article>
+    </div>
+    <p id="delivery-scope" class="delivery-muted">Số liệu trong phạm vi RLS và dữ liệu tải. Không phải chỉ số toàn công ty nếu bị giới hạn.</p>
+    <div class="delivery-layout">
+      <section class="delivery-panel" aria-labelledby="delivery-list-title">
+        <div class="delivery-toolbar"><h2 id="delivery-list-title">Danh sách công trình vận hành</h2>
+          <button class="delivery-button" type="button" id="delivery-new">+ Lập hồ sơ</button></div>
+        <label for="delivery-search">Tìm theo tên</label>
+        <input id="delivery-search" type="search" maxlength="120" placeholder="Tìm không dấu…">
+        <label for="delivery-filter">Giai đoạn</label>
+        <select id="delivery-filter"><option value="all">Tất cả</option>
+          <option value="planning">Lập kế hoạch</option><option value="design">Thiết kế</option>
+          <option value="procurement">Chuẩn bị vật tư</option><option value="construction">Thi công</option>
+          <option value="handover">Nghiệm thu</option><option value="done">Hoàn tất</option><option value="paused">Tạm dừng</option></select>
+        <div id="delivery-list" class="delivery-list" aria-label="Công trình"></div>
+      </section>
+      <section class="delivery-panel" aria-labelledby="delivery-editor-title">
+        <h2 id="delivery-editor-title">Lập hồ sơ điều phối</h2>
+        <p class="delivery-muted">Không tự công khai hồ sơ lên website hoặc gửi thông báo ngoài hệ thống.</p>
+        <form id="delivery-form">
+          <label for="delivery-title">Tên công trình *</label><input id="delivery-title" required minlength="3" maxlength="180">
+          <label for="delivery-inquiry">Khách hàng / yêu cầu tư vấn *</label><select id="delivery-inquiry" required><option value="">Chọn yêu cầu tư vấn</option></select>
+          <label for="delivery-portfolio">Liên kết hồ sơ công trình công khai (tùy chọn)</label><select id="delivery-portfolio"><option value="">Không liên kết</option></select>
+          <label for="delivery-stage">Giai đoạn</label><select id="delivery-stage">
+            <option value="planning">Lập kế hoạch</option><option value="design">Thiết kế</option><option value="procurement">Chuẩn bị vật tư</option>
+            <option value="construction">Thi công</option><option value="handover">Nghiệm thu</option><option value="done">Hoàn tất</option><option value="paused">Tạm dừng</option></select>
+          <label for="delivery-owner">Người điều phối</label><select id="delivery-owner"><option value="">Chưa phân công</option></select>
+          <label for="delivery-due">Hạn dự kiến</label><input id="delivery-due" type="datetime-local">
+          <label for="delivery-details">Ghi chú nội bộ</label><textarea id="delivery-details" maxlength="2000" rows="3"></textarea>
+          <div class="delivery-actions"><button class="delivery-button" id="delivery-save" type="submit">Lưu hồ sơ</button>
+            <button class="delivery-button secondary" id="delivery-reset" type="button">Hủy sửa</button></div>
+        </form>
+        <section id="delivery-links" hidden aria-label="Vật tư và công việc liên kết">
+          <h3>Vật tư từ Catalog</h3>
+          <p class="delivery-muted">Chỉ liên kết mục Catalog đã công khai; số lượng chỉ để kế hoạch, chưa tạo phiếu xuất kho.</p>
+          <div class="delivery-pair"><select id="delivery-catalog"><option value="">Chọn vật tư</option></select>
+            <input id="delivery-quantity" type="number" value="1" min="0.01" max="1000000" step="0.01" aria-label="Số lượng vật tư">
+            <button id="delivery-catalog-add" class="delivery-button" type="button">Thêm</button></div>
+          <div id="delivery-catalog-list"></div>
+          <h3>Công việc liên kết CRM</h3>
+          <p class="delivery-muted">Chỉ nối công việc thuộc cùng yêu cầu khách hàng. Phân công nhân viên và đổi trạng thái tại trang Công việc.</p>
+          <div class="delivery-pair"><select id="delivery-task"><option value="">Chọn công việc CRM</option></select>
+            <button id="delivery-task-add" class="delivery-button" type="button">Liên kết</button></div>
+          <div id="delivery-task-list"></div>
+          <p><a href="./admin.html#tasks">Mở trang giao việc và nhắc hạn</a></p>
+        </section>
+      </section>
+    </div>
+  </section>
+  <noscript><p class="delivery-status">Cần bật JavaScript để làm việc với dữ liệu được phân quyền.</p></noscript>
+</main>
+<script src="./app-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0"></script>
+<script src="./assets/admin-workspace.js"></script>
+<script src="./assets/delivery.js"></script>
+</body>
+</html>
