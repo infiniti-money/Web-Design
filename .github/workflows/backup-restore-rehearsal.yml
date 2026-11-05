@@ -33,16 +33,9 @@ jobs:
           --health-retries 10
     steps:
       - uses: actions/checkout@v4
-      - name: Install matching PostgreSQL client if needed
+      - name: Rehearse dump and restore using PostgreSQL 17 client (fixture data only)
         run: |
-          if ! command -v pg_dump >/dev/null || ! command -v pg_restore >/dev/null; then
-            sudo apt-get update
-            sudo apt-get install -y postgresql-client
-          fi
-      - name: Rehearse encrypted-offline backup procedure with synthetic records only
-        env:
-          PGPASSWORD: isolated-ci-only
-          PGHOST: 127.0.0.1
-          PGPORT: 5432
-          PGUSER: ci
-        run: bash tests/backup-restore-rehearsal.sh
+          docker run --rm --network host \
+            -e PGHOST=127.0.0.1 -e PGPORT=5432 -e PGUSER=ci -e PGPASSWORD=isolated-ci-only \
+            -v "$PWD:/work" -w /work postgres:17 \
+            bash tests/backup-restore-rehearsal.sh
