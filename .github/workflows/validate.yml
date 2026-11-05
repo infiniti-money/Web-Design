@@ -24,3 +24,33 @@ jobs:
         run: node scripts/build-project-pages.cjs --check
       - name: Run website and security tests
         run: node --test tests/*.test.cjs
+
+  quote-history-postgres:
+    name: PostgreSQL 17 quote history immutability
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: isolated-ci-only
+          POSTGRES_DB: quote_guard_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d quote_guard_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: PostgreSQL isolated trigger regression (no production credentials)
+        env:
+          PGPASSWORD: isolated-ci-only
+        run: |
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql-client
+          fi
+          psql -h 127.0.0.1 -U ci -d quote_guard_test -v ON_ERROR_STOP=1 -f tests/quote-version-guard-isolated.sql
+
