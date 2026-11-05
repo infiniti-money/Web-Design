@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '17,47 * * * *'
 permissions:
   contents: read
   pages: write
@@ -24,7 +26,7 @@ jobs:
       - name: Test website and package boundaries
         run: node --test tests/*.test.cjs
       - name: Build public website only
-        run: node scripts/build-pages.cjs
+        run: node scripts/build-pages.cjs --cms
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

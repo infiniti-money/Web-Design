@@ -11,10 +11,7 @@
   }
   async function detail(){
     const slug=new URLSearchParams(location.search).get("slug");if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug||"")){ $("article-status").textContent="Không tìm thấy bài viết.";return;}
-    try{const {data}=await query({slug:"eq."+slug,limit:"1"});const post=data[0];if(!post){$("article-status").textContent="Bài viết chưa được xuất bản hoặc đã được lưu trữ.";return;}
-      $("article-title").textContent=post.title;$("article-excerpt").textContent=post.excerpt;$("article-category").textContent=post.category;$("article-date").textContent="Đăng ngày "+new Date(post.published_at).toLocaleDateString("vi-VN");if(/^https:\/\//i.test(post.cover_image_url)){$("article-cover").src=post.cover_image_url;$("article-cover").alt=post.image_alt||post.title;$("article-cover").hidden=false;}
-      window.AtelierMarkdown.render($("article-body"),post.body_markdown);$("article-content").hidden=false;$("article-status").textContent="";document.title=(post.seo_title||post.title)+" | ATELIER HOME";document.querySelector('meta[name="description"]').content=post.seo_description||post.excerpt;const url=base+"bai-viet.html?slug="+encodeURIComponent(post.slug);document.querySelector('link[rel="canonical"]').href=url;document.querySelector('meta[property="og:url"]').content=url;document.querySelector('meta[property="og:title"]').content=document.title;document.querySelector('meta[property="og:image"]').content=post.cover_image_url||base+"assets/og-card.png";
-    }catch{$("article-status").textContent="Không tải được nội dung. Vui lòng thử lại sau.";}
+    location.replace(new URL("./kien-thuc/"+slug+"/",location.href).href);return;
   }
   if($("knowledge-list")){$("knowledge-prev").onclick=()=>{if(page>0){page--;list();}};$("knowledge-next").onclick=()=>{if((page+1)*12<total){page++;list();}};list();}else detail();
 })();

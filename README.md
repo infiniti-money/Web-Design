@@ -2,6 +2,8 @@
 
 Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub Pages.
 
+[Lộ trình website chuyên nghiệp](WEBSITE_ROADMAP.md) · [Web v1.19: kiến thức HTML và nội dung gốc](RELEASE_NOTES_V1_19_0.md) · [Hướng dẫn biên tập](content/KNOWLEDGE_PUBLISHING.md).
+
 Theo dõi [lịch sử phiên bản và việc còn thiếu](RELEASE_HISTORY.md). Bản web [v1.18.0](RELEASE_NOTES_V1_18_0.md) hoàn thiện tìm CRM tiếng Việt không dấu; phiên bản PC độc lập với phiên bản web.
 
 Bản hiện tại: [web v1.18.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.18.0) · [Windows Manager 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1). Các mục 1.1.0 bên dưới ghi lại đợt nâng cấp giao diện trước bản vá tìm kiếm.

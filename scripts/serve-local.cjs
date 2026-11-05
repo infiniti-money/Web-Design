@@ -1,5 +1,5 @@
 const http=require("node:http"),fs=require("node:fs"),path=require("node:path");
-const root=path.resolve(__dirname,".."),port=Number(process.env.PORT||4173);
+const root=path.resolve(process.env.ATELIER_PREVIEW_ROOT||path.join(__dirname,"..")),port=Number(process.env.PORT||4173);
 if(!Number.isInteger(port)||port<1024||port>65535)throw new Error("Invalid local preview port");
 const types={".html":"text/html; charset=utf-8",".js":"application/javascript; charset=utf-8",".css":"text/css; charset=utf-8",".json":"application/json; charset=utf-8",".svg":"image/svg+xml",".png":"image/png",".webp":"image/webp",".jpg":"image/jpeg",".jpeg":"image/jpeg",".ico":"image/x-icon",".xml":"application/xml",".txt":"text/plain; charset=utf-8"};
 http.createServer((request,response)=>{

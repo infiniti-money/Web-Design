@@ -32,6 +32,10 @@ jobs:
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
         run: node tests/cms-browser-smoke.cjs
+      - name: Check static knowledge without JavaScript
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/knowledge-browser.cjs
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4
