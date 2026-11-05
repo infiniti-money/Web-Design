@@ -3,6 +3,7 @@ const {trustedPage,resolveAsset,externalTarget,csp}=require("../security.cjs");
 test("Desktop protocol accepts only packaged resources and rejects traversal or privileged files",()=>{
   const root=path.resolve("ui");
   assert.equal(trustedPage("atelier://app/admin.html#projects"),true);
+  assert.equal(trustedPage("atelier://app/operations.html"),true);
   for(const url of ["https://infiniti-money.github.io/Web-Design/admin.html","atelier://other/admin.html","atelier://app.evil/admin.html","atelier://user@app/admin.html","atelier://app/admin-posts.html/extra"])assert.equal(trustedPage(url),false);
   assert.equal(resolveAsset("atelier://app/assets/admin-workspace.css",root),path.join(root,"assets/admin-workspace.css"));
   for(const url of ["atelier://app/%2e%2e%5cmain.cjs","atelier://app/main.cjs","atelier://app/%00.js","atelier://app/secret.html","atelier://evil/app-config.js"])assert.equal(resolveAsset(url,root),null);

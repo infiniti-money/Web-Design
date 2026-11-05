@@ -40,3 +40,11 @@ Tiến độ đợt v1.19: đã lập lộ trình; đã dựng danh mục/bài k
 Đã triển khai v1.20, đối chiếu revision `9d338249fc0aae4147a815c7e80297fe5b43d8b4`; CI triển khai và browser smoke đều thành công. Online đo 93 hiệu suất / 100 Accessibility / 100 Best Practices / 100 SEO. Đây là cải thiện cấu trúc tải và nhãn, chưa có bằng chứng tăng tốc tổng thể ổn định so với lần đo cũ; xem số đo đầy đủ trong PERFORMANCE_BASELINE.md. Chặng 4 và 6 tiếp tục mở cho nghiệm thu thật/CWV, không tự đánh dấu hoàn thành toàn bộ.
 
 Mỗi đợt có ghi chú phạm vi, kiểm thử, URL đang chạy và giới hạn còn lại. Cập nhật bảng này theo bằng chứng thực tế. Các chặng 4–6 và nghiệm thu doanh nghiệp chưa tự động được xem là hoàn tất khi chỉ có giao diện hoặc build thành công.
+
+## Chặng 5 — Đợt điều phối vận hành (05/11/2026)
+
+- Bổ sung `operations.html` (Trung tâm vận hành) cho Admin và Quản lý, sử dụng Auth hiện tại và kiểm soát dữ liệu bằng RLS; không tạo bảng mới.
+- Hàng đợi chỉ đọc: công việc quá hạn, đến hạn trong 7 ngày, báo giá chờ duyệt, bài chờ duyệt, số nhân sự hoạt động chỉ với Admin. Tổng số theo phạm vi tài khoản có thể đọc, không giả định tất cả hồ sơ trong doanh nghiệp.
+- Không đưa dữ liệu khách hàng lên dashboard, không ghi trạng thái hoặc gửi thông báo; lỗi tải số liệu hiển thị `–`, không bị quy thành 0. Thao tác xử lý vẫn đặt tại các trang nghiệp vụ sẵn có.
+- Bộ kiểm thử gồm Node cho Auth/role/count/filter, GitHub Pages package và desktop allowlist, Chromium smoke trên bản Pages sau triển khai. Các giới hạn nghiệm thu thật và kiểm thử khôi phục được ghi tại `OPERATIONS_RUNBOOK.md`.
+- Các hạng mục chưa xác nhận: đăng nhập UAT với Admin/Quản lý/Nhân viên thật; backup/restore độc lập; kích hoạt migration quote history riêng; số liệu CWV/Search Console. Không đánh dấu hoàn thành chặng 5 chỉ vì deploy trang thành công.

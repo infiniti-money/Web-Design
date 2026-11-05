@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Trung tâm vận hành | ATELIER HOME</title>
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./assets/admin-workspace.css">
+<link rel="stylesheet" href="./assets/operations.css">
+</head>
+<body>
+<main id="workspace-main" class="ops-main">
+<a href="./admin.html" class="ops-back">← Trung tâm quản lý</a>
+<header class="ops-heading">
+  <div><p class="ops-eyebrow">ATELIER HOME / ĐIỀU PHỐI</p><h1>Trung tâm vận hành</h1>
+  <p class="ops-muted">Tổng hợp việc cần xử lý theo quyền được cấp. Chỉ đọc dữ liệu, không thay đổi trạng thái nghiệp vụ.</p></div>
+  <button type="button" id="ops-refresh" class="ops-button">Làm mới số liệu</button>
+</header>
+<p id="ops-status" class="ops-status" role="status" aria-live="polite">Đang kiểm tra quyền truy cập…</p>
+<section id="ops-app" hidden aria-label="Số liệu vận hành">
+  <div class="ops-summary">
+    <p id="ops-role-scope" class="ops-muted"></p>
+    <p class="ops-muted">Số liệu dựa trên những bản ghi được Supabase RLS cho phép tài khoản hiện tại đọc. Không nhất thiết là tổng số liệu toàn doanh nghiệp.</p>
+  </div>
+  <section class="ops-metrics" aria-label="Hàng đợi công việc và phê duyệt">
+    <article class="ops-metric"><strong id="ops-tasks-overdue" data-ops-count>–</strong><h2>Việc quá hạn</h2><p id="ops-tasks-overdue-state">Chưa tải</p><a href="./admin.html#tasks">Xử lý công việc</a></article>
+    <article class="ops-metric"><strong id="ops-tasks-next" data-ops-count>–</strong><h2>Việc đến hạn 7 ngày tới</h2><p id="ops-tasks-next-state">Chưa tải</p><a href="./admin.html#tasks">Xem danh sách việc</a></article>
+    <article class="ops-metric"><strong id="ops-quotes-review" data-ops-count>–</strong><h2>Báo giá chờ duyệt</h2><p id="ops-quotes-review-state">Chưa tải</p><a href="./commercial.html">Mở báo giá & hợp đồng</a></article>
+    <article class="ops-metric"><strong id="ops-posts-review" data-ops-count>–</strong><h2>Bài viết chờ duyệt</h2><p id="ops-posts-review-state">Chưa tải</p><a href="./admin-posts.html">Mở quản lý bài viết</a></article>
+    <article class="ops-metric" id="ops-staff-card" hidden><strong id="ops-staff-active" data-ops-count>–</strong><h2>Nhân sự đang hoạt động</h2><p id="ops-staff-active-state">Chưa tải</p><a href="./admin.html#staff">Quản lý nhân sự</a></article>
+  </section>
+  <section class="ops-next-steps" aria-labelledby="ops-next-title">
+    <h2 id="ops-next-title">Quy trình vận hành</h2>
+    <div class="ops-steps">
+      <article><span>01</span><h3>Kiểm tra việc đến hạn</h3><p>Phân công, xử lý và cập nhật trên trang Công việc. Không tự động chuyển trạng thái.</p></article>
+      <article><span>02</span><h3>Duyệt báo giá và nội dung</h3><p>Đối chiếu phiên bản trước khi duyệt; tác vụ phê duyệt thực hiện tại màn hình chuyên trách theo quyền.</p></article>
+      <article><span>03</span><h3>Kiểm tra trước khi phát hành</h3><p>CI xanh không thay thế bản sao lưu có thử phục hồi, nghiệm thu bằng tài khoản thật hoặc kiểm tra phân quyền.</p></article>
+    </div>
+  </section>
+  <section class="ops-governance" aria-labelledby="ops-governance-title">
+    <h2 id="ops-governance-title">Các kiểm tra chưa được tự động xác minh</h2>
+    <p>Trang này không kiểm tra được tính phục hồi của backup, tình trạng migration production, phê duyệt pháp lý, Search Console/CWV hay kết quả UAT tài khoản thật. Không suy diễn trạng thái “đạt” từ các bộ đếm.</p>
+    <a href="https://github.com/infiniti-money/Web-Design/blob/main/OPERATIONS_RUNBOOK.md" target="_blank" rel="noopener noreferrer">Mở quy trình nghiệm thu vận hành</a>
+  </section>
+</section>
+<noscript><p class="ops-status">Cần bật JavaScript và đăng nhập để xem dữ liệu vận hành.</p></noscript>
+</main>
+<script src="./app-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0"></script>
+<script src="./assets/admin-workspace.js"></script>
+<script src="./assets/operations.js"></script>
+</body>
+</html>
