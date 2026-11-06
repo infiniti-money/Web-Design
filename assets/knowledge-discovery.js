@@ -4,7 +4,7 @@
   if(!form)return;
   const query=document.getElementById("knowledge-query"),category=document.getElementById("knowledge-category"),status=document.getElementById("knowledge-results"),empty=document.getElementById("knowledge-empty");
   const normalize=value=>value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[đĐ]/g,"d").toLocaleLowerCase("vi").replace(/\s+/g," ").trim();
-  const cards=[...document.querySelectorAll("#knowledge-list .knowledge-card")].map(node=>({node,category:node.dataset.category,text:normalize(node.textContent)}));
+  const cards=[...document.querySelectorAll("#knowledge-list .knowledge-card")].map(node=>({node,category:node.dataset.category,text:normalize([...node.querySelectorAll("h2,p")].map(part=>part.textContent).join(" "))}));
   let timer;
   function render(updateUrl=false){
     clearTimeout(timer);

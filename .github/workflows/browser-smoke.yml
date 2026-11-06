@@ -36,6 +36,10 @@ jobs:
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
         run: node tests/knowledge-browser.cjs
+      - name: Check published knowledge search and article navigation
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/knowledge-discovery-browser.cjs
       - name: Check operations hub RBAC/counts using synthetic browser fixtures
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/

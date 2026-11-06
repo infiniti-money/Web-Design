@@ -26,3 +26,21 @@ test("CMS export uses public fields only, paginates and fails closed on API erro
   assert.doesNotMatch(requests[0].url.searchParams.get("select"),/author|rights|version/);
   await assert.rejects(fetchPublicPosts(root,async()=>({ok:false,status:503})),/503/);
 });
+
+test("Article outline keeps unique safe anchors for duplicate, suffix and unsafe headings",()=>{
+  const outline=[],html=markdown('## Đồ gỗ\n\n## Đồ gỗ\n\n## Đồ gỗ 2\n\n## [<script>](javascript:alert%281%29)\n\n### **Chuẩn bị** & lựa chọn',outline);
+  assert.equal(outline.length,5);
+  assert.equal(new Set(outline.map(item=>item.id)).size,5);
+  for(const item of outline){assert.match(item.id,/^phan-[a-z0-9-]+$/);assert.ok(html.includes('id="'+item.id+'"'));}
+  assert.doesNotMatch(html,/<script|href="javascript:|<h1/);
+  assert.match(html,/aria-label="Liên kết đến phần:/);
+});
+
+test("Discovery enhances a complete public listing while article outlines need no JavaScript",()=>{
+  const output=temp();buildPages({output,cmsPosts:[post({category:'Lựa chọn "<mẫu>"',body_markdown:'## Mục thứ nhất\n\n'+"Thông tin đã duyệt. ".repeat(20)+'\n\n## Mục thứ hai\n\nNội dung tiếp theo.'})]});
+  const index=fs.readFileSync(path.join(output,"kien-thuc.html"),"utf8"),article=fs.readFileSync(path.join(output,"kien-thuc/bai-da-duyet/index.html"),"utf8");
+  assert.match(index,/id="knowledge-filters"[^>]*hidden/);assert.match(index,/assets\/knowledge-discovery.js/);
+  assert.match(index,/data-category="Lựa chọn &quot;&lt;mẫu&gt;&quot;"/);assert.match(index,/Nội dung đã duyệt/);
+  assert.match(article,/class="article-toc" open/);assert.match(article,/href="#phan-muc-thu-hai"/);
+  assert.match(article,/Khoảng \d+ phút đọc/);assert.doesNotMatch(article,/<script src=/);
+});
