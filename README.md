@@ -8,7 +8,7 @@ Bản nâng cấp web: [v1.24.0 — Quản trị công trình tin cậy](RELEASE
 
 Theo dõi [lịch sử phiên bản và việc còn thiếu](RELEASE_HISTORY.md). Bản web [v1.18.0](RELEASE_NOTES_V1_18_0.md) hoàn thiện tìm CRM tiếng Việt không dấu; phiên bản PC độc lập với phiên bản web.
 
-Bản phát hành: [web v1.23.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.23.0) · [Windows Manager 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1). Các mục 1.1.0 bên dưới ghi lại đợt nâng cấp giao diện trước bản vá tìm kiếm. Gói nguồn v1.23.0 lưu revision lúc phát hành; website tiếp tục nhận cập nhật nhánh chính, kiểm tra revision đang chạy qua `release.json`.
+Bản phát hành: [web v1.24.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.24.0) · [Windows Manager 1.1.2](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.2). Gói nguồn lưu revision lúc phát hành; website tiếp tục nhận cập nhật nhánh chính, kiểm tra revision đang chạy qua `release.json`. [Bằng chứng web/PC và checksum](PROJECT_ADMIN_ACCEPTANCE.md). Các mục 1.1.0 bên dưới ghi lại đợt nâng cấp giao diện trước đây.
 
 ## Giao diện quản trị chuyên nghiệp — 05/11/2026
 

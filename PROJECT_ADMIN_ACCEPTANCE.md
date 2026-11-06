@@ -36,4 +36,17 @@ Các mục còn mở: UAT Admin/Quản lý/Nhân viên thật, thiết bị vậ
 
 ## PC 1.1.2
 
-Tăng phiên bản package/lockfile lên 1.1.2 để phân phối cùng UI cho người dùng PC. Giữ dependency, appId, kho phiên DPAPI và feed `desktop-stable`. Chờ CI Electron/build, phát hành Setup/Portable và kiểm tra checksum metadata sau phát hành; không ghi đạt cài nâng cấp thực tế nếu chưa thử trên máy người dùng.
+Đã phát hành [Windows Manager 1.1.2](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.2) qua [workflow Windows](https://github.com/infiniti-money/Web-Design/actions/runs/42314513514), giữ dependency, appId, kho phiên DPAPI và feed `desktop-stable`.
+
+- 4 bài desktop security/updater đạt; Electron thật đạt UI local, sandbox/context isolation, mã hóa/xóa phiên giả, chặn tài nguyên ngoài allowlist, trạng thái updater và PDF báo giá mẫu. Đây là fixture, không đăng nhập bằng tài khoản thật.
+- Setup và Portable dựng/phát hành thành công. Feed HTTP 200 trả version 1.1.2; đã tải đầy đủ Setup qua feed, 121.565.860 byte, SHA-512 `iV1ZGMUkIiTiI3xyvf20z+5jr+fN8Js/WGDxcrvZdp9np0XQpy4dNfVBSd2QBe5/9kg/Pt/CD+HFmLHS3hbUgg==` khớp `latest.yml`.
+- Portable 110.663.810 byte, URL release trả HTTP 200; không đồng nhất kiểm tra tải được với kiểm tra checksum hoặc chạy Portable thực tế.
+- Log build xác nhận bỏ qua ký số vì chưa có chứng thư. Chưa nghiệm thu cài đè/nâng cấp trên máy đang có bản cũ; không ghi đạt UAT cài nâng cấp chỉ từ feed/checksum.
+
+## Gói nguồn web
+
+[Release v1.24.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.24.0) ở revision `134f1a5cf27680e53f156a228ceb6eca98a67791`, [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42314512897) thành công. Đã tải ZIP 591.454 byte, SHA-256 `948fa9b0985156b59862c6b8fa3f3a84e883c2ccc00083e87a97d9e10fb57470` khớp `SHA256SUMS.txt`. Tag/gói giữ nguyên; sửa fixture smoke sau tag tiếp tục trên nhánh chính, không đổi mã ứng dụng đã đóng gói.
+
+## Xác nhận cuối ngày 07/11/2026
+
+Website trả revision `df691d92ad57b004fa09d8a34ad024433e631d7b` từ `release.json`. [Validate](https://github.com/infiniti-money/Web-Design/actions/runs/42314938007), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42314937918) và [browser smoke sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42315006081) đều thành công toàn bộ, gồm ca quản trị công trình mới, fixture CRUD đã sửa và các module hiện có. Khác biệt sau tag chỉ ở fixture smoke/tài liệu; web và PC giữ cùng mã chức năng công trình đã kiểm tra. Đã đẩy báo cáo/roadmap lên main; chưa coi các điều kiện UAT/backup/ký số còn mở là hoàn tất.

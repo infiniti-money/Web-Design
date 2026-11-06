@@ -5,8 +5,8 @@ Tên thương hiệu hiện tại: **ATELIER HOME**. Các tài liệu cũ dùng 
 ## Mốc hiện tại
 
 - Web: [v1.24.0](RELEASE_NOTES_V1_24_0.md): quyền công trình theo trạng thái hiện tại, xác nhận ghi, giữ nội dung khi lỗi và cảnh báo chưa lưu. [v1.23.0](RELEASE_NOTES_V1_23_0.md) hoàn thiện tìm/lọc kiến thức và mục lục bài.
-- PC: `desktop-v1.1.1`, bản vá tìm CRM tương ứng. Số phiên bản PC và web độc lập.
-- Đã phát hành: [web v1.23.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.23.0) · [PC 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1).
+- PC: `desktop-v1.1.2`, đóng gói các sửa lỗi công trình và giao diện vận hành hiện tại. Số phiên bản PC và web độc lập.
+- Đã phát hành: [web v1.24.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.24.0) · [PC 1.1.2](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.2).
 - Bản nâng cấp giao diện trước đó: [báo cáo triển khai](PROFESSIONAL_UPGRADE.md). Bản nền tảng CMS/desktop: [báo cáo kiểm thử](ADMIN_UPGRADE_REPORT.md).
 
 ## Đối chiếu những hạn chế trong ghi chú cũ
