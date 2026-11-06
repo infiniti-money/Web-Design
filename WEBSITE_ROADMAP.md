@@ -37,6 +37,8 @@ Tiến độ đợt v1.19: đã lập lộ trình; đã dựng danh mục/bài k
 
 Đợt v1.23 (07/11/2026) tiếp tục chặng 2/3: tìm bài không dấu, lọc chủ đề và URL giữ bộ lọc; mục lục HTML/neo heading, thời gian đọc ước tính và hỗ trợ in. Triển khai chức năng trước rồi kiểm thử sâu sau theo yêu cầu chủ website, giữ chốt CI hiện có. Trạng thái và bằng chứng cập nhật trong [nghiệm thu trải nghiệm kiến thức](KNOWLEDGE_EXPERIENCE_ACCEPTANCE.md); không sửa database hoặc tạo nội dung doanh nghiệp giả.
 
+Đã triển khai v1.23.0 tại revision `6ec7849d4372606f71863afe778eb3a7ad901fe9`, xác nhận `release.json`. Sau triển khai, hai bộ browser kiến thức đều đạt trên Pages; bộ Node mở rộng 96/97 bài đạt, 1 bài gửi thật bỏ qua. Validate, Pages và gói phát hành thành công; checksum nguồn tải về khớp. Giữ các việc cần nội dung thật, UAT và CWV/Search Console ở trạng thái mở.
+
 Đợt v1.22 tiếp tục chặng 2/5 với Catalog công khai: REST nhẹ, URL chia sẻ/khôi phục bộ lọc, phân trang và trạng thái lỗi rõ. Sửa policy làm anon bị 401 do tham chiếu staff_profiles; giữ bảng nhân sự riêng tư và kiểm tra Admin hiện hành. SQL rollback, API public thực tế và browser fixture đã đạt. Xem CATALOG_PUBLIC_ACCEPTANCE.md; dữ liệu sản phẩm/ảnh thật và trang SEO độc lập còn mở.
 
 Xác minh lại ngày 07/11/2026: website chạy revision `d3489e0bf7a3a1ebeea340ff30d151d1ebd9ea9b`, giữ cập nhật CMS/Delivery từ nhánh chính sau gói nguồn v1.22.0. Pages và browser smoke thành công; hai bộ browser Catalog chạy trực tiếp trên Pages đều đạt. Bộ Node hiện tại đạt 94/95 bài, 1 bài gửi thật bỏ qua; API Catalog public 200 và bảng nhân sự vẫn chặn 401. [Bằng chứng và phạm vi còn mở](CATALOG_PUBLIC_ACCEPTANCE.md). Chặng 2/5 tiếp tục mở cho nội dung thật và UAT, không coi một mục hiện có là bộ Catalog doanh nghiệp hoàn chỉnh.
