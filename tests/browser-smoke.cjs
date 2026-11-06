@@ -214,6 +214,7 @@ window.supabase={createClient:()=>{
          getSession:async()=>({data:{session:{access_token:"mock-session"}},error:null}),
          signOut:async()=>({error:null})},
    from(table) {
+     const confirmed=row=>({select(){return this},single:async()=>({data:row?{id:row.id}:null,error:null})});
      const q={
        conditions:[],head:false,countRequested:false,term:"",
        filtered(){
@@ -254,7 +255,7 @@ window.supabase={createClient:()=>{
            careTasks.push(record);
            taskEvents.push({id:"event-"+taskEvents.length,inquiry_id:record.inquiry_id,task_id:record.id,
              event_type:"created",current_value:record.assignee_name,created_at:ts});
-         } else records.push({id:"project-"+(records.length+1),...value});
+         } else {const row={id:"project-"+(records.length+1),...value};records.push(row);return confirmed(row);}
          return Promise.resolve({error:null});
        },
        update(value){return{eq(key,id){
@@ -285,10 +286,11 @@ window.supabase={createClient:()=>{
            else if(value.status!=="done")item.completed_at=null;
          }
          if(item)Object.assign(item,value);
+         if(table==="projects")return confirmed(item);
          return Promise.resolve({error:null})}}},
        delete(){return{eq(key,id){
          if(table==="inquiries")inquiries=inquiries.filter(r=>r[key]!==id);
-         else records=records.filter(r=>r[key]!==id);
+         else {const row=records.find(r=>r[key]===id);records=records.filter(r=>r[key]!==id);return confirmed(row);}
          return Promise.resolve({error:null})}}}
      };return q;
    }

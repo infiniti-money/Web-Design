@@ -32,6 +32,7 @@ Các mục còn mở: UAT Admin/Quản lý/Nhân viên thật, thiết bị vậ
 - [Validate](https://github.com/infiniti-money/Web-Design/actions/runs/42313926885) thành công, gồm migration thật và bộ kiểm thử vai trò trên PostgreSQL 17 cách ly.
 - [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42313926828) lần đầu lỗi HTTP 500 khi tạo deployment. Chạy lại riêng job deploy thành công ở attempt 2; không đổi mã hoặc ghi lại dữ liệu để xử lý lỗi hạ tầng.
 - Đã thêm ca ID trả về sai và fixture đầy đủ; chạy lại browser trên Pages đạt. Ảnh desktop/mobile kiểm tra ở đầu trang và sau khi menu mobile đóng ổn định. Bổ sung script vào browser smoke cho các đợt tiếp theo.
+- Smoke tổng thể cũ cần cập nhật fixture project INSERT/UPDATE/DELETE để hỗ trợ `.select("id").single()` như API thực; lượt CI cũ dừng tại ca CRUD vì fixture trả Promise không có projection. Sau sửa riêng fixture, chạy lại `tests/browser-smoke.cjs` trên Pages đạt toàn bộ: công trình CRUD, CRM phân trang/KPI/CSV, mobile, form và trạng thái lỗi. Không nới kiểm tra ID trong mã ứng dụng; các ca trả 0 hàng/sai ID vẫn phải bị từ chối.
 
 ## PC 1.1.2
 
