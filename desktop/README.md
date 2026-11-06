@@ -13,7 +13,7 @@
 
 ## Cài đặt và sử dụng
 
-Bản vá hiện tại: [Windows Manager 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1), bổ sung tìm CRM không dấu. Feed cập nhật stable đã chuyển sang 1.1.1; các đường dẫn 1.1.0 dưới đây là bản nâng cấp giao diện trước đó.
+Bản vá mới: [Windows Manager 1.1.2](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.2), đóng gói quản trị công trình tin cậy và các cập nhật vận hành hiện tại. Xem [ghi chú 1.1.2](RELEASE_NOTES_1_1_2.md) và [bằng chứng phát hành/feed](../PROJECT_ADMIN_ACCEPTANCE.md); chỉ coi đã phát hành khi workflow và kiểm tra feed thành công. Bản 1.1.1 bổ sung tìm CRM không dấu; các đường dẫn 1.1.0 dưới đây là lịch sử nâng cấp giao diện.
 
 Mở tệp `dist/ATELIER-HOME-Manager-1.1.0-x64-Setup.exe`, cài theo từng bước và đăng nhập bằng tài khoản đã được cấp quyền. Tài khoản mới vẫn cần Admin duyệt. Đăng ký/khôi phục mật khẩu mở trang xác thực của website bằng trình duyệt; ứng dụng PC đăng nhập bằng email và mật khẩu.
 
@@ -60,4 +60,4 @@ Không nhúng GitHub token vào ứng dụng. Feed đọc công khai qua HTTPS v
 
 CMS và trigger kiểm tra tổng báo giá đã được thêm bằng migration trong `supabase/migrations`. `staff-management` hỗ trợ Origin desktop `atelier://app` và tiếp tục yêu cầu JWT cùng tài khoản Admin đang hoạt động.
 
-Các trang bài viết công khai hiện đọc Supabase và giữ `noindex` trong khi chưa có luồng xuất HTML tĩnh cho nội dung CMS. Giao diện web mới và các route bài viết đã được triển khai lên GitHub Pages ngày 05/11/2026; phần soạn thảo/xem trước trong ứng dụng PC hoạt động từ UI đóng gói. Xem [báo cáo nâng cấp](../PROFESSIONAL_UPGRADE.md) để đối chiếu kiểm thử và triển khai.
+Website đã có luồng dựng bài CMS công khai thành HTML tĩnh từ v1.19 và tìm/lọc kiến thức từ v1.23. Phần soạn thảo/xem trước trong PC dùng UI đóng gói; thời điểm lưu CMS vẫn khác thời điểm Pages triển khai thành công. Xem [lộ trình](../WEBSITE_ROADMAP.md) và [báo cáo v1.24](../PROJECT_ADMIN_ACCEPTANCE.md) để đối chiếu phạm vi đã kiểm tra.

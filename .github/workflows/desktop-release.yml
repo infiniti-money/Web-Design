@@ -61,7 +61,13 @@ jobs:
           if($LASTEXITCODE -eq 0){
             gh release upload $env:GITHUB_REF_NAME @files desktop/dist/latest.yml --clobber
           }else{
-            gh release create $env:GITHUB_REF_NAME @files desktop/dist/latest.yml --verify-tag --title "ATELIER HOME Manager $env:GITHUB_REF_NAME" --notes 'Windows Manager: projects, staff, articles and quotations.'
+            $desktopVersion=(Get-Content desktop/package.json -Raw | ConvertFrom-Json).version
+            $desktopNotes=Join-Path 'desktop' ('RELEASE_NOTES_'+$desktopVersion.Replace('.','_')+'.md')
+            if(Test-Path -LiteralPath $desktopNotes){
+              gh release create $env:GITHUB_REF_NAME @files desktop/dist/latest.yml --verify-tag --title "ATELIER HOME Manager $desktopVersion" --notes-file $desktopNotes
+            }else{
+              gh release create $env:GITHUB_REF_NAME @files desktop/dist/latest.yml --verify-tag --title "ATELIER HOME Manager $desktopVersion" --notes 'Windows Manager: projects, staff, articles and quotations.'
+            }
           }
           if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
           gh release view desktop-stable *> $null

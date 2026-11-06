@@ -16,7 +16,7 @@ Migration `20261106233736_projects_authoritative_admin_roles` đã triển khai:
 
 ## Giao diện và kiểm thử sau phát hành
 
-Đã hoàn thiện mã giao diện và script `tests/projects-admin-browser.cjs`; chờ đối chiếu revision Pages rồi chạy kiểm thử trực tiếp. Các ca dùng fixture trong trình duyệt, chặn API production; không tạo/sửa/xóa công trình thật.
+Đã triển khai giao diện tại revision `e00f735ab85f82b7ca4e278b2cb81309d86ecbd8`, đối chiếu `release.json` rồi chạy script `tests/projects-admin-browser.cjs` trực tiếp trên Pages: đạt các ca dưới đây. Các ca dùng fixture trong trình duyệt, chặn API production; không tạo/sửa/xóa công trình thật. Bộ Node đạt 96/97 bài, 0 lỗi, 1 bài gửi dữ liệu thật chủ động bỏ qua.
 
 - Trường hợp 0 hàng hoặc ID phản hồi khác không được báo lưu/xóa thành công.
 - Khi ghi: khóa trường/nút tạo mới/hành động bảng, chặn gửi trùng. Khi lỗi mạng: giữ nội dung, không tự gửi lại.
@@ -26,3 +26,13 @@ Migration `20261106233736_projects_authoritative_admin_roles` đã triển khai:
 - Tạo/sửa/xóa được xác nhận, hiển thị điện thoại và kiểm tra lỗi JavaScript. CI PostgreSQL chạy migration thực và cùng bộ SQL với dữ liệu tổng hợp trong database tách biệt.
 
 Các mục còn mở: UAT Admin/Quản lý/Nhân viên thật, thiết bị vật lý, backup/restore độc lập, migration quote history và nội dung công trình/ảnh thật. Bản vá này không đánh dấu hoàn tất toàn bộ UAT hoặc mọi cổng bảo mật của dự án.
+
+## Bằng chứng triển khai đợt đầu
+
+- [Validate](https://github.com/infiniti-money/Web-Design/actions/runs/42313926885) thành công, gồm migration thật và bộ kiểm thử vai trò trên PostgreSQL 17 cách ly.
+- [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42313926828) lần đầu lỗi HTTP 500 khi tạo deployment. Chạy lại riêng job deploy thành công ở attempt 2; không đổi mã hoặc ghi lại dữ liệu để xử lý lỗi hạ tầng.
+- Đã thêm ca ID trả về sai và fixture đầy đủ; chạy lại browser trên Pages đạt. Ảnh desktop/mobile kiểm tra ở đầu trang và sau khi menu mobile đóng ổn định. Bổ sung script vào browser smoke cho các đợt tiếp theo.
+
+## PC 1.1.2
+
+Tăng phiên bản package/lockfile lên 1.1.2 để phân phối cùng UI cho người dùng PC. Giữ dependency, appId, kho phiên DPAPI và feed `desktop-stable`. Chờ CI Electron/build, phát hành Setup/Portable và kiểm tra checksum metadata sau phát hành; không ghi đạt cài nâng cấp thực tế nếu chưa thử trên máy người dùng.

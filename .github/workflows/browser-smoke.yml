@@ -59,6 +59,10 @@ jobs:
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
         run: node tests/catalog-browser-smoke.cjs
+      - name: Check project confirmations, unsaved edits and failure recovery
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/projects-admin-browser.cjs
       - name: Check homepage font, keyboard and contact fallbacks
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
