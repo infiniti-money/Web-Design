@@ -2,13 +2,13 @@
 
 Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub Pages.
 
-Bản web hiện tại: [v1.21.1 — luồng tư vấn và tích hợp quản trị](RELEASE_NOTES_V1_21_1.md). [Nghiệm thu tư vấn](CONSULTATION_ACCEPTANCE.md) · [Kết quả đo và các điểm tiếp tục tối ưu](PERFORMANCE_BASELINE.md).
+Bản web hiện tại: [v1.22.0 — Catalog công khai, chia sẻ và phân quyền](RELEASE_NOTES_V1_22_0.md). [Nghiệm thu Catalog](CATALOG_PUBLIC_ACCEPTANCE.md) · [Nghiệm thu tư vấn](CONSULTATION_ACCEPTANCE.md) · [Kết quả đo và các điểm tiếp tục tối ưu](PERFORMANCE_BASELINE.md).
 
 [Lộ trình website chuyên nghiệp](WEBSITE_ROADMAP.md) · [Web v1.19: kiến thức HTML và nội dung gốc](RELEASE_NOTES_V1_19_0.md) · [Hướng dẫn biên tập](content/KNOWLEDGE_PUBLISHING.md).
 
 Theo dõi [lịch sử phiên bản và việc còn thiếu](RELEASE_HISTORY.md). Bản web [v1.18.0](RELEASE_NOTES_V1_18_0.md) hoàn thiện tìm CRM tiếng Việt không dấu; phiên bản PC độc lập với phiên bản web.
 
-Bản hiện tại: [web v1.18.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.18.0) · [Windows Manager 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1). Các mục 1.1.0 bên dưới ghi lại đợt nâng cấp giao diện trước bản vá tìm kiếm.
+Bản phát hành: [web v1.22.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.22.0) · [Windows Manager 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1). Các mục 1.1.0 bên dưới ghi lại đợt nâng cấp giao diện trước bản vá tìm kiếm. Gói nguồn v1.22.0 lưu revision lúc phát hành; website tiếp tục nhận cập nhật nhánh chính, kiểm tra revision đang chạy qua `release.json`.
 
 ## Giao diện quản trị chuyên nghiệp — 05/11/2026
 

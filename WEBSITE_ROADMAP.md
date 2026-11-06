@@ -37,6 +37,8 @@ Tiến độ đợt v1.19: đã lập lộ trình; đã dựng danh mục/bài k
 
 Đợt v1.22 tiếp tục chặng 2/5 với Catalog công khai: REST nhẹ, URL chia sẻ/khôi phục bộ lọc, phân trang và trạng thái lỗi rõ. Sửa policy làm anon bị 401 do tham chiếu staff_profiles; giữ bảng nhân sự riêng tư và kiểm tra Admin hiện hành. SQL rollback, API public thực tế và browser fixture đã đạt. Xem CATALOG_PUBLIC_ACCEPTANCE.md; dữ liệu sản phẩm/ảnh thật và trang SEO độc lập còn mở.
 
+Xác minh lại ngày 07/11/2026: website chạy revision `d3489e0bf7a3a1ebeea340ff30d151d1ebd9ea9b`, giữ cập nhật CMS/Delivery từ nhánh chính sau gói nguồn v1.22.0. Pages và browser smoke thành công; hai bộ browser Catalog chạy trực tiếp trên Pages đều đạt. Bộ Node hiện tại đạt 94/95 bài, 1 bài gửi thật bỏ qua; API Catalog public 200 và bảng nhân sự vẫn chặn 401. [Bằng chứng và phạm vi còn mở](CATALOG_PUBLIC_ACCEPTANCE.md). Chặng 2/5 tiếp tục mở cho nội dung thật và UAT, không coi một mục hiện có là bộ Catalog doanh nghiệp hoàn chỉnh.
+
 Đợt v1.21 tiếp tục chặng 4: khóa biểu mẫu khi gửi, xác nhận thành công/bắt đầu yêu cầu mới, giữ nội dung khi lỗi, timeout không tự gửi lại, khôi phục xác minh và CTA không che liên hệ. Xem [bảng nghiệm thu tư vấn](CONSULTATION_ACCEPTANCE.md). Kiểm thử bằng fixture đạt; việc tiếp nhận thật của doanh nghiệp và thiết bị thật vẫn chưa đánh dấu hoàn thành.
 
 Bản tích hợp v1.21.1 giữ các nâng cấp main song song về Operations/CRM/CMS/Catalog, thống nhất timeout 15 giây; tổng 85/86 bài Node đạt (1 bài gửi thật bỏ qua). Tag v1.21.0 lưu nguồn trước hợp nhất; bản triển khai nhánh chính dùng v1.21.1. Xem RELEASE_NOTES_V1_21_1.md để phân biệt phạm vi của hai gói.
