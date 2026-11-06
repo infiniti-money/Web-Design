@@ -2,7 +2,7 @@
 
 Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub Pages.
 
-Bản nâng cấp web: [v1.23.0 — Tìm và đọc hướng dẫn](RELEASE_NOTES_V1_23_0.md). [Nghiệm thu kiến thức](KNOWLEDGE_EXPERIENCE_ACCEPTANCE.md) · [Nghiệm thu Catalog](CATALOG_PUBLIC_ACCEPTANCE.md) · [Nghiệm thu tư vấn](CONSULTATION_ACCEPTANCE.md) · [Kết quả đo và các điểm tiếp tục tối ưu](PERFORMANCE_BASELINE.md).
+Bản nâng cấp web: [v1.24.0 — Quản trị công trình tin cậy](RELEASE_NOTES_V1_24_0.md). [Nghiệm thu công trình](PROJECT_ADMIN_ACCEPTANCE.md) · [Nghiệm thu kiến thức](KNOWLEDGE_EXPERIENCE_ACCEPTANCE.md) · [Nghiệm thu Catalog](CATALOG_PUBLIC_ACCEPTANCE.md) · [Nghiệm thu tư vấn](CONSULTATION_ACCEPTANCE.md) · [Kết quả đo và các điểm tiếp tục tối ưu](PERFORMANCE_BASELINE.md).
 
 [Lộ trình website chuyên nghiệp](WEBSITE_ROADMAP.md) · [Web v1.19: kiến thức HTML và nội dung gốc](RELEASE_NOTES_V1_19_0.md) · [Hướng dẫn biên tập](content/KNOWLEDGE_PUBLISHING.md).
 

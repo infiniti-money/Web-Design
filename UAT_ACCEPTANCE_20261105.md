@@ -8,6 +8,8 @@ Theo chỉ đạo trực tiếp, migration **additive** `20261105082144_delivery
 
 ## Phạm vi và kết quả chỉ-đọc
 
+Cập nhật 07/11/2026: điểm policy công trình dựa JWT trong snapshot 05/11 bên dưới đã được xử lý bằng migration `20261106233736_projects_authoritative_admin_roles`. SQL rollback đạt và checksum 6 công trình không đổi; xem [báo cáo v1.24](PROJECT_ADMIN_ACCEPTANCE.md). Kết quả này không thay thế UAT thật hoặc backup/restore và không áp dụng migration quote history.
+
 - GitHub main `a2be922abc681b6fffb89ca7584621c76e1cdb73`: CI, Pages và browser smoke đạt; các browser fixtures **không phải** kiểm tra bằng tài khoản thật.
 - Supabase `mswiegltusllzvuavjdh`: ACTIVE_HEALTHY, 1 admin active, 1 manager active, **không có employee active** tại thời điểm kiểm tra; 6 projects, 1 catalog_items, 2 inquiries, 0 cms_posts và 1 customer_quote_versions.
 - RLS đã bật trên bảng liên quan, nhưng policy của `public.projects` hiện dựa trên `app_metadata.role` trong JWT và không đối chiếu trạng thái nhân sự live; đây là cổng bảo mật cần bản vá và kiểm thử trước nghiệm thu.

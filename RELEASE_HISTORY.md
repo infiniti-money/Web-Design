@@ -4,7 +4,7 @@ Tên thương hiệu hiện tại: **ATELIER HOME**. Các tài liệu cũ dùng 
 
 ## Mốc hiện tại
 
-- Web: [v1.23.0](RELEASE_NOTES_V1_23_0.md): triển khai tìm/lọc kiến thức và mục lục bài; nghiệm thu sau phát hành ghi riêng. [v1.22.0](RELEASE_NOTES_V1_22_0.md) hoàn thiện Catalog công khai và quyền đọc anon.
+- Web: [v1.24.0](RELEASE_NOTES_V1_24_0.md): quyền công trình theo trạng thái hiện tại, xác nhận ghi, giữ nội dung khi lỗi và cảnh báo chưa lưu. [v1.23.0](RELEASE_NOTES_V1_23_0.md) hoàn thiện tìm/lọc kiến thức và mục lục bài.
 - PC: `desktop-v1.1.1`, bản vá tìm CRM tương ứng. Số phiên bản PC và web độc lập.
 - Đã phát hành: [web v1.23.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.23.0) · [PC 1.1.1](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.1).
 - Bản nâng cấp giao diện trước đó: [báo cáo triển khai](PROFESSIONAL_UPGRADE.md). Bản nền tảng CMS/desktop: [báo cáo kiểm thử](ADMIN_UPGRADE_REPORT.md).
@@ -45,6 +45,7 @@ Kiểm chứng phát hành 05/11/2026: [triển khai Pages](https://github.com/i
 - [v1.21.1](RELEASE_NOTES_V1_21_1.md): bản tích hợp main; giữ tag/gói nguồn v1.21.0 đã tạo trước hợp nhất.
 - [v1.22](RELEASE_NOTES_V1_22_0.md): Catalog công khai và [nghiệm thu quyền đọc/chia sẻ](CATALOG_PUBLIC_ACCEPTANCE.md).
 - [v1.23](RELEASE_NOTES_V1_23_0.md): tìm/lọc kiến thức và [nghiệm thu trải nghiệm đọc](KNOWLEDGE_EXPERIENCE_ACCEPTANCE.md).
+- [v1.24](RELEASE_NOTES_V1_24_0.md): quyền và thao tác công trình với [bằng chứng nghiệm thu](PROJECT_ADMIN_ACCEPTANCE.md).
 
 Không tạo ghi chú v1.14–v1.16 hoặc tag lịch sử giả chỉ để lấp số thứ tự. Các module tương ứng đã có trong nguồn; chỉ ghi nhận release khi có bằng chứng phát hành.
 

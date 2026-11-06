@@ -35,6 +35,8 @@ Tiến độ đợt v1.19: đã lập lộ trình; đã dựng danh mục/bài k
 
 ## Cách đánh giá hoàn thành
 
+Đợt v1.24 (07/11/2026) ưu tiên P0/P1 của chặng 5: kiểm tra quyền công trình với Auth/nhân sự hiện tại, không tin claim Admin cũ; lưu/xóa có xác nhận ID, bảo toàn biểu mẫu, cảnh báo chưa lưu, khóa gửi trùng và không hiển thị danh sách/số liệu cũ khi lỗi. Migration policy đã áp dụng và SQL rollback đạt, dữ liệu 6 công trình giữ nguyên checksum. Giao diện triển khai trước rồi kiểm thử sâu sau; bằng chứng cập nhật trong [nghiệm thu quản trị công trình](PROJECT_ADMIN_ACCEPTANCE.md). Quote history, backup độc lập và UAT thật vẫn là cổng riêng.
+
 Đợt v1.23 (07/11/2026) tiếp tục chặng 2/3: tìm bài không dấu, lọc chủ đề và URL giữ bộ lọc; mục lục HTML/neo heading, thời gian đọc ước tính và hỗ trợ in. Triển khai chức năng trước rồi kiểm thử sâu sau theo yêu cầu chủ website, giữ chốt CI hiện có. Trạng thái và bằng chứng cập nhật trong [nghiệm thu trải nghiệm kiến thức](KNOWLEDGE_EXPERIENCE_ACCEPTANCE.md); không sửa database hoặc tạo nội dung doanh nghiệp giả.
 
 Đã triển khai v1.23.0 tại revision `6ec7849d4372606f71863afe778eb3a7ad901fe9`, xác nhận `release.json`. Sau triển khai, hai bộ browser kiến thức đều đạt trên Pages; bộ Node mở rộng 96/97 bài đạt, 1 bài gửi thật bỏ qua. Validate, Pages và gói phát hành thành công; checksum nguồn tải về khớp. Giữ các việc cần nội dung thật, UAT và CWV/Search Console ở trạng thái mở.

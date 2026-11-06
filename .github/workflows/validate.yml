@@ -55,6 +55,10 @@ jobs:
             sudo apt-get install -y postgresql-client
           fi
           psql -h 127.0.0.1 -U ci -d quote_guard_test -v ON_ERROR_STOP=1 -f tests/quote-version-guard-isolated.sql
+      - name: Verify current project roles and revoked JWTs on isolated PostgreSQL
+        env:
+          PGPASSWORD: isolated-ci-only
+        run: psql -h 127.0.0.1 -U ci -d quote_guard_test -v ON_ERROR_STOP=1 -f tests/projects-authoritative-rls-isolated.sql
 
 
 
@@ -62,6 +66,9 @@ jobs:
     name: Public consultation UX (isolated Playwright)
     runs-on: ubuntu-24.04
     timeout-minutes: 8
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+      options: --ipc=host
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node
@@ -69,9 +76,10 @@ jobs:
         with:
           node-version: '22'
       - name: Install pinned Playwright Chromium
+        timeout-minutes: 3
         run: |
           npm install --no-save --no-package-lock playwright@1.64.1
-          npx playwright install --with-deps chromium
+          npx playwright --version
       - name: Start isolated preview (no production writes)
         run: |
           node scripts/serve-local.cjs > /tmp/atelier-preview.log 2>&1 &

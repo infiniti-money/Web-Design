@@ -30,7 +30,7 @@
     tabLoads.set(name,entry);
     return entry.pending;
   }
-  const state = { projects:[], inquiries:[], editingId:null, slugTouched:false, busy:false,
+  const state = { projects:[], projectsLoaded:false, projectSeq:0, projectSession:0, projectPending:false, projectBaseline:null, inquiries:[], editingId:null, slugTouched:false, busy:false,
     leadSearch:"", leadStatus:"all", leadService:"all", leadPeriod:"all", leadPage:0, leadTotal:0,
     leadQuerySeq:0, leadStatsSeq:0, leadReminder:"all",activeProfile:null,profileSeq:0,customerTaskSeq:0,taskBoardSeq:0,taskBoardPage:0,prioritySeq:0,taskBoardTotal:0,taskView:"table",reportSeq:0,taskReport:null,editingTask:null,staff:[],currentUser:null,currentRole:null,myTaskSeq:0,taskStatusFilter:"all",taskOwnerFilter:"",taskDueFilter:"all" };
 
@@ -74,6 +74,11 @@
   function switchTab(name) {
     const permitted=state.currentRole==="admin"?["overview","projects","inquiries","tasks","reports","my-tasks","staff"]:state.currentRole==="manager"?["tasks","reports","my-tasks"]:["my-tasks"];
     if(!permitted.includes(name))return;
+    if(state.projectPending){if(!$("panel-projects").classList.contains("hide"))history.replaceState(null,"","#projects");return;}
+    if(name!=="projects"&&!$("panel-projects").classList.contains("hide")&&projectDirty()
+      &&!confirm("Công trình còn thay đổi chưa lưu. Rời mục này? Nội dung chỉ được giữ trong phiên trang hiện tại.")){
+      history.replaceState(null,"","#projects");return;
+    }
     for(const kind of ["overview","projects","inquiries","tasks","reports","my-tasks","staff"]) {
       const active = kind === name;
       $("panel-"+kind).classList.toggle("hide", !active);
@@ -88,11 +93,17 @@
     state.busy=b;
     for(const id of ["project-save","login-button","reload-projects","reload-inquiries","profile-note-save","profile-reminder-save","profile-reminder-clear"]) $(id).disabled=b;
     $("profile-reminder-done").disabled=b || !state.activeProfile?.follow_up_at;
+    for(const field of $("project-form").querySelectorAll("input,select,textarea,button"))field.disabled=b;
+    for(const action of $("projects-table").querySelectorAll("button"))action.disabled=b;
   }
   function loginVisible() {
     tabLoads.clear();
+    ++state.projectSession;++state.projectSeq;
+    state.projectPending=false;state.projects=[];state.projectsLoaded=false;
+    newProject(true);renderProjects();renderMetrics();
     state.activeProfile=null;
     state.currentUser=null;state.currentRole=null;state.staff=[];
+    setBusy(false);
     ++state.profileSeq;
     $("lead-profile").classList.add("hide");
     $("profile-note-input").value="";
@@ -242,11 +253,20 @@
     }catch(error){message("staff-status","Không cập nhật được: "+error.message,true)}
   }
   async function loadProjects() {
-    const {data,error}=await client.from("projects")
-      .select("id,slug,title,category,area,style,image_url,summary,published,sort_order,created_at")
-      .order("sort_order",{ascending:true}).range(0,199);
-    if(error) {message("dash-status","Không đọc được dự án: "+(error.message||"Lỗi truy vấn"),true);return;}
-    state.projects=data||[];renderProjects();renderMetrics();
+    if(state.currentRole!=="admin")return false;
+    const seq=++state.projectSeq,session=state.projectSession;
+    try{
+      const {data,error}=await client.from("projects")
+        .select("id,slug,title,category,area,style,image_url,summary,published,sort_order,created_at")
+        .order("sort_order",{ascending:true}).range(0,199);
+      if(seq!==state.projectSeq||session!==state.projectSession)return false;
+      if(error)throw error;if(!Array.isArray(data))throw new Error("Phản hồi danh sách không hợp lệ.");
+      state.projects=data;state.projectsLoaded=true;renderProjects();renderMetrics();return true;
+    }catch(error){
+      if(seq!==state.projectSeq||session!==state.projectSession)return false;
+      state.projects=[];state.projectsLoaded=false;renderProjects();renderMetrics();
+      message("dash-status","Chưa tải được danh sách công trình. Dữ liệu cũ đã ẩn; nội dung biểu mẫu được giữ. Nhấn Làm mới để thử lại.",true);return false;
+    }
   }
   // All customer data is fetched only after verifying Admin authentication.
   // RLS is the final authorization boundary for every query.
@@ -542,11 +562,15 @@
       message("dash-status","Đã tải dữ liệu. Quản lý khách hàng phân trang 25 hồ sơ, thống kê toàn bộ dữ liệu.");
   }
   function renderMetrics() {
-    $("metric-projects").textContent=state.projects.length;
-    $("metric-published").textContent=state.projects.filter(p=>p.published).length;
+    $("metric-projects").textContent=state.projectsLoaded?state.projects.length:"—";
+    $("metric-published").textContent=state.projectsLoaded?state.projects.filter(p=>p.published).length:"—";
   }
   function renderProjects() {
     const body=$("projects-table");body.replaceChildren();
+    if(!state.projectsLoaded){
+      $("project-match-count").textContent="Chưa xác nhận được danh sách công trình.";
+      const row=el("tr"),td=el("td","Danh sách chưa tải được. Nhấn Làm mới để thử lại.","empty");td.colSpan=4;row.append(td);body.append(row);return;
+    }
     const search=$("project-search").value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/đ/g,"d").trim();
     const visibility=$("project-visibility").value;
     const visible=state.projects.filter(p=>
@@ -570,6 +594,7 @@
       const tools=el("div",undefined,"actions");
       tools.append(btn("Sửa",()=>editProject(p)),
                    btn("Xóa",()=>deleteProject(p),"danger"));
+      for(const action of tools.querySelectorAll("button"))action.disabled=state.busy;
       cell(row,tools);body.append(row);
     });
   }
@@ -935,26 +960,36 @@
     await Promise.all([loadTaskBoard(),loadTaskKpis(),
       ...(state.currentRole==="admin"?[loadPriorityHub()]:[])]);
   }
-  function newProject() {
+  function projectSnapshot(){return JSON.stringify([...$("project-form").querySelectorAll("input,select,textarea")].map(field=>field.type==="checkbox"?field.checked:field.value));}
+  function projectDirty(){return state.currentRole==="admin"&&state.projectBaseline!==null&&projectSnapshot()!==state.projectBaseline;}
+  function projectEditStatus(){
+    $("project-edit-state").textContent=state.projectPending?"Đang chờ xác nhận từ máy chủ…":projectDirty()?"Có thay đổi chưa được xác nhận lưu.":"Biểu mẫu chưa có thay đổi cần lưu.";
+  }
+  function discardProject(){return !state.projectPending&&(!projectDirty()||confirm("Bỏ các thay đổi công trình chưa lưu?"));}
+  function newProject(force=false) {
+    if(force!==true&&!discardProject())return;
     state.editingId=null;state.slugTouched=false;
     $("project-form").reset();$("p-order").value="0";
+    state.projectBaseline=projectSnapshot();projectEditStatus();
     $("edit-title").textContent="Thêm dự án mới";
     message("dash-status","");
   }
   function editProject(p) {
+    if(state.busy||!discardProject())return;
     state.editingId=p.id;state.slugTouched=true;
     $("p-title").value=p.title;$("p-slug").value=p.slug;
     $("p-category").value=p.category;$("p-area").value=p.area;
     $("p-style").value=p.style;$("p-image").value=p.image_url;
     $("p-summary").value=p.summary;$("p-order").value=p.sort_order;
     $("p-published").checked=p.published;
+    state.projectBaseline=projectSnapshot();projectEditStatus();
     $("edit-title").textContent="Chỉnh sửa dự án";
     $("project-form").scrollIntoView({behavior:"smooth",block:"center"});
     $("p-title").focus();
   }
   async function submitProject(event) {
     event.preventDefault();
-    if(state.busy)return;
+    if(state.busy||state.currentRole!=="admin")return;
     const title=$("p-title").value.trim();
     const slug=$("p-slug").value.trim().toLowerCase();
     const url=$("p-image").value.trim();
@@ -971,25 +1006,36 @@
       sort_order:sortOrder,published:$("p-published").checked,
       updated_at:new Date().toISOString()};
     if(payload.published && !confirm("Xác nhận thông tin công trình, quyền sử dụng ảnh đã được kiểm tra và muốn công khai trên danh sách website?"))return;
-    setBusy(true);
+    const editingId=state.editingId,session=state.projectSession;
+    state.projectPending=true;setBusy(true);projectEditStatus();
     try {
-      const request=state.editingId
-        ? client.from("projects").update(payload).eq("id",state.editingId)
+      const request=editingId
+        ? client.from("projects").update(payload).eq("id",editingId)
         : client.from("projects").insert(payload);
-      const {error}=await request;
+      const {data,error}=await request.select("id").single();
+      if(session!==state.projectSession)return;
       if(error)throw error;
-      newProject();await loadProjects();
-      message("dash-status","Đã lưu dự án. Dự án xuất bản sẽ xuất hiện trên website.",false);
+      if(!data?.id||(editingId&&data.id!==editingId))throw new Error("Máy chủ chưa xác nhận bản ghi đã lưu; có thể quyền hoặc dữ liệu đã thay đổi.");
+      newProject(true);const loaded=await loadProjects();
+      if(session!==state.projectSession)return;
+      message("dash-status",loaded?"Đã xác nhận lưu công trình. Mục công khai sẽ hiện trong danh sách website; hồ sơ HTML cần nội dung được xác minh riêng.":"Đã xác nhận lưu công trình, nhưng danh sách chưa tải lại được. Nhấn Làm mới; không gửi lại để tránh trùng.",!loaded);
     } catch(error) {
-      message("dash-status","Không thể lưu dự án: "+(error.message||"Lỗi không xác định"),true);
-    } finally {setBusy(false)}
+      if(session===state.projectSession)message("dash-status","Chưa xác nhận lưu công trình: "+(error.message||"Lỗi kết nối")+" Nội dung được giữ. Làm mới danh sách để kiểm tra trước khi gửi lại.",true);
+    } finally {if(session===state.projectSession){state.projectPending=false;setBusy(false);projectEditStatus();}}
   }
   async function deleteProject(p) {
+    if(state.busy||state.currentRole!=="admin"||!discardProject())return;
     if(!confirm('Xóa dự án "'+p.title+'"? Không thể khôi phục.'))return;
-    const {error}=await client.from("projects").delete().eq("id",p.id);
-    if(error){message("dash-status","Không xóa được dự án: "+error.message,true);return}
-    if(state.editingId===p.id)newProject();
-    await loadProjects();message("dash-status","Đã xóa dự án.");
+    const session=state.projectSession;state.projectPending=true;setBusy(true);projectEditStatus();
+    try{
+      const {data,error}=await client.from("projects").delete().eq("id",p.id).select("id").single();
+      if(session!==state.projectSession)return;
+      if(error)throw error;if(data?.id!==p.id)throw new Error("Không có xác nhận xóa bản ghi; có thể quyền hoặc dữ liệu đã thay đổi.");
+      if(state.editingId===p.id)newProject(true);
+      const loaded=await loadProjects();if(session!==state.projectSession)return;
+      message("dash-status",loaded?"Đã xác nhận xóa công trình.":"Đã xác nhận xóa công trình, nhưng danh sách chưa tải lại được. Nhấn Làm mới.",!loaded);
+    }catch(error){if(session===state.projectSession)message("dash-status","Chưa xác nhận xóa công trình: "+(error.message||"Lỗi kết nối")+" Làm mới danh sách để kiểm tra trước khi thử lại.",true);}
+    finally{if(session===state.projectSession){state.projectPending=false;setBusy(false);projectEditStatus();}}
   }
   async function markInquiryContacted(record) {
     if (state.busy) return;
@@ -1231,6 +1277,10 @@
   });
   $("p-slug").addEventListener("input",()=>{state.slugTouched=true});
   $("project-cancel").addEventListener("click",newProject);
+  $("project-form").addEventListener("input",projectEditStatus);
+  $("project-form").addEventListener("change",projectEditStatus);
+  state.projectBaseline=projectSnapshot();projectEditStatus();
+  window.addEventListener("beforeunload",event=>{if(state.projectPending||projectDirty()){event.preventDefault();event.returnValue="";}});
   $("project-form").addEventListener("submit",submitProject);
   $("tab-overview").addEventListener("click",()=>switchTab("overview"));
   window.addEventListener("hashchange",()=>{if(state.currentRole)switchTab(location.hash.slice(1));});
@@ -1361,7 +1411,7 @@
     state.leadReminder="due";state.leadPage=0;
     loadInquiries();
   });
-  $("logout").addEventListener("click",async()=>{await client.auth.signOut();loginVisible();});
+  $("logout").addEventListener("click",async()=>{if(!discardProject())return;await client.auth.signOut();loginVisible();});
   $("login-form").addEventListener("submit",async(event)=>{
     event.preventDefault();
     const email=$("email").value.trim();const password=$("password").value;

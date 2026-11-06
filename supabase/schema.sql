@@ -1,4 +1,7 @@
 -- ATELIER HOME v1.1 — apply in Supabase SQL Editor once a project exists.
+-- Historical bootstrap only: do not reapply over a migrated production project.
+-- Staff/Auth setup and subsequent migrations are required; project role hardening:
+-- migrations/20261106233736_projects_authoritative_admin_roles.sql.
 -- Never paste a secret/service_role key into frontend code.
 -- ADMIN ROLE SETUP (manually, after creating an Auth user):
 -- Supabase Dashboard > Authentication > Users > select user > App Metadata.
