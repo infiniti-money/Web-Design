@@ -5,7 +5,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
   async function open(config,fail=false){
    const page=await browser.newPage();let requests=0;
    await page.route('**/assets/integration-config.js',route=>route.fulfill({contentType:'application/javascript',body:'window.ATELIER_INTEGRATIONS='+JSON.stringify({tawk:config})}));
-   await page.route('https://embed.tawk.to/**',route=>{requests++;return fail?route.abort():route.fulfill({contentType:'application/javascript',body:'window.Tawk_API.showWidget=()=>{};window.Tawk_API.maximize=()=>window.__chatOpens=(window.__chatOpens||0)+1;window.Tawk_API.hideWidget=()=>{};window.Tawk_API.onLoad();'});});
+   await page.route('https://embed.tawk.to/**',route=>{requests++;return fail?route.abort():route.fulfill({headers:{'access-control-allow-origin':'*'},contentType:'application/javascript',body:'window.Tawk_API.showWidget=()=>{};window.Tawk_API.maximize=()=>window.__chatOpens=(window.__chatOpens||0)+1;window.Tawk_API.hideWidget=()=>{};window.Tawk_API.onLoad();'});});
    await page.goto(base);return{page,count:()=>requests};
   }
   for(const config of [{enabled:false},{enabled:true,propertyId:'../unsafe',widgetId:'invalid'}]){

@@ -24,6 +24,6 @@
       window.Tawk_API.showWidget();window.Tawk_API.maximize();
     };
     window.Tawk_API.onChatMinimized=()=>window.Tawk_API.hideWidget?.();
-    script.async=true;script.charset="UTF-8";script.src=`https://embed.tawk.to/${config.propertyId}/${config.widgetId}`;script.referrerPolicy="strict-origin-when-cross-origin";script.onerror=fail;document.head.append(script);
+    script.async=true;script.charset="UTF-8";script.crossOrigin="anonymous";script.src=`https://embed.tawk.to/${config.propertyId}/${config.widgetId}`;script.referrerPolicy="strict-origin-when-cross-origin";script.onerror=fail;document.head.append(script);
   });
 })();

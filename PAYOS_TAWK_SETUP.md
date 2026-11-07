@@ -2,6 +2,10 @@
 
 ## Kích hoạt tawk.to từ mã chủ website cung cấp
 
+Kiểm tra thực tế: website đã lên revision `288b1cb4367f1c8b2fe2ad351263c21c1e2a2abd`. HTTP client nhận SDK 200/application-x-javascript và header CORS `*`; trình duyệt tự động nhận HTTP 403 không có header CORS (Cốc Cốc báo ORB, Edge báo CORS). Chưa xác định được lớp chặn ở nhà cung cấp/mạng hay thiết lập tài khoản, nên không kết luận widget hỏng hoặc agent đang online. Chưa mở thành công hội thoại thật và không gửi tin nhắn. Đã yêu cầu chủ website kiểm tra bằng trình duyệt thường.
+
+Bổ sung `crossOrigin="anonymous"` cho script để tương ứng với hành vi thuộc tính crossorigin của mã nhúng được cung cấp. Kiểm thử SDK giả lập có header CORS trên Edge đạt: tắt/ID sai, tải theo click, một SDK, mở lại và thử lại khi lỗi. Fallback form/email tiếp tục dùng được; không vô hiệu hóa bảo vệ CORS/ORB của trình duyệt để báo kết quả đạt giả.
+
 Chủ website đã cung cấp mã nhúng với Property ID `6aef0ec47c126a3c334ec009`, Widget ID `1k6qt3cal`. Đã cấu hình `enabled:true` trong bộ tải sẵn có, giữ tải SDK sau khi khách bấm nút trong mục Liên hệ. Không dán thêm mã nhúng tự chạy để tránh tải trùng. Bổ sung thông báo xử lý dữ liệu chat trong nội dung privacy.html, giữ nguyên Title/Description/canonical/ảnh và link cũ.
 
 Kiểm thử Node trước triển khai: 98 bài, 97 đạt, 1 bài gửi thật bỏ qua. Các đoạn ghi “ID trống/enabled:false” bên dưới là bằng chứng của đợt chuẩn bị trước, không phải cấu hình kích hoạt mới. Chưa tự gửi tin nhắn cho nhân viên hoặc thay đổi tài khoản/lịch trực trong dashboard tawk.to. payOS vẫn chưa bật.
