@@ -24,3 +24,5 @@ Không có payment endpoint hoặc migration thanh toán được triển khai t
 ## Kiểm chứng mã chuẩn bị
 
 Trước triển khai: 98 bài Node, 97 đạt và 1 bài gửi dữ liệu thật bỏ qua. `tests/customer-chat-browser.cjs` đạt trên preview với SDK giả lập: tắt/ID sai không gọi nhà cung cấp, chỉ tải khi bấm, một SDK cho nhiều lần mở, lỗi tải cho phép thử lại. Không dùng tài khoản/agent thật. CI Validate chạy cùng ca trên preview cách ly. Test bảo toàn metadata/ảnh/URL hiện có tiếp tục đạt. Chưa đánh dấu chat merchant hoạt động thật hoặc thanh toán payOS đã được tích hợp backend.
+
+Đã triển khai mã chuẩn bị tại revision `f754ee92f8a700ec184cb8edae08a8ecf8167fbd`, xác nhận `release.json`. [Validate](https://github.com/infiniti-money/Web-Design/actions/runs/42369050611), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42369050562) và [browser smoke sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42369086221) đều thành công. Chạy lại ca chat trực tiếp trên URL Pages với cấu hình/SDK giả lập cũng đạt; cấu hình phát hành thật vẫn `enabled:false`, ID trống. Không có thanh toán, hội thoại nhân viên thật hoặc thay đổi database trong đợt này.
