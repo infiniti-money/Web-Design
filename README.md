@@ -2,6 +2,8 @@
 
 Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub Pages.
 
+[Chương trình nâng cấp UI/UX, hiệu suất, bảo toàn SEO, đặt cọc và chat nhân viên](UPGRADE_SCOPE_20261107.md): phạm vi website + quản trị/PC, phương án nhà cung cấp, ngày công và tiêu chí nghiệm thu. Thanh toán/chat chưa kích hoạt khi chưa có lựa chọn và tài khoản dịch vụ.
+
 Bản nâng cấp web: [v1.24.0 — Quản trị công trình tin cậy](RELEASE_NOTES_V1_24_0.md). [Nghiệm thu công trình](PROJECT_ADMIN_ACCEPTANCE.md) · [Nghiệm thu kiến thức](KNOWLEDGE_EXPERIENCE_ACCEPTANCE.md) · [Nghiệm thu Catalog](CATALOG_PUBLIC_ACCEPTANCE.md) · [Nghiệm thu tư vấn](CONSULTATION_ACCEPTANCE.md) · [Kết quả đo và các điểm tiếp tục tối ưu](PERFORMANCE_BASELINE.md).
 
 [Lộ trình website chuyên nghiệp](WEBSITE_ROADMAP.md) · [Web v1.19: kiến thức HTML và nội dung gốc](RELEASE_NOTES_V1_19_0.md) · [Hướng dẫn biên tập](content/KNOWLEDGE_PUBLISHING.md).
