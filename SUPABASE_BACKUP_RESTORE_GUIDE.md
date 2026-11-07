@@ -4,6 +4,20 @@ Ngày lập: 08/11/2026. Project nguồn đang chạy: `mswiegltusllzvuavjdh`.
 
 **Trạng thái: chưa sao lưu dữ liệu thật, chưa nghiệm thu khôi phục.** CI hiện có chỉ dùng dữ liệu tổng hợp. Máy hiện chưa tìm thấy Docker, psql, pg_dump hoặc pg_restore trên PATH. Backend payOS đã triển khai nhưng đang tắt thu tiền; không bật thanh toán hoặc áp dụng migration lịch sử báo giá trước khi hoàn tất quy trình này.
 
+## Dành cho project gói Free — bắt đầu tại đây
+
+Gói Free vẫn xuất logical backup thủ công được. Supabase khuyến nghị người dùng Free dùng `supabase db dump` và giữ bản ngoài dịch vụ; không cần nâng gói Supabase để xuất theo cách này. Mục Backups trong Dashboard không phải bước bắt buộc cho project này. Nguồn: [Database Backups, phần giới thiệu](https://supabase.com/docs/guides/platform/backups).
+
+Lộ trình cho ATELIER HOME:
+
+1. Chuẩn bị thư mục riêng ở bước 1. Bỏ qua bước 2 nếu Dashboard không cung cấp backup.
+2. Chuẩn bị Docker Desktop và CLI theo [hướng dẫn xuất của Supabase](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore). Việc cài công cụ chưa tạo bản backup. Trên máy hiện chưa thấy Docker ở PATH hoặc vị trí cài mặc định; chưa thấy PostgreSQL client ở vị trí mặc định.
+3. Thực hiện lệnh xuất ở bước 3 bằng tài khoản chủ sở hữu. Mật khẩu database khác ba khóa payOS; chỉ nhập qua prompt riêng trên máy, không gửi vào chat. Nếu mạng không hỗ trợ IPv6, dùng kết nối **Session pooler** trong Dashboard → Connect theo tài liệu; không chọn Transaction pooler cho dump.
+4. Lưu file Storage/cấu hình ở bước 4. Kiểm tra dung lượng truyền và giới hạn đang dùng; xuất thủ công không cấp thêm quota cho gói Free.
+5. Khôi phục vào Supabase local riêng ở bước 5 để thử mà không cần mua thêm project cloud; kiểm tra khả năng tương thích và nghiệm thu ở bước 6.
+
+Không đổi gói hoặc tạo dịch vụ trả phí trong quy trình này. Chưa chạy xuất dữ liệu thật vì công cụ và phiên xác thực database tại máy chưa sẵn sàng. Các secrets payOS đã có không thay thế quyền kết nối PostgreSQL để sao lưu.
+
 ## 1. Chuẩn bị nơi lưu độc lập
 
 - Dùng thư mục riêng ngoài Git/OneDrive, ví dụ `C:\AtelierPrivateBackups\2026-11-08`. Chỉ tài khoản chủ sở hữu và người phụ trách phục hồi được đọc. Lưu thêm bản mã hóa trên thiết bị khác; kiểm tra có thể giải mã, giữ khóa trong trình quản lý mật khẩu riêng.
