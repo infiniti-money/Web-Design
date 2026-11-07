@@ -1,0 +1,36 @@
+name: Isolated payOS ledger and SDK checks
+on:
+  push:
+    branches: [main]
+    paths: ['supabase/payos-deposits-staging.sql', 'supabase/functions/**', 'tests/payos*', '.github/workflows/payos-staging.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ledger:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: isolated-ci-only
+          POSTGRES_DB: payos_test
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U ci -d payos_test" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Isolated ledger and RLS (no production credentials)
+        env:
+          PGPASSWORD: isolated-ci-only
+        run: psql -h 127.0.0.1 -U ci -d payos_test -v ON_ERROR_STOP=1 -f tests/payos-ledger-isolated.sql
+      - name: Core default-off, auth, amount, idempotency and callback rules
+        run: node --test tests/payos-core.test.cjs
+      - name: Install pinned official SDK (test credentials only)
+        run: npm install --prefix dist/payos-sdk --no-package-lock --ignore-scripts @payos/node@2.0.5
+      - name: Verify official SDK signature and tampered receipt handling
+        run: node tests/payos-sdk-check.cjs
