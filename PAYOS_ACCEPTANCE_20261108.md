@@ -2,6 +2,8 @@
 
 **Kết luận: các ca tự động trong phạm vi dưới đây đạt; chưa nghiệm thu thu tiền thật.** Chưa có màn hình Admin xử lý các giao dịch unknown/review/unmatched. Chưa kiểm chứng callback từ tài khoản merchant qua Internet, ngân hàng nhận tiền hoặc đăng nhập bằng Auth service thật. Không tạo giao dịch payOS thật trong đợt này.
 
+Mã kiểm thử/bản sửa: `088edc5d2b28665d733ff5e6a44aee7259a7dc1c`, đã xác minh qua release.json của GitHub Pages. [CI SQL/SDK/HTTP đối soát](https://github.com/infiniti-money/Web-Design/actions/runs/42397759460), [Validate gồm trình duyệt payment-return](https://github.com/infiniti-money/Web-Design/actions/runs/42397759511), [triển khai Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42397759553) và [browser smoke bản đang chạy](https://github.com/infiniti-money/Web-Design/actions/runs/42397796978) đều hoàn thành thành công. CI có artifact JSON kết quả đối soát dùng dữ liệu tổng hợp. Các container local và preview server đã dừng sau kiểm tra.
+
 ## Phạm vi và bằng chứng
 
 | Lớp | Kiểm chứng thực tế | Kết quả |
