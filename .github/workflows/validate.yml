@@ -113,3 +113,7 @@ jobs:
         env:
           SITE_URL: http://127.0.0.1:4173/
         run: node tests/payment-return-browser.cjs
+      - name: Verify Admin reconciliation UI and explicit bank attestation with fixtures
+        env:
+          SITE_URL: http://127.0.0.1:4173/
+        run: node tests/payments-browser.cjs

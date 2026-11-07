@@ -1,5 +1,9 @@
 # Backend đặt cọc payOS — chế độ chuẩn bị
 
+## Màn hình đối soát và pilot 10.000 VND — 08/11/2026
+
+Đã bổ sung [màn hình và quy trình đối soát](PAYOS_RECONCILIATION_ADMIN.md), triển khai guard/ledger/audit và giới hạn pilot một yêu cầu 10.000 VND cho báo giá đã chấp nhận. Đây là cập nhật thay thế trạng thái “chưa có UI/chưa áp dụng ledger” bên dưới. Webhook và merchant/ngân hàng thực tế phải được xác minh theo quy trình; chưa coi test tổng hợp hoặc credentialsPresent là chứng minh nhận tiền.
+
 ## Kiểm thử ứng dụng/webhook/đối soát — 08/11/2026
 
 [Báo cáo nghiệm thu có phạm vi và giới hạn](PAYOS_ACCEPTANCE_20261108.md): 18 nhóm HTTP/SDK/PostgreSQL tổng hợp đạt, gồm callback đồng thời, idempotency, sai tiền/link/currency và các lỗi cần đối soát. Giao diện báo giá/CMS và trang quay về đạt trên trình duyệt với fixture. Đã sửa body actorId ghi đè tác nhân Auth; hai Edge Function lên v2 và vẫn tắt thu tiền. Chưa có UI xử lý đối soát, chưa UAT Auth service/merchant/ngân hàng thật; không coi kết quả tự động là đã sẵn sàng thu tiền.

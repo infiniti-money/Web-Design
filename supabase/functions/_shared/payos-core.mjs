@@ -7,13 +7,14 @@ export function checkoutUrl(value){
   try{const url=new URL(value);if(url.protocol==='https:'&&url.hostname==='pay.payos.vn'&&!url.username&&!url.password&&url.port==='')return url.href;}catch{}
   throw new PaymentError('PROVIDER_RESULT_UNCONFIRMED',502);
 }
-export function paymentCore({enabled,auth,store,provider,now=()=>Date.now()}){
+export function paymentCore({enabled,auth,store,provider,pilot=null,now=()=>Date.now()}){
   function gate(){if(!enabled)throw new PaymentError('PAYMENTS_DISABLED',503);}
   return {
     async create(request,input){
       gate();const actor=await auth(request);
       if(!actor||actor.role!=='admin')throw new PaymentError('ADMIN_REQUIRED',403);
       if(!input||!uuid(input.quoteId)||!uuid(input.requestKey)||!money(input.amount))throw new PaymentError('INVALID_DEPOSIT_REQUEST');
+      if(pilot&&(input.quoteId!==pilot.quoteId||input.amount!==pilot.amount))throw new PaymentError('PAYOS_PILOT_SCOPE_ONLY',409);
       // The database rechecks live Admin, accepted quote, exact approved version and remaining amount under a row lock.
       const intent=await store.reserve({actorId:actor.id,quoteId:input.quoteId,requestKey:input.requestKey,amount:input.amount});
       if(!intent.fresh){

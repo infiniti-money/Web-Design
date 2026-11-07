@@ -1,7 +1,7 @@
 "use strict";
 const path=require("node:path");
 const SITE="https://infiniti-money.github.io/Web-Design/";
-const pages=new Set(["admin.html","admin-posts.html","admin-catalog.html","commercial.html","operations.html","delivery.html","notifications.html","reports-advanced.html"]);
+const pages=new Set(["admin.html","admin-posts.html","admin-catalog.html","commercial.html","payments.html","operations.html","delivery.html","notifications.html","reports-advanced.html"]);
 function trustedPage(value){try{const url=new URL(value);return url.protocol==="atelier:"&&url.hostname==="app"&&!url.port&&!url.username&&!url.password&&pages.has(url.pathname.slice(1));}catch{return false;}}
 function resolveAsset(value,root){
   let url;try{url=new URL(value);}catch{return null;}
@@ -13,6 +13,6 @@ function resolveAsset(value,root){
   const target=path.resolve(root,name),relative=path.relative(root,target);
   return relative&&!relative.startsWith("..")&&!path.isAbsolute(relative)?target:null;
 }
-function externalTarget(value){try{const url=new URL(value);if(url.protocol!=="https:"||url.username||url.password)return null;if(url.href.startsWith(SITE)||url.href.startsWith("https://github.com/infiniti-money/Web-Design/"))return url.href;return null;}catch{return null;}}
+function externalTarget(value){try{const url=new URL(value);if(url.protocol!=="https:"||url.username||url.password)return null;if(url.href.startsWith(SITE)||url.href.startsWith("https://github.com/infiniti-money/Web-Design/"))return url.href;if(url.hostname==="pay.payos.vn"&&!url.port&&/^\/web\/[a-zA-Z0-9_-]+\/?$/.test(url.pathname)&&!url.search&&!url.hash)return url.href;return null;}catch{return null;}}
 const csp="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self'; connect-src 'self' https://mswiegltusllzvuavjdh.supabase.co wss://mswiegltusllzvuavjdh.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'; frame-ancestors 'none'";
 module.exports={SITE,pages,trustedPage,resolveAsset,externalTarget,csp};

@@ -1,0 +1,53 @@
+-- Fresh synthetic database only.
+\set ON_ERROR_STOP on
+do $$ begin if current_database()<>'payos_reconciliation_test' or to_regclass('auth.users') is not null then raise exception 'FRESH_ISOLATED_DATABASE_REQUIRED';end if;end$$;
+begin;
+create role anon nologin;create role authenticated nologin;create role service_role nologin;
+create schema auth;create schema private;create schema extensions;
+create extension pgcrypto with schema extensions;
+create table auth.users(id uuid primary key,raw_app_meta_data jsonb);
+create table public.staff_profiles(user_id uuid primary key,role text,active boolean);
+create function auth.uid() returns uuid language sql stable as $$select (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid$$;
+create function private.current_staff_role() returns text language sql stable security definer set search_path='' as $$select sp.role from public.staff_profiles sp join auth.users u on u.id=sp.user_id where sp.user_id=auth.uid() and sp.active and sp.role=u.raw_app_meta_data->>'role'$$;
+revoke all on function private.current_staff_role() from public,anon,authenticated,service_role;
+grant usage on schema private,auth to authenticated;
+grant execute on function private.current_staff_role() to authenticated;
+create table public.customer_quotes(id uuid primary key,status text,approved_by uuid,approved_version_id uuid);
+create table public.customer_quote_versions(id uuid primary key,quote_id uuid,version_no integer,total_amount numeric,content jsonb);
+insert into auth.users values('11111111-1111-4111-8111-111111111111','{"role":"admin"}'),('22222222-2222-4222-8222-222222222222','{"role":"manager"}');
+insert into public.staff_profiles values('11111111-1111-4111-8111-111111111111','admin',true),('22222222-2222-4222-8222-222222222222','manager',true);
+insert into public.customer_quotes values('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','accepted','11111111-1111-4111-8111-111111111111','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+insert into public.customer_quote_versions values('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',1,1000000,'{"total":1000000}');
+\ir ../supabase/migrations/20261107180731_payos_reconciliation_admin.sql
+do $test$ declare i jsonb;s jsonb;r jsonb;n integer;begin
+ update private.payos_pilot_policy set enabled=true,quote_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',amount=300000;
+ begin perform public.payos_reserve_deposit('11111111-1111-4111-8111-111111111111','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','cccccccc-cccc-4ccc-8ccc-cccccccccccc',300000);raise exception 'UNCONFIRMED_WEBHOOK_ALLOWED';exception when raise_exception then if sqlerrm<>'PAYOS_WEBHOOK_NOT_CONFIRMED' then raise;end if;end;
+ perform public.payos_record_review('11111111-1111-4111-8111-111111111111',null,null,'webhook_confirmed','Synthetic provider confirms fixed URL');
+ i:=public.payos_reserve_deposit('11111111-1111-4111-8111-111111111111','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','cccccccc-cccc-4ccc-8ccc-cccccccccccc',300000);
+ begin perform public.payos_record_review('11111111-1111-4111-8111-111111111111',(i->>'id')::uuid,null,'bank_confirmed','Synthetic bank check before paid');raise exception 'BANK_WITHOUT_PAID';exception when raise_exception then if sqlerrm<>'PAYOS_BANK_CONFIRM_REQUIRES_PAID' then raise;end if;end;
+ perform public.payos_mark_deposit_unknown((i->>'id')::uuid);
+ s:=jsonb_build_object('paymentLinkId','link-one','orderCode',(i->>'order_code')::bigint,'amount',300000,'amountPaid',0,'amountRemaining',300000,'status','PENDING','transactions','[]'::jsonb);
+ r:=public.payos_sync_provider('11111111-1111-4111-8111-111111111111',(i->>'id')::uuid,s,'Recover a synthetic unknown link');if r->>'state'<>'ready' then raise exception 'LINK_NOT_RECOVERED';end if;
+ r:=public.payos_sync_provider('11111111-1111-4111-8111-111111111111',(i->>'id')::uuid,s||'{"amountPaid":100000,"amountRemaining":200000,"status":"UNDERPAID","transactions":[{"amount":100000,"reference":"ref1"}]}'::jsonb,'Synthetic partial transfer');if r->>'state'<>'review' then raise exception 'PARTIAL_PAID';end if;
+ r:=public.payos_sync_provider('11111111-1111-4111-8111-111111111111',(i->>'id')::uuid,s||'{"amountPaid":300000,"amountRemaining":0,"status":"PAID","transactions":[{"amount":100000,"reference":"ref1","accountNumber":"MUST_NOT_BE_STORED"},{"amount":200000,"reference":"ref2"}]}'::jsonb,'Provider confirms exact total');if r->>'state'<>'paid' then raise exception 'SIGNED_TOTAL_NOT_PAID';end if;
+ if exists(select 1 from public.payos_admin_events where details::text like '%MUST_NOT_BE_STORED%') then raise exception 'RAW_PROVIDER_PII_STORED';end if;
+ perform public.payos_record_review('11111111-1111-4111-8111-111111111111',(i->>'id')::uuid,null,'bank_confirmed','Admin checked bank separately');
+ begin perform public.payos_reserve_deposit('11111111-1111-4111-8111-111111111111','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','dddddddd-dddd-4ddd-8ddd-dddddddddddd',300000);raise exception 'PILOT_CREATED_TWICE';exception when raise_exception then if sqlerrm<>'PAYOS_PILOT_ALREADY_CREATED' then raise;end if;end;
+ begin perform public.payos_record_review('22222222-2222-4222-8222-222222222222',(i->>'id')::uuid,null,'note','Manager forged review');raise exception 'MANAGER_REVIEW';exception when raise_exception then if sqlerrm<>'PAYOS_ADMIN_REQUIRED' then raise;end if;end;
+ begin update public.payos_admin_events set reason='tamper';raise exception 'AUDIT_MUTABLE';exception when raise_exception then if sqlerrm<>'PAYOS_AUDIT_IMMUTABLE' then raise;end if;end;
+ insert into public.customer_quotes values('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee','accepted','11111111-1111-4111-8111-111111111111','ffffffff-ffff-4fff-8fff-ffffffffffff');
+ insert into public.customer_quote_versions values('ffffffff-ffff-4fff-8fff-ffffffffffff','eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',1,1000000,'{"total":1000000}');
+ update private.payos_pilot_policy set quote_id='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',amount=100000;
+ i:=public.payos_reserve_deposit('11111111-1111-4111-8111-111111111111','eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee','99999999-9999-4999-8999-999999999999',100000);
+ s:=jsonb_build_object('paymentLinkId','link-two','orderCode',(i->>'order_code')::bigint,'amount',100000,'amountPaid',0,'amountRemaining',100000,'status','CANCELLED','transactions','[]'::jsonb);
+ r:=public.payos_sync_provider('11111111-1111-4111-8111-111111111111',(i->>'id')::uuid,s,'Provider confirms zero received');if r->>'state'<>'cancelled' then raise exception 'ZERO_CANCELLATION_FAILED';end if;
+ r:=public.payos_apply_receipt((i->>'order_code')::bigint,'late-reference',100000,'VND','link-two');if r->>'status'<>'needs_review' then raise exception 'LATE_CANCELLED_MARKED_PAID';end if;
+ begin perform public.payos_sync_provider('11111111-1111-4111-8111-111111111111',(i->>'id')::uuid,s||'{"paymentLinkId":"wrong-link"}','Wrong provider response link');raise exception 'WRONG_LINK_ACCEPTED';exception when raise_exception then if sqlerrm<>'PAYOS_PROVIDER_MISMATCH' then raise;end if;end;
+ if has_function_privilege('authenticated','public.payos_record_review(uuid,uuid,bigint,text,text)','EXECUTE') then raise exception 'DIRECT_REVIEW_RPC_EXPOSED';end if;
+end $test$;
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"22222222-2222-4222-8222-222222222222","app_metadata":{"role":"admin"}}',true);
+do $$begin if exists(select 1 from public.payos_admin_events) then raise exception 'MANAGER_READ_AUDIT';end if;end$$;
+reset role;
+select 'PASS: pilot singleton, webhook gate, recovery, partial/paid/cancelled lookup, immutable audit and Admin-only review' as result;
+rollback;
