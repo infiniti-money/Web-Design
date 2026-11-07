@@ -29,3 +29,20 @@ test('Public health excludes private pilot identifiers and amount',async()=>{
  const handler=runtimeHandler({env:n=>values[n],sdk:()=>{throw Error('no SDK on public health');},mode:'deposits',releaseEnabled:true,pilotOnly:true});
  const response=await handler(new Request('https://edge.invalid/health'));const result=await response.json();assert.equal(result.pilotOnly,true);assert.equal(result.paymentsEnabled,true);assert.ok(!JSON.stringify(result).includes(id));assert.equal(result.pilotAmount,undefined);
 });
+test('General availability requires an explicit server flag and exposes no private pilot scope',async()=>{
+ const {runtimeHandler}=await import('../supabase/functions/_shared/payos-runtime.mjs');
+ const values={PAYOS_CLIENT_ID:'fake',PAYOS_API_KEY:'fake',PAYOS_CHECKSUM_KEY:'fake',PAYOS_PAYMENTS_ENABLED:'true',PAYOS_LEDGER_READY:'true',PAYOS_GENERAL_AVAILABILITY:'true',SUPABASE_URL:'https://db.invalid',SUPABASE_ANON_KEY:'synthetic'};
+ const options={env:n=>values[n],sdk:()=>{throw Error('no SDK for status');},releaseEnabled:true,pilotOnly:true};
+ let handler=runtimeHandler({...options,mode:'deposits'});
+ let result=await (await handler(new Request('https://edge.invalid/health'))).json();assert.equal(result.pilotOnly,false);assert.equal(result.paymentsEnabled,true);
+ handler=runtimeHandler({...options,mode:'admin',managementEnabled:true,fetcher:async url=>String(url).includes('/auth/')?Response.json({id,app_metadata:{role:'admin'}}):Response.json([{role:'admin',active:true}])});
+ result=await (await handler(new Request('https://edge.invalid',{method:'POST',headers:{Authorization:'Bearer SYNTHETIC'},body:JSON.stringify({action:'status'})}))).json();assert.equal(result.pilotOnly,false);assert.equal(result.paymentsEnabled,true);assert.equal(result.pilotQuoteId,undefined);
+ delete values.PAYOS_GENERAL_AVAILABILITY;handler=runtimeHandler({...options,mode:'deposits'});result=await (await handler(new Request('https://edge.invalid/health'))).json();assert.equal(result.pilotOnly,true);assert.equal(result.paymentsEnabled,false);
+});
+test('Balances use the authenticated actor and reject invalid or excessive quote ID arrays',async()=>{
+ const {reconciliationCore}=await modulePromise;let args;
+ const core=reconciliationCore({auth:async()=>({id,role:'admin'}),rpc:async(name,body)=>{assert.equal(name,'payos_quote_balances');args=body;return[];},provider:{},webhookUrl:url});
+ await core(null,{action:'balances',quoteIds:[id],actorId:'forged'});assert.equal(args.p_actor,id);assert.deepEqual(args.p_quotes,[id]);
+ await assert.rejects(core(null,{action:'balances',quoteIds:['invalid']}),/INVALID_ADMIN_REQUEST/);
+ await assert.rejects(core(null,{action:'balances',quoteIds:Array(101).fill(id)}),/INVALID_ADMIN_REQUEST/);
+});

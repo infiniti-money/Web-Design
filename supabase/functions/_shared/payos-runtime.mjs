@@ -14,10 +14,12 @@ export function runtimeHandler({env,sdk,mode,releaseEnabled=false,managementEnab
   const configured=credentials.every(value=>value.trim().length>0);
   const pilotQuoteId=env('PAYOS_PILOT_QUOTE_ID'),pilotAmount=Number(env('PAYOS_PILOT_AMOUNT'));
   const pilotConfigured=typeof pilotQuoteId==='string'&&/^[0-9a-f-]{36}$/i.test(pilotQuoteId)&&Number.isSafeInteger(pilotAmount)&&pilotAmount>0;
-  const enabled=releaseEnabled===true&&configured&&env('PAYOS_PAYMENTS_ENABLED')==='true'&&env('PAYOS_LEDGER_READY')==='true'&&(!pilotOnly||pilotConfigured);
+  const generalAvailability=env('PAYOS_GENERAL_AVAILABILITY')==='true';
+  const restrictToPilot=pilotOnly&&!generalAvailability;
+  const enabled=releaseEnabled===true&&configured&&env('PAYOS_PAYMENTS_ENABLED')==='true'&&env('PAYOS_LEDGER_READY')==='true'&&(!restrictToPilot||pilotConfigured);
   const adminEnabled=managementEnabled&&env('PAYOS_LEDGER_READY')==='true';
   const root=env('SUPABASE_URL'),anon=env('SUPABASE_ANON_KEY'),service=env('SUPABASE_SERVICE_ROLE_KEY');
-  const businessCodes=new Set(['PAYOS_ADMIN_REQUIRED','PAYOS_QUOTE_NOT_ACCEPTED','PAYOS_AMOUNT_EXCEEDS_BALANCE','PAYOS_ACTIVE_PAYMENT','PAYOS_REQUEST_KEY_REUSED','PAYOS_QUOTE_HISTORY_UNPROTECTED','PAYOS_EVENT_CONFLICT','PAYOS_PILOT_DISABLED','PAYOS_PILOT_SCOPE_ONLY','PAYOS_PILOT_ALREADY_CREATED','PAYOS_WEBHOOK_NOT_CONFIRMED','PAYOS_INTENT_NOT_FOUND','PAYOS_INVALID_REVIEW','PAYOS_BANK_CONFIRM_REQUIRES_PAID','PAYOS_PROVIDER_MISMATCH']);
+  const businessCodes=new Set(['PAYOS_ADMIN_REQUIRED','PAYOS_QUOTE_NOT_ACCEPTED','PAYOS_AMOUNT_EXCEEDS_BALANCE','PAYOS_ACTIVE_PAYMENT','PAYOS_REQUEST_KEY_REUSED','PAYOS_QUOTE_HISTORY_UNPROTECTED','PAYOS_EVENT_CONFLICT','PAYOS_PILOT_DISABLED','PAYOS_COLLECTION_DISABLED','PAYOS_PILOT_SCOPE_ONLY','PAYOS_PILOT_ALREADY_CREATED','PAYOS_WEBHOOK_NOT_CONFIRMED','PAYOS_INTENT_NOT_FOUND','PAYOS_INVALID_REVIEW','PAYOS_BANK_CONFIRM_REQUIRES_PAID','PAYOS_PROVIDER_MISMATCH']);
   async function rpc(name,args){
     const response=await fetcher(root+'/rest/v1/rpc/'+name,{method:'POST',headers:{apikey:service,Authorization:'Bearer '+service,'Content-Type':'application/json'},body:JSON.stringify(args),signal:AbortSignal.timeout(15000)});
     const result=response.status===204?null:await response.json();if(!response.ok)throw new PaymentError(businessCodes.has(result?.message)?result.message:'LEDGER_UNAVAILABLE',businessCodes.has(result?.message)?409:503);return result;
@@ -43,7 +45,7 @@ export function runtimeHandler({env,sdk,mode,releaseEnabled=false,managementEnab
   function getClient(){if(!client)client=sdk({clientId:credentials[0],apiKey:credentials[1],checksumKey:credentials[2],maxRetries:0,timeout:15000,logLevel:'off'});return client;}
   function core(){
     if(!provider){const sdkClient=getClient();provider={create:body=>sdkClient.paymentRequests.create(body),verify:body=>sdkClient.webhooks.verify(body)};}
-    return paymentCore({enabled,auth,store,provider,pilot:pilotOnly?{quoteId:pilotQuoteId,amount:pilotAmount}:null});
+    return paymentCore({enabled,auth,store,provider,pilot:restrictToPilot?{quoteId:pilotQuoteId,amount:pilotAmount}:null});
   }
   return async request=>{
     const origin=request.headers.get('origin')||'';
@@ -51,11 +53,11 @@ export function runtimeHandler({env,sdk,mode,releaseEnabled=false,managementEnab
     const reply=(status,body)=>new Response(JSON.stringify(body),{status,headers});
     if(origin&&!allowedOrigins.has(origin))return reply(403,{error:'ORIGIN_NOT_ALLOWED'});
     if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
-    if(mode==='deposits'&&request.method==='GET'&&new URL(request.url).pathname.endsWith('/health'))return reply(200,{service:'payos-deposits',credentialsPresent:configured,paymentsEnabled:enabled,...(pilotOnly?{pilotOnly:true}:{})});
+    if(mode==='deposits'&&request.method==='GET'&&new URL(request.url).pathname.endsWith('/health'))return reply(200,{service:'payos-deposits',credentialsPresent:configured,paymentsEnabled:enabled,...(pilotOnly?{pilotOnly:restrictToPilot}:{})});
     if(request.method!=='POST')return reply(405,{error:'METHOD_NOT_ALLOWED'});
     if(mode==='admin'?!adminEnabled:!enabled)return reply(503,{error:mode==='admin'?'MANAGEMENT_DISABLED':'PAYMENTS_DISABLED'});
     try{const input=await boundedJson(request);let result;
-      if(mode==='admin')result=await reconciliationCore({auth,rpc,status:{credentialsPresent:configured,paymentsEnabled:configured&&env('PAYOS_PAYMENTS_ENABLED')==='true'&&pilotConfigured,pilotOnly:true,pilotQuoteId:pilotConfigured?pilotQuoteId:null,pilotAmount:pilotConfigured?pilotAmount:null},webhookUrl:root+'/functions/v1/payos-webhook',provider:{get:id=>getClient().paymentRequests.get(id),confirm:url=>getClient().webhooks.confirm(url)}})(request,input);
+      if(mode==='admin')result=await reconciliationCore({auth,rpc,status:{credentialsPresent:configured,paymentsEnabled:configured&&env('PAYOS_PAYMENTS_ENABLED')==='true'&&(generalAvailability||pilotConfigured),pilotOnly:!generalAvailability,...(!generalAvailability&&pilotConfigured?{pilotQuoteId,pilotAmount}:{})},webhookUrl:root+'/functions/v1/payos-webhook',provider:{get:id=>getClient().paymentRequests.get(id),confirm:url=>getClient().webhooks.confirm(url)}})(request,input);
       else result=mode==='webhook'?await core().webhook(input):await core().create(request,input);
       return reply(200,result);}
     catch(error){return reply(error instanceof PaymentError?error.status:503,{error:error instanceof PaymentError?error.code:'PAYMENT_SERVICE_UNAVAILABLE'});}

@@ -29,7 +29,11 @@ const report=[],check=async(name,fn)=>{await fn();report.push({name,passed:true}
  }
  assert.equal(await sql("select current_database()||':'||(to_regclass('auth.users') is null)::text"),database+':true','requires a fresh synthetic database');
  const fixture=fs.readFileSync('tests/payos-ledger-isolated.sql','utf8').split('begin;')[1].split('\\ir ../supabase/migrations/')[0];
- await sql('BEGIN;'+fixture+fs.readFileSync('supabase/migrations/20261105093000_quote_version_immutability.sql','utf8')+fs.readFileSync('supabase/payos-deposits-staging.sql','utf8')+'COMMIT;');
+ const initSql='BEGIN;'+fixture+fs.readFileSync('supabase/migrations/20261107180731_payos_reconciliation_admin.sql','utf8')+fs.readFileSync('supabase/migrations/20261107183121_payos_general_availability.sql','utf8')+"update private.payos_pilot_policy set enabled=true,general_availability=true; select public.payos_record_review('"+admin+"',null,null,'webhook_confirmed','Synthetic webhook confirmed before general collection');COMMIT;";
+ fs.mkdirSync('dist/payos-uat',{recursive:true});const initPath=path.resolve('dist/payos-uat/init-synthetic.sql');fs.writeFileSync(initPath,initSql);
+ if(container)await run(docker,['cp',initPath,container+':/tmp/payos-uat-init.sql']);
+ const initArgs=['-U','ci','-d',database,'-q','-v','ON_ERROR_STOP=1','-f',container?'/tmp/payos-uat-init.sql':initPath];
+ await run(container?docker:'psql',container?['exec',container,'psql',...initArgs]:['-h','127.0.0.1',...initArgs]);
  const {runtimeHandler}=await import('../supabase/functions/_shared/payos-runtime.mjs');
  const values={PAYOS_CLIENT_ID:'SYNTHETIC_CLIENT',PAYOS_API_KEY:'SYNTHETIC_API',PAYOS_CHECKSUM_KEY:checksum,PAYOS_PAYMENTS_ENABLED:'true',PAYOS_LEDGER_READY:'true',SUPABASE_URL:'https://database.invalid',SUPABASE_ANON_KEY:'SYNTHETIC_ANON',SUPABASE_SERVICE_ROLE_KEY:'SYNTHETIC_SERVICE'};
  let providerCalls=0,providerMode='normal',earlyCallback,failFinish=false,revokeBeforeRpc=false;

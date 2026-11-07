@@ -14,6 +14,10 @@ export function reconciliationCore({auth,rpc,provider,webhookUrl,status={}}){
   const actor=await auth(request);
   if(!input||typeof input.action!=='string')throw new PaymentError('INVALID_ADMIN_REQUEST');
   if(input.action==='status')return status;
+  if(input.action==='balances'){
+   if(!Array.isArray(input.quoteIds)||input.quoteIds.length>100||!input.quoteIds.every(uuid))throw new PaymentError('INVALID_ADMIN_REQUEST');
+   return rpc('payos_quote_balances',{p_actor:actor.id,p_quotes:input.quoteIds});
+  }
   const reason=typeof input.reason==='string'?input.reason.trim():'';
   if(reason.length<5||reason.length>1000)throw new PaymentError('PAYOS_INVALID_REVIEW');
   if(input.action==='confirm_webhook'){

@@ -40,6 +40,12 @@ jobs:
         run: |
           psql -h 127.0.0.1 -U ci -d postgres -v ON_ERROR_STOP=1 -c 'CREATE DATABASE payos_reconciliation_test'
           psql -h 127.0.0.1 -U ci -d payos_reconciliation_test -v ON_ERROR_STOP=1 -f tests/payos-reconciliation-isolated.sql
+      - name: General collection preserves pilot receipts and quote balance
+        env:
+          PGPASSWORD: isolated-ci-only
+        run: |
+          psql -h 127.0.0.1 -U ci -d postgres -v ON_ERROR_STOP=1 -c 'CREATE DATABASE payos_general_test'
+          psql -h 127.0.0.1 -U ci -d payos_general_test -v ON_ERROR_STOP=1 -f tests/payos-general-isolated.sql
       - name: HTTP, official SDK and PostgreSQL reconciliation with concurrent callbacks
         env:
           PGHOST: 127.0.0.1
