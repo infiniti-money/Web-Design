@@ -34,3 +34,20 @@ jobs:
         run: npm install --prefix dist/payos-sdk --no-package-lock --ignore-scripts @payos/node@2.0.5
       - name: Verify official SDK signature and tampered receipt handling
         run: node tests/payos-sdk-check.cjs
+      - name: HTTP, official SDK and PostgreSQL reconciliation with concurrent callbacks
+        env:
+          PGHOST: 127.0.0.1
+          PGUSER: ci
+          PGPASSWORD: isolated-ci-only
+          PGDATABASE: payos_e2e_test
+          PAYOS_TEST_ISOLATED: '1'
+        run: |
+          psql -h 127.0.0.1 -U ci -d postgres -v ON_ERROR_STOP=1 -c 'CREATE DATABASE payos_e2e_test'
+          node tests/payos-http-ledger.cjs
+      - name: Upload synthetic reconciliation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: payos-http-ledger-results
+          path: dist/payos-uat/*.json
+          if-no-files-found: ignore

@@ -1,5 +1,9 @@
 # Backend đặt cọc payOS — chế độ chuẩn bị
 
+## Kiểm thử ứng dụng/webhook/đối soát — 08/11/2026
+
+[Báo cáo nghiệm thu có phạm vi và giới hạn](PAYOS_ACCEPTANCE_20261108.md): 18 nhóm HTTP/SDK/PostgreSQL tổng hợp đạt, gồm callback đồng thời, idempotency, sai tiền/link/currency và các lỗi cần đối soát. Giao diện báo giá/CMS và trang quay về đạt trên trình duyệt với fixture. Đã sửa body actorId ghi đè tác nhân Auth; hai Edge Function lên v2 và vẫn tắt thu tiền. Chưa có UI xử lý đối soát, chưa UAT Auth service/merchant/ngân hàng thật; không coi kết quả tự động là đã sẵn sàng thu tiền.
+
 ## Cập nhật sau đăng nhập CLI — 08/11/2026
 
 Đã xuất backup production trên gói Free và thử phục hồi PostgreSQL cách ly: 59/59 bảng khớp số dòng, ba bảng nghiệp vụ chính khớp hash. Guard/ledger đã thử thành công trên bản phục hồi rồi rollback. [Bằng chứng và phạm vi kiểm chứng](BACKUP_RESTORE_EVIDENCE_20261108.md). Chưa áp dụng guard/ledger lên production, chưa UAT Auth service và toàn bộ luồng đặt cọc; thu tiền vẫn tắt. Các ghi chú chưa có backup ở đợt khảo sát bên dưới được thay thế bởi cập nhật này trong phạm vi database.

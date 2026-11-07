@@ -15,7 +15,7 @@ export function paymentCore({enabled,auth,store,provider,now=()=>Date.now()}){
       if(!actor||actor.role!=='admin')throw new PaymentError('ADMIN_REQUIRED',403);
       if(!input||!uuid(input.quoteId)||!uuid(input.requestKey)||!money(input.amount))throw new PaymentError('INVALID_DEPOSIT_REQUEST');
       // The database rechecks live Admin, accepted quote, exact approved version and remaining amount under a row lock.
-      const intent=await store.reserve({actorId:actor.id,...input});
+      const intent=await store.reserve({actorId:actor.id,quoteId:input.quoteId,requestKey:input.requestKey,amount:input.amount});
       if(!intent.fresh){
         if(intent.state==='ready')return{intentId:intent.id,state:intent.state,checkoutUrl:checkoutUrl(intent.checkout_url)};
         if(intent.state==='paid')return{intentId:intent.id,state:'paid'};

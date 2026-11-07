@@ -109,3 +109,7 @@ jobs:
         env:
           SITE_URL: http://127.0.0.1:4173/
         run: node tests/customer-chat-browser.cjs
+      - name: Verify payment return cannot confirm money from URL parameters
+        env:
+          SITE_URL: http://127.0.0.1:4173/
+        run: node tests/payment-return-browser.cjs

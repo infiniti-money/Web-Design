@@ -1,6 +1,6 @@
 const {chromium}=require("playwright");
 const fs=require("node:fs"),path=require("node:path"),assert=require("node:assert/strict");
-const target=path.join(process.cwd(),"preview-v1-17");fs.mkdirSync(target,{recursive:true});
+const target=path.resolve(process.env.COMMERCIAL_PREVIEW_OUTPUT||"preview-v1-17");fs.mkdirSync(target,{recursive:true});
 const demo={
  inquiries:[{id:"a",full_name:"Khách hàng mẫu - Căn hộ"},{id:"b",full_name:"Khách hàng mẫu - Nhà phố"}],
  customer_quotes:[{id:"q1",title:"Thiết kế căn hộ 90 m²",status:"draft",inquiry_id:"a"},{id:"q2",title:"Thi công nội thất nhà phố",status:"submitted",inquiry_id:"b"},{id:"q3",title:"Cải tạo phòng khách",status:"approved",inquiry_id:"a"},{id:"q4",title:"Thiết kế bếp Japandi",status:"accepted",inquiry_id:"b"}],
@@ -30,7 +30,7 @@ async function render(browser,name,width,height,role){
  const page=await context.newPage(),errors=[];
  page.on("pageerror",e=>errors.push(e.message));
  await setup(page,role);
- await page.goto("http://127.0.0.1:8765/commercial.html",{waitUntil:"networkidle"});
+ await page.goto(new URL("commercial.html",process.env.SITE_URL||"http://127.0.0.1:8765/").href,{waitUntil:"networkidle"});
  await page.locator("#status").waitFor({state:"visible"});
  if(role!=="employee")await page.locator("#quotes .item").first().waitFor({state:"visible"});
  await page.evaluate(()=>{
@@ -50,7 +50,7 @@ async function render(browser,name,width,height,role){
  await context.close();return result;
 }
 (async()=>{
- const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
+ const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||undefined,args:["--no-sandbox"]});
  try{
   const result=[];
   for(const [name,w,h,role] of [["desktop-admin-1440",1440,900,"admin"],["mobile-admin-390",390,844,"admin"],["desktop-manager-1280",1280,800,"manager"],["mobile-employee-denied-390",390,844,"employee"]])result.push(await render(browser,name,w,h,role));

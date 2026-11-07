@@ -9,6 +9,10 @@ async function setup(overrides={}){
  return{calls,store,provider,intent,core:paymentCore({enabled:true,auth:async()=>({id:'actor',role:'admin'}),store,provider,...overrides})};
 }
 const input={quoteId,requestKey,amount:100000};
+test('Client fields cannot replace the authenticated actor in a reservation',async()=>{
+ const x=await setup();await x.core.create(null,{...input,actorId:'forged-admin',state:'paid',orderCode:1});
+ assert.deepEqual(x.calls.find(c=>c[0]==='reserve')[1],{actorId:'actor',quoteId,requestKey,amount:100000});
+});
 test('Payment switch defaults closed before Auth, database or provider access',async()=>{
  const x=await setup({enabled:false});await assert.rejects(x.core.create(null,input),/PAYMENTS_DISABLED/);await assert.rejects(x.core.webhook({}),/PAYMENTS_DISABLED/);assert.deepEqual(x.calls,[]);
 });
