@@ -4,7 +4,7 @@
   if(!target||config?.enabled!==true||!/^[a-f0-9]{24}$/.test(config.propertyId)||!/^[a-zA-Z0-9]{6,32}$/.test(config.widgetId))return;
   const box=document.createElement("div"),button=document.createElement("button"),notice=document.createElement("p"),status=document.createElement("p");
   button.type="button";button.className="btn";button.textContent="Chat trực tiếp với nhân viên";
-  notice.textContent="Khi mở chat, dịch vụ tawk.to sẽ được tải. Bạn vẫn có thể dùng biểu mẫu hoặc email bên dưới khi nhân viên chưa trực.";
+  notice.textContent="Khi mở chat, dịch vụ tawk.to sẽ được tải. Bạn vẫn có thể dùng biểu mẫu hoặc email tại mục Liên hệ khi nhân viên chưa trực.";
   status.setAttribute("role","status");status.setAttribute("aria-live","polite");status.style.fontSize=notice.style.fontSize="13px";
   box.append(notice,button,status);target.append(box);
   let pending=false,ready=false,attempt=0;

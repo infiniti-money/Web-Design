@@ -1,5 +1,11 @@
 # payOS và tawk.to — lựa chọn đã chốt 07/11/2026
 
+## Kích hoạt tawk.to từ mã chủ website cung cấp
+
+Chủ website đã cung cấp mã nhúng với Property ID `6aef0ec47c126a3c334ec009`, Widget ID `1k6qt3cal`. Đã cấu hình `enabled:true` trong bộ tải sẵn có, giữ tải SDK sau khi khách bấm nút trong mục Liên hệ. Không dán thêm mã nhúng tự chạy để tránh tải trùng. Bổ sung thông báo xử lý dữ liệu chat trong nội dung privacy.html, giữ nguyên Title/Description/canonical/ảnh và link cũ.
+
+Kiểm thử Node trước triển khai: 98 bài, 97 đạt, 1 bài gửi thật bỏ qua. Các đoạn ghi “ID trống/enabled:false” bên dưới là bằng chứng của đợt chuẩn bị trước, không phải cấu hình kích hoạt mới. Chưa tự gửi tin nhắn cho nhân viên hoặc thay đổi tài khoản/lịch trực trong dashboard tawk.to. payOS vẫn chưa bật.
+
 Chủ website chọn payOS cho đặt cọc chuyển khoản/QR và tawk.to cho chat nhân viên. Thay thế trạng thái “đang cân nhắc” trong UPGRADE_SCOPE_20261107.md. Chưa có merchant credentials hay Property/Widget ID được cung cấp trong phiên này; không giả lập trạng thái đang nhận tiền/chat thật.
 
 ## Chat: mã đã chuẩn bị, mặc định tắt
