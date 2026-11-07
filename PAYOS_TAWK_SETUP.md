@@ -1,5 +1,11 @@
 # payOS và tawk.to — lựa chọn đã chốt 07/11/2026
 
+## Cập nhật 08/11/2026: backend đã triển khai, vẫn tắt thu tiền
+
+Sau khi chủ website lưu ba secret, health của Edge Function xác nhận đủ giá trị cấu hình (`credentialsPresent:true`) và thanh toán đang tắt (`paymentsEnabled:false`). Hai endpoint đã triển khai phiên bản 1; POST trả 503 `PAYMENTS_DISABLED`. Chưa xác minh merchant/ngân hàng, đăng ký webhook hoặc tạo link thu tiền. Các đoạn “không có endpoint” bên dưới ghi lại đợt chuẩn bị trước.
+
+Chi tiết và CI: [PAYOS_BACKEND_STAGING.md](PAYOS_BACKEND_STAGING.md). Chủ website chưa có backup/restore độc lập: [hướng dẫn thực hiện](SUPABASE_BACKUP_RESTORE_GUIDE.md). Chưa áp dụng migration guard/ledger lên production. Chat giữ cấu hình đã được chủ website xác nhận mở được; không tự gửi tin nhắn.
+
 ## Kích hoạt tawk.to từ mã chủ website cung cấp
 
 Chủ website đã xác nhận “Khung chat mở được” khi kiểm tra bằng trình duyệt thường sau khi nhận ID. Đây là xác nhận mở giao diện thực tế từ chủ website; không phải kiểm thử gửi/nhận tin nhắn với agent. Lỗi 403 bên dưới là giới hạn quan sát trong môi trường trình duyệt tự động, không được dùng để khẳng định khách thông thường bị chặn.

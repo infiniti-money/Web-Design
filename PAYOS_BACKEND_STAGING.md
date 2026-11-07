@@ -1,5 +1,13 @@
 # Backend đặt cọc payOS — chế độ chuẩn bị
 
+## Kết quả triển khai đã xác minh — cập nhật 08/11/2026
+
+Mã nguồn `e33056526b9537a6bdb4a1c520921cd93e330a4f` đã lên main. Hai Edge Function `payos-deposits` và `payos-webhook` ACTIVE phiên bản 1. GET `/payos-deposits/health` trả HTTP 200, `credentialsPresent:true`, `paymentsEnabled:false`; chỉ xác nhận hiện diện secret, chưa gọi merchant. POST cả hai endpoint trả HTTP 503 `PAYMENTS_DISABLED`. Không tạo link hoặc chuyển tiền thật.
+
+[Validate](https://github.com/infiniti-money/Web-Design/actions/runs/42393607537), [SQL/SDK cách ly](https://github.com/infiniti-money/Web-Design/actions/runs/42393607574), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42393607420) và [browser smoke sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42393646182) đều thành công. Kiểm tra production sau triển khai: ledger chưa tồn tại, 1 báo giá, 1 phiên bản báo giá, 0 quote-history guard; không áp dụng SQL staging.
+
+Chủ website xác nhận chưa có backup độc lập và thử restore. Thực hiện [hướng dẫn sao lưu/khôi phục cách ly](SUPABASE_BACKUP_RESTORE_GUIDE.md) trước khi áp dụng migration lên dữ liệu thật. Kiểm thử SQL tổng hợp trong CI không thay thế điều kiện này.
+
 Chủ website xác nhận đã lưu PAYOS_CLIENT_ID, PAYOS_API_KEY, PAYOS_CHECKSUM_KEY vào Edge Function secrets. Không yêu cầu gửi lại giá trị. Dùng SDK chính thức `@payos/node@2.0.5`, tắt log và retry tạo link; không tự gọi API merchant trong kiểm thử.
 
 ## Phạm vi đợt này
