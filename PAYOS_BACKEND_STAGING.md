@@ -1,5 +1,9 @@
 # Backend đặt cọc payOS — chế độ chuẩn bị
 
+## Pilot thực tế đã xác nhận — 08/11/2026
+
+Chủ website đã xác minh merchant webhook, tạo yêu cầu 10.000 VND và thực hiện chuyển khoản. Kiểm tra trực tiếp thấy một intent paid và một receipt paid 10.000 VND; chủ website xác nhận “Đã thấy tiền vào” ngân hàng trong chat. [Biên bản và CI](PAYOS_RECONCILIATION_ADMIN.md). Chưa có xác nhận bank_confirmed trong nhật ký app tại thời điểm kiểm tra; không giả lập hoặc tự ghi thay xác nhận của chủ tài khoản. Giữ giới hạn một yêu cầu pilot, chưa mở thu đại trà. Các trạng thái chưa kiểm chứng/tắt thu tiền bên dưới là lịch sử các đợt trước.
+
 ## Màn hình đối soát và pilot 10.000 VND — 08/11/2026
 
 Đã bổ sung [màn hình và quy trình đối soát](PAYOS_RECONCILIATION_ADMIN.md), triển khai guard/ledger/audit và giới hạn pilot một yêu cầu 10.000 VND cho báo giá đã chấp nhận. Đây là cập nhật thay thế trạng thái “chưa có UI/chưa áp dụng ledger” bên dưới. Webhook và merchant/ngân hàng thực tế phải được xác minh theo quy trình; chưa coi test tổng hợp hoặc credentialsPresent là chứng minh nhận tiền.

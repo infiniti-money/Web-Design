@@ -1,5 +1,19 @@
 # Thu tiền và đối soát ATELIER HOME — 08/11/2026
 
+## Kết quả kiểm chứng thực tế
+
+**Đã đạt kiểm chứng pilot 10.000 VND.** Sau khi chủ website thao tác trên giao diện thật:
+
+- 01:15:16 ngày 08/11/2026 (Asia/Saigon): có sự kiện webhook_confirmed từ luồng xác minh merchant.
+- 01:15:26: tạo một yêu cầu đặt cọc 10.000 VND, có provider link.
+- 01:16:07: webhook ghi một receipt paid 10.000 VND và cập nhật intent thành paid. Không có provider_sync hoặc ghi nhận bank_confirmed trong app tại thời điểm kiểm tra; bằng chứng ghi thu này đến từ luồng callback.
+- Chủ website xác nhận riêng trong chat **“Đã thấy tiền vào”** tài khoản ngân hàng. Đây là xác nhận của chủ tài khoản, không phải API đọc số dư ngân hàng tự động. Nếu cần lưu xác nhận này trong nhật ký ứng dụng, chủ website dùng nút **Tôi đã kiểm tra tiền vào ngân hàng** trên yêu cầu đã paid.
+- Có thêm một receipt unmatched 3.000 VND, order 123, ngay trước sự kiện xác minh webhook. Đây là bản ghi cần xem xét trong luồng kiểm tra; không gắn với yêu cầu đặt cọc và không được cộng vào khoản đã thu. Không tự sửa/xóa receipt hoặc giả danh Admin để đóng bản ghi.
+
+Website đã xác minh revision `f2686631dac815743699f424b4b70ec2e5c20f9c` qua release.json. [CI SQL/SDK/HTTP và đối soát](https://github.com/infiniti-money/Web-Design/actions/runs/42400130167), [Validate với giao diện đối soát](https://github.com/infiniti-money/Web-Design/actions/runs/42400130164), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42400130126) và [browser smoke sau phát hành](https://github.com/infiniti-money/Web-Design/actions/runs/42400179709) đều thành công.
+
+Giới hạn một yêu cầu pilot 10.000 VND vẫn giữ nguyên. Không mở thu đại trà, tự chuyển tiền hoặc hoàn tiền trong lần xác minh này. Các phần bên dưới là hướng dẫn thực hiện lại và bằng chứng lúc triển khai ban đầu.
+
 Trang quản trị: [Thu tiền & đối soát](https://infiniti-money.github.io/Web-Design/payments.html). Đăng nhập tại admin.html bằng tài khoản Admin đang hoạt động trước khi mở trang. Manager/Employee không được đọc sổ thu hoặc thực hiện thao tác.
 
 ## Đợt kiểm chứng 10.000 VND
@@ -33,8 +47,8 @@ Nếu kết quả tạo link chưa rõ, **Kiểm tra lại yêu cầu** dùng c�
 - Node core/admin, SQL pilot/recovery/partial-paid-cancelled/audit/roles và trình duyệt desktop/mobile với fixture đã đạt. Đã chuẩn bị route/page cho mã nguồn PC và kiểm tra allowlist; chưa phát hành bộ cài PC mới trong đợt này.
 - Advisor giữ bốn cảnh báo RPC SECURITY DEFINER cũ và leaked-password protection cũ. Hai INFO private RLS không policy gồm inquiry_rate_limits và payos_pilot_policy là mặc định từ chối; bảng policy không cấp quyền browser/service_role trực tiếp.
 
-## Bằng chứng thực tế phải cập nhật sau thao tác Admin
+## Phạm vi xác nhận
 
-Tại thời điểm triển khai chưa khẳng định merchant credentials hợp lệ, webhook thật đã qua hoặc ngân hàng đã nhận tiền. Cần quan sát sự kiện webhook_confirmed, callback đã xác minh, intent paid / provider_sync và xác nhận ngân hàng của chủ sở hữu. Các test giả lập không thay thế các bằng chứng này. [Kết quả kiểm thử trước](PAYOS_ACCEPTANCE_20261108.md) ghi trạng thái trước khi bổ sung màn hình này.
+Đợt triển khai ban đầu chưa có bằng chứng merchant/ngân hàng; kết quả thực tế hiện được ghi ở đầu tài liệu. Callback đã ghi thu và chủ website đã xác nhận ngân hàng cho đúng khoản pilot này. Không suy rộng thành bảo đảm mọi giao dịch tương lai, hoàn tiền hoặc quy trình xử lý mọi ngoại lệ đã được nghiệm thu. [Kết quả kiểm thử trước](PAYOS_ACCEPTANCE_20261108.md) ghi trạng thái trước khi bổ sung màn hình này.
 
 Nếu cần dừng tạo yêu cầu mới, tắt enabled trong private.payos_pilot_policy bằng quyền quản trị database. Giữ webhook hoạt động để tiếp nhận callback muộn; không xóa ledger hoặc tắt callback đang dùng để xử lý sự cố tạo link.
