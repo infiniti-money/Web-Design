@@ -55,4 +55,20 @@ Chat: tải widget khi khách mở, giữ kênh liên hệ hiện có khi nhà c
 
 Kiểm chứng trước phát hành: 98 bài Node, 97 đạt, 1 bài gửi thật bỏ qua; home experience và consultation browser đạt trên preview (ghi form dùng fixture). Đã xem ảnh mobile và kiểm tra không tràn ngang. Đo online bản cũ ngày 07/11/2026 bằng Lighthouse mobile mặc định, một lượt: Performance 95, Accessibility/Best Practices/SEO 100; FCP 1,6 giây, LCP 2,8 giây, TBT 30 ms, CLS 0,001. Mẫu này chưa đủ để kết luận ổn định hoặc so sánh tăng tốc. JSON local: `dist/audits/upgrade-program-before.json`.
 
+## Kết quả đợt nền tảng đã triển khai
+
+Website xác minh revision `f40bfef141c50fadf8fa0c6e6b6d255736562984`; [Validate](https://github.com/infiniti-money/Web-Design/actions/runs/42368500545), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42368500535) và [browser smoke sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42368553933) đều thành công. Snapshot bảo vệ 10 trang HTML công khai trong nguồn. Không đổi dữ liệu Supabase hoặc ảnh/Title/Description/URL hiện có.
+
+Lighthouse 13.6.0, mobile mặc định qua Chromium/Cốc Cốc trên cùng máy và URL GitHub Pages; đo tuần tự sau triển khai, không phải máy điện thoại vật lý hoặc CWV field. Báo cáo JSON trong `dist/audits/upgrade-program-after*.json`.
+
+| Lượt sau triển khai | Performance | LCP | FCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 96 | 2,62 giây | 1,54 giây | 38 ms | 0,0011 |
+| 2 | 95 | 2,63 giây | 1,56 giây | 102 ms | 0,0019 |
+| 3 | 96 | 2,76 giây | 1,31 giây | 64 ms | 0,0010 |
+
+Trung vị LCP 2,63 giây, cả ba mẫu dưới 3 giây; không đồng nghĩa mọi tài nguyên đã tải xong dưới 3 giây. Trước thay đổi chỉ có một mẫu 2,78 giây nên chưa đủ đối chứng để khẳng định tăng tốc ổn định. Điểm Accessibility/Best Practices/SEO lượt sau đầu đều 100; điểm SEO không chứng minh index hoặc giữ thứ hạng.
+
+Đã hoàn tất lớp bảo toàn và cải thiện trang chủ đầu tiên; chưa hoàn tất thiết kế lại toàn bộ website/quản trị/PC, tích hợp đặt cọc/chat, chuyển đổi dữ liệu, đo conversion hay UAT tài khoản thật. Bản PC hiện hành vẫn 1.1.2. Chưa tự tạo tài khoản merchant/chat hoặc kích hoạt thu tiền; chủ website đang lựa chọn phương án đã trình bày ở trên.
+
 Hoàn thành toàn bộ chương trình khi UI được nghiệm thu trên web/PC, số đo trước/sau có điều kiện rõ, sandbox và giao dịch thật được chủ website cho phép đã đối soát, chat có người phụ trách, CI xanh, backup/UAT có bằng chứng và có phương án rollback. Hiện chưa đánh dấu toàn bộ chương trình hoàn tất.
