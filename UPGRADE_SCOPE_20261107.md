@@ -2,6 +2,8 @@
 
 Phạm vi chủ website chọn: cả website và quản trị/PC; thanh toán nhận đặt cọc công trình/báo giá; chat trực tiếp qua nhà cung cấp riêng. Chưa có tài khoản dịch vụ, ngân sách và ngày vận hành. Giữ GitHub Pages, ATELIER HOME, Supabase, URL, Title/Description và ảnh hiện có.
 
+Cập nhật lựa chọn: chủ website đã chốt **payOS + tawk.to**. Các phương án so sánh bên dưới giữ làm căn cứ lịch sử; hướng triển khai và các bước chuẩn bị tài khoản nằm trong [PAYOS_TAWK_SETUP.md](PAYOS_TAWK_SETUP.md). Mã chat mặc định tắt; thanh toán thật chưa kích hoạt.
+
 ## Hiện trạng và thứ tự xử lý
 
 - Nền hiện có: CRM/nhân sự, CMS và phê duyệt, báo giá, công trình, Catalog; PC 1.1.2 có feed cập nhật. Tận dụng các module này, không thay database hoặc xây CRM thứ hai.

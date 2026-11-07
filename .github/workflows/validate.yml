@@ -105,3 +105,7 @@ jobs:
         env:
           SITE_URL: http://127.0.0.1:4173/
         run: node tests/delivery-browser-smoke.cjs
+      - name: Verify opt-in chat loader without contacting the provider
+        env:
+          SITE_URL: http://127.0.0.1:4173/
+        run: node tests/customer-chat-browser.cjs
