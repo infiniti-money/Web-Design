@@ -2,7 +2,11 @@
 
 ## Kích hoạt tawk.to từ mã chủ website cung cấp
 
-Kiểm tra thực tế: website đã lên revision `288b1cb4367f1c8b2fe2ad351263c21c1e2a2abd`. HTTP client nhận SDK 200/application-x-javascript và header CORS `*`; trình duyệt tự động nhận HTTP 403 không có header CORS (Cốc Cốc báo ORB, Edge báo CORS). Chưa xác định được lớp chặn ở nhà cung cấp/mạng hay thiết lập tài khoản, nên không kết luận widget hỏng hoặc agent đang online. Chưa mở thành công hội thoại thật và không gửi tin nhắn. Đã yêu cầu chủ website kiểm tra bằng trình duyệt thường.
+Chủ website đã xác nhận “Khung chat mở được” khi kiểm tra bằng trình duyệt thường sau khi nhận ID. Đây là xác nhận mở giao diện thực tế từ chủ website; không phải kiểm thử gửi/nhận tin nhắn với agent. Lỗi 403 bên dưới là giới hạn quan sát trong môi trường trình duyệt tự động, không được dùng để khẳng định khách thông thường bị chặn.
+
+Bản cấu hình cuối xác minh qua release.json: `abf6b11bee253ed22bc838eb9bf642f100f376ef`. [Validate](https://github.com/infiniti-money/Web-Design/actions/runs/42391198948), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42391199050) và [browser smoke sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42391254009) đều thành công. Không gửi tin nhắn, tự mời agent hoặc thay đổi lịch trực của tài khoản chủ website trong kiểm thử.
+
+Kiểm tra thực tế: website đã lên revision `288b1cb4367f1c8b2fe2ad351263c21c1e2a2abd`. HTTP client nhận SDK 200/application/x-javascript và header CORS `*`; trình duyệt tự động nhận HTTP 403 không có header CORS (Cốc Cốc báo ORB, Edge báo CORS). Chưa xác định được lớp chặn ở nhà cung cấp/mạng hay thiết lập tài khoản, nên không kết luận widget hỏng hoặc agent đang online. Chưa mở thành công hội thoại thật và không gửi tin nhắn. Đã yêu cầu chủ website kiểm tra bằng trình duyệt thường.
 
 Bổ sung `crossOrigin="anonymous"` cho script để tương ứng với hành vi thuộc tính crossorigin của mã nhúng được cung cấp. Kiểm thử SDK giả lập có header CORS trên Edge đạt: tắt/ID sai, tải theo click, một SDK, mở lại và thử lại khi lỗi. Fallback form/email tiếp tục dùng được; không vô hiệu hóa bảo vệ CORS/ORB của trình duyệt để báo kết quả đạt giả.
 
