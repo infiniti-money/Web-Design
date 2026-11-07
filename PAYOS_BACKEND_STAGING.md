@@ -1,5 +1,9 @@
 # Backend đặt cọc payOS — chế độ chuẩn bị
 
+## Cập nhật sau đăng nhập CLI — 08/11/2026
+
+Đã xuất backup production trên gói Free và thử phục hồi PostgreSQL cách ly: 59/59 bảng khớp số dòng, ba bảng nghiệp vụ chính khớp hash. Guard/ledger đã thử thành công trên bản phục hồi rồi rollback. [Bằng chứng và phạm vi kiểm chứng](BACKUP_RESTORE_EVIDENCE_20261108.md). Chưa áp dụng guard/ledger lên production, chưa UAT Auth service và toàn bộ luồng đặt cọc; thu tiền vẫn tắt. Các ghi chú chưa có backup ở đợt khảo sát bên dưới được thay thế bởi cập nhật này trong phạm vi database.
+
 ## Kết quả triển khai đã xác minh — cập nhật 08/11/2026
 
 Mã nguồn `e33056526b9537a6bdb4a1c520921cd93e330a4f` đã lên main. Hai Edge Function `payos-deposits` và `payos-webhook` ACTIVE phiên bản 1. GET `/payos-deposits/health` trả HTTP 200, `credentialsPresent:true`, `paymentsEnabled:false`; chỉ xác nhận hiện diện secret, chưa gọi merchant. POST cả hai endpoint trả HTTP 503 `PAYMENTS_DISABLED`. Không tạo link hoặc chuyển tiền thật.
