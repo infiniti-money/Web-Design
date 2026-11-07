@@ -177,6 +177,8 @@ async function roles(browser){
   await manager.locator("#post-list .cms-post").click();await manager.locator("#post-status").selectOption("review");await manager.locator("#post-save").click();await manager.locator("#post-save-state").getByText("Đã lưu · phiên bản 2",{exact:true}).waitFor();
   const payload=await manager.evaluate(()=>window.__cmsFixture.writes.at(-1).payload);assert.equal(payload.status,"review");assert.equal(Object.hasOwn(payload,"published_at"),false);
   await manager.setViewportSize({width:390,height:844});
+  // Let the breakpoint change handler finish closing the previous drawer before keyboard activation.
+  await manager.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   assert.equal(await manager.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+3),false);
   await manager.locator(".workspace-menu").press("Enter");
   assert.equal(await manager.locator(".workspace-sidebar").evaluate(element=>element.inert),false);
