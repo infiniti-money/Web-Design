@@ -24,3 +24,6 @@ test('Audit rejects offsite sitemap URLs and redirects without requesting their 
 test('HTML inspector reads quoted metadata, schema and escaped links',()=>{
  const h=inspectHtml(`<title>A &amp; B</title><meta name='description' content='Text'><link href='${base}' rel='canonical'><h1>X</h1><a href='?a=1&amp;b=2' id='x'>X</a>`);assert.equal(h.title,'A & B');assert.equal(h.description,'Text');assert.equal(h.hrefs[0],'?a=1&b=2');assert.ok(h.ids.has('x'));assert.equal(h.h1,1);
 });
+test('Audit rejects private and unreviewed catalog sitemap entries even when their HTML is noindex',async()=>{
+ const f=fixture(url=>url.endsWith('sitemap.xml')?new Response('<urlset><loc>'+base+'</loc><loc>'+base+'admin.html</loc><loc>'+base+'catalog/</loc></urlset>'):undefined),r=await audit({base,fetcher:f.fetcher});assert.ok(r.issues.some(x=>x.code==='private-sitemap'));assert.ok(r.issues.some(x=>x.code==='catalog-sitemap'));
+});

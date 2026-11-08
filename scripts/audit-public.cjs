@@ -1,6 +1,6 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path');
-const privatePages=['admin.html','admin-posts.html','admin-catalog.html','commercial.html','payments.html','operations.html','delivery.html','notifications.html','reports-advanced.html','register.html','complete-profile.html','reset-password.html','set-password.html','payment-return.html','404.html'];
+const privatePages=['admin.html','admin-posts.html','admin-catalog.html','commercial.html','payments.html','operations.html','delivery.html','notifications.html','reports-advanced.html','register.html','complete-profile.html','reset-password.html','set-password.html','payment-return.html','404.html','bai-viet.html'];
 const decode=s=>String(s).replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>');
 function attributes(tag){const result={};for(const m of tag.matchAll(/([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g))result[m[1].toLowerCase()]=decode(m[2]??m[3]);return result;}
 function inspectHtml(html){
@@ -36,10 +36,11 @@ async function audit({base='https://infiniti-money.github.io/Web-Design/',fetche
  try{const r=await get(projectRobots);if(r.status!==200||!r.body.split(/\r?\n/).some(line=>line.trim()==='Sitemap: '+sitemapUrl))issue('P1','project-robots',projectRobots,'Missing project robots file or canonical sitemap declaration');}catch(e){issue('P1','project-robots',projectRobots,e.message);}
  const expected=new Map(indexed.map(u=>[pageKey(u),true])),queue=[...expected.keys()];
  const add=url=>{const key=pageKey(url);if(!queue.includes(key))queue.push(key);};
- for(const p of [...privatePages,'du-an/']){const u=new URL(p,base).href;expected.set(pageKey(u),false);add(u);}
+ for(const p of privatePages){const u=new URL(p,base).href;expected.set(pageKey(u),false);add(u);if(indexed.includes(u))issue('P1','private-sitemap',u,'Private document must not appear in sitemap');}
+ const projectsUrl=new URL('du-an/',base).href;expected.set(pageKey(projectsUrl),indexed.includes(projectsUrl));add(projectsUrl);
  const manifestUrl=new URL('catalog-publication.json',base).href;
  try{const r=await get(manifestUrl);if(r.status!==200)throw Error('HTTP '+r.status);const data=JSON.parse(r.body);if(data.schema!==1||!Array.isArray(data.items)||data.items.length>5000)throw Error('Invalid catalog publication manifest');
-  let any=false;for(const item of data.items){if(!/^catalog\/muc-[0-9a-f-]{36}\/$/.test(item.path)||typeof item.indexable!=='boolean')throw Error('Invalid catalog route');const u=new URL(item.path,base).href;expected.set(pageKey(u),item.indexable);add(u);any||=item.indexable;if(indexed.includes(u)!==item.indexable)issue('P1','catalog-sitemap',u,'Catalog review and sitemap disagree');}const u=new URL('catalog/',base).href;expected.set(pageKey(u),any);add(u);
+  let any=false;for(const item of data.items){if(!/^catalog\/muc-[0-9a-f-]{36}\/$/.test(item.path)||typeof item.indexable!=='boolean')throw Error('Invalid catalog route');const u=new URL(item.path,base).href;expected.set(pageKey(u),item.indexable);add(u);any||=item.indexable;if(indexed.includes(u)!==item.indexable)issue('P1','catalog-sitemap',u,'Catalog review and sitemap disagree');}const u=new URL('catalog/',base).href;expected.set(pageKey(u),any);add(u);if(indexed.includes(u)!==any)issue('P1','catalog-sitemap',u,'Catalog listing review and sitemap disagree');
  }catch(e){issue('P1','catalog-manifest',manifestUrl,e.message);}
  const seen=new Map(),anchors=[];
  for(let i=0;i<queue.length&&i<200;i++){
