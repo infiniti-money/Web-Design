@@ -68,3 +68,15 @@ Ba lần đo trang chủ online sau khi giao diện mới được triển khai.
 Trung vị LCP 2,227 giây, Performance 96. **Một lần vượt 3 giây**, nên chưa thể coi mục tiêu dưới 3 giây là ổn định. Không suy diễn cải thiện dài hạn so với mẫu trước, không có dữ liệu CWV thực địa/INP. Giữ ảnh hero và metadata cũ; video không có nguồn và không tải lúc vào trang. Giao diện thêm CSS/JS nhỏ, không thêm framework hoặc thư viện animation. Hướng tiếp tục là theo dõi tài nguyên ngoài, cache và chi phí khởi tạo trên các mẫu độc lập, chưa đổi hostname hoặc dữ liệu để chạy theo một lần đo.
 
 Báo cáo local `dist/audits/home-v1-26-2026-11-08-{1,2,3}.report.*`. Kiểm toán online 31 trang: 12 URL trong sitemap, 0 P1, 1 P2 robots gốc. Đây là kiểm toán cấu trúc/cú pháp JSON-LD và liên kết, không phải xác nhận Google index hay Rich Results Test.
+
+## Font và bố cục v1.28 — 08/11/2026
+
+Đo online revision `ba69055e6f5bb1df37be3bfa10fe4e357be57b07`, Lighthouse 13.6.0/Edge 157 headless, mobile mặc định, ba lần liên tiếp trên cùng máy.
+
+| Lần | Performance | Accessibility | Best practices | SEO | FCP | LCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | 91 | 100 | 100 | 100 | 1,54 s | 2,406 s | 265 ms | 0 |
+| 2 | 94 | 100 | 100 | 100 | 1,38 s | 2,238 s | 242 ms | 0 |
+| 3 | 95 | 100 | 100 | 100 | 1,33 s | 2,250 s | 216 ms | 0 |
+
+Trung vị LCP 2,250 giây, Performance 94. Cả ba mẫu dưới 3 giây; không phải cam kết cho mọi mạng hoặc dữ liệu CWV thực địa. TBT vẫn đáng theo dõi, không khẳng định điểm tổng thể cải thiện so với v1.26. Phông local có Vietnamese subsets và giấy phép; bộ font gồm 183.108 byte, chỉ tải face đang dùng. Trang chủ giữ chiến lược ưu tiên ảnh trước font. Báo cáo local: `dist/audits/home-v1-28-2026-11-08-{1,2,3}.report.*`.

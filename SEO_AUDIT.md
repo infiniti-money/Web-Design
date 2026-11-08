@@ -107,3 +107,7 @@ Gói [web v1.25.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.
 ## Trợ lý tư vấn v1.27 — 08/11/2026
 
 Bổ sung cửa sổ Gemini và điều khoản riêng trong trang quyền riêng tư, giữ metadata/ảnh/đích cũ. Câu trả lời AI không tự xuất thành bài viết hoặc trang index. Kiểm toán online 31 trang, 12 URL sitemap: 0 P1, 1 P2 robots gốc. [Phạm vi dữ liệu, hạn mức và trạng thái bật/tắt](AI_CONSULTATION_RUNBOOK.md).
+
+## Đồng nhất font/layout v1.28 — 08/11/2026
+
+Đã giữ metadata, ảnh và đích URL cũ khi chuẩn hóa header/typography. Kiểm toán online 31 trang, 12 URL sitemap: 0 P1, 1 P2 robots gốc. Kiểm thử thực tế glyph tiếng Việt trên Pages và CI đã đạt. [Bằng chứng](PUBLIC_UI_ACCEPTANCE.md).

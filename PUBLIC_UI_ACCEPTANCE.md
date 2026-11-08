@@ -32,3 +32,13 @@ Backend đã triển khai lại và bật `AI_ENABLED=true`. Health trả đúng
 144 bài Node: 143 đạt, 1 gửi lead thật bỏ qua; 2/2 an toàn route PC đạt. Public shell browser đi qua tám loại trang ở 1440/1024/390/320 px: header và lề logo thống nhất, không tràn ngang; menu bàn phím; fallback không JS/lỗi font. Chrome DevTools xác nhận glyph thực tế của H1 là Playfair Display và paragraph là Be Vietnam Pro, không chỉ kiểm tra tên font trong CSS. Đã xem ảnh Catalog/dịch vụ/dự án và sửa tương phản chữ CTA.
 
 Catalog động, trang chủ, dự toán và cửa sổ AI vẫn qua các kiểm thử fixture. Đây là responsive QA trên Chromium, không phải chứng nhận mọi trình duyệt/thiết bị. Không ghi lead/giao dịch thật hoặc giải CAPTCHA trong CI. Bằng chứng online được thêm sau khi Actions và Pages hoàn tất.
+
+## Xác minh phát hành v1.28 — 08/11/2026
+
+Online release.json khớp revision `ba69055e6f5bb1df37be3bfa10fe4e357be57b07`. [Validate/SQL quota mới/Playwright](https://github.com/infiniti-money/Web-Design/actions/runs/42452892465), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42452892523), [browser sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42452930376), [payOS SDK/cách ly](https://github.com/infiniti-money/Web-Design/actions/runs/42452892476) và [SEO/Lighthouse](https://github.com/infiniti-money/Web-Design/actions/runs/42452930436) đều thành công. Node 144 bài: 143 đạt, 1 gửi lead thật bỏ qua.
+
+Kiểm tra trực tiếp Catalog, dịch vụ và dự án ở 1440/390 px: glyph H1 dùng Playfair Display, paragraph dùng Be Vietnam Pro, đều là font custom tải từ website. Lề/menu/CTA đúng, không tràn ngang. Trang chủ có đúng tên Trợ lý tư vấn thiết kế nội thất; cửa sổ đọc health enabled=true và giới hạn 500/15/250000. Không gửi lead, không gọi AI hoặc giải CAPTCHA trong các kiểm tra giao diện.
+
+Kiểm toán online 31 trang, 12 URL sitemap: 0 P1, 1 P2 robots gốc. Ba mẫu Lighthouse mobile trang chủ LCP 2,406 / 2,238 / 2,250 giây, CLS 0; [chi tiết hiệu suất](PERFORMANCE_BASELINE.md). Không suy diễn thành CWV thực địa hay bảo đảm tốc độ trên mọi mạng.
+
+Gói [web v1.28.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.28.0) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42453199615) thành công. ZIP tải lại khớp SHA-256: `7d90e1d4e792e86b6da0f751484a2c856aa5eb4e245d8a175accf64e86798c7a` (984037 byte). Tài liệu sau tag không thay đổi giao diện hoặc gói đã phát hành.
