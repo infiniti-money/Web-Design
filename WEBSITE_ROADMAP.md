@@ -128,3 +128,7 @@ Kiểm tra thêm trực tiếp bản Pages ở 390 px: sáu bước, diện tíc
 Không đánh dấu video/công trình/đơn giá thật hoặc gửi Zalo/Email đạt nghiệm thu khi chưa có đầu vào. Bản này là website, không phát hành bộ cài PC mới.
 
 Gói [web v1.26.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.26.0) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42434352733) thành công. ZIP tải lại khớp SHA-256 trong SHA256SUMS.txt: `028894c1ca8d6f64ba93c52917f073adfd93eabcdd032e51dae9fdc2a53f5e5e` (744136 byte). Tài liệu cập nhật sau tag không sửa giao diện/gói đã phát hành.
+
+## Trợ lý tư vấn Gemini v1.27 — 08/11/2026
+
+Theo lựa chọn dùng miễn phí, tích hợp Gemini qua máy chủ thay vì gọi OpenAI đã hết số dư. Tư vấn bằng lựa chọn cấu trúc, dựa trên bốn bài công khai, opt-in và Turnstile riêng; không gửi liên hệ hoặc CRM sang AI. Chốt 20 lượt/ngày toàn website, 5 lượt/giờ theo mạng, không tự nâng gói/provider. Gemini đã trả lời mẫu tổng hợp HTTP 200; công khai vẫn tắt tới khi chủ website xác nhận project đang Free tier. [Runbook AI, hạn mức, dữ liệu và nghiệm thu](AI_CONSULTATION_RUNBOOK.md).
