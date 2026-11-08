@@ -1,5 +1,5 @@
 const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs");
-const {authorize,readCounts}=require("../assets/operations.js");
+const {authorize,readCounts,loadSnapshot}=require("../assets/operations.js");
 function fake({role="admin",profileRole=role,active=true,authError=false,unavailable=[]}={}){
   const calls=[];
   const counts={"inquiry_care_tasks":4,"customer_quotes":2,"cms_posts":1,"staff_profiles":3};
@@ -14,6 +14,7 @@ function fake({role="admin",profileRole=role,active=true,authError=false,unavail
         in(field,value){record.filters.push(["in",field,value]);return query;},
         lt(field,value){record.filters.push(["lt",field,value]);return query;},
         gte(field,value){record.filters.push(["gte",field,value]);return query;},
+        abortSignal(){return query;},
         single:async()=>({data:{role:profileRole,active,full_name:"Người thử"},error:null}),
         then(ok,fail){const res=unavailable.includes(table)?{count:null,error:{message:"RLS failure"}}:{count:counts[table],error:null};return Promise.resolve(res).then(ok,fail);}
       };
@@ -41,7 +42,7 @@ test("Operations page is private, noindex, and included by website and Windows p
 test("Only active Admin/Manager with matching staff role can access operations",async()=>{
   for(const role of ["admin","manager"]){
     const {client}=fake({role});
-    assert.deepEqual(await authorize(client),{role,name:"Người thử"});
+    assert.deepEqual(await authorize(client),{id:"test-user",role,name:"Người thử"});
   }
   for(const options of [{role:"employee"},{role:"manager",profileRole:"employee"},{role:"admin",active:false},{role:"manager",authError:true}]){
     const {client}=fake(options);
@@ -82,4 +83,18 @@ test("Operations page has no mutations or privileged browser keys",()=>{
   assert.doesNotMatch(script,/\.insert\(|\.update\(|\.delete\(|\.upsert\(|\.rpc\(/);
   assert.doesNotMatch(script,/service_role|supabaseSecret|SUPABASE_SERVICE_ROLE/i);
   assert.match(script,/event==="SIGNED_OUT"/);
+});
+test("Snapshot validates account identity and current authorization again after counts",async()=>{
+  const good=fake();assert.equal((await loadSnapshot(good.client)).account.id,"test-user");
+  for(const change of ["account","role"]){
+    const f=fake();let checks=0;const original=f.client.auth.getUser;
+    f.client.auth.getUser=async()=>{const r=await original();if(++checks===2){if(change==="account")r.data.user.id="different-user";else r.data.user.app_metadata.role="employee";}return r;};
+    await assert.rejects(()=>loadSnapshot(f.client),/AUTHORIZATION_CHANGED/);assert.equal(checks,2);
+  }
+});
+test("Snapshot times out stuck Auth and cancels without publishing or requesting counts",async()=>{
+  const f=fake();f.client.auth.getUser=()=>new Promise(()=>{});
+  await assert.rejects(()=>loadSnapshot(f.client,{timeoutMs:15}),/SNAPSHOT_TIMEOUT/);assert.equal(f.calls.length,0);
+  const controller=new AbortController();controller.abort();const g=fake();
+  await assert.rejects(()=>loadSnapshot(g.client,{signal:controller.signal}),/SNAPSHOT_CANCELLED/);assert.equal(g.calls.length,0);
 });

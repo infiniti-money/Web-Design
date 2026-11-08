@@ -102,3 +102,7 @@ Mỗi đợt có ghi chú phạm vi, kiểm thử, URL đang chạy và giới h
 Đã triển khai và đối chiếu revision `044282a2390563185bfa75107653a3dadf5b1442`. Validate, PostgreSQL cách ly, Pages, browser sau triển khai và SEO/Lighthouse đều thành công. Báo cáo online 31 trang: 0 P1, 1 P2 robots gốc. [Bằng chứng và việc còn mở](SEO_AUDIT.md). Catalog và bài vật liệu đọc được không JavaScript; không sửa DB hoặc tạo dữ liệu/giao dịch doanh nghiệp thật. Các đầu vào còn thiếu phía trên tiếp tục để mở.
 
 Gói [web v1.25.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.25.0) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42431918553) thành công. Tải lại ZIP nguồn và đối chiếu SHA-256 với SHA256SUMS.txt đạt: `d073fa12391c445ea64e3d9aebe6bb7bab2e498607684467a96c0775e0591b95` (716773 byte). Tag giữ nguồn revision trên; bản cập nhật tài liệu sau đó không đổi gói hoặc giao diện.
+
+## Đợt vận hành v1.25.1 — 08/11/2026
+
+Đối chiếu các mục chặng 4/5 và CRM/Catalog/CMS: phần nền đã có, đợt này xử lý thêm số liệu vận hành cũ và thay đổi quyền trong lúc tải. Xóa snapshot khi refresh/logout/offline, giới hạn 15 giây, kiểm tra lại cùng tài khoản/vai trò active sau khi đọc; hủy/loại phản hồi cũ. Không sửa schema/RLS hoặc tạo dữ liệu doanh nghiệp. [Ma trận đối chiếu, cách vận hành và giới hạn UAT](OPERATIONS_RUNBOOK.md). Bằng chứng online được bổ sung sau khi triển khai và Actions hoàn tất.
