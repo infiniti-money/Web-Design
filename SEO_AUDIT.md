@@ -103,3 +103,7 @@ Gói [web v1.25.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.
 ## Giao diện trọn gói v1.26 — 08/11/2026
 
 Đã giữ metadata, ảnh và mọi đích/ID cũ, bổ sung CTA/ID cho dự toán và hồ sơ công trình. H1 thay theo thiết kế mới. Kiểm toán online 31 trang, 12 URL sitemap: 0 P1, 1 P2 robots gốc; không thêm LocalBusiness/VideoObject, trang địa phương hoặc công trình thiếu bằng chứng. [Bằng chứng và cấu hình](TURNKEY_ROLLOUT.md).
+
+## Trợ lý tư vấn v1.27 — 08/11/2026
+
+Bổ sung cửa sổ Gemini và điều khoản riêng trong trang quyền riêng tư, giữ metadata/ảnh/đích cũ. Câu trả lời AI không tự xuất thành bài viết hoặc trang index. Kiểm toán online 31 trang, 12 URL sitemap: 0 P1, 1 P2 robots gốc. [Phạm vi dữ liệu, hạn mức và trạng thái bật/tắt](AI_CONSULTATION_RUNBOOK.md).

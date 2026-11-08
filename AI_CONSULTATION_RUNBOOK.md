@@ -54,3 +54,13 @@ Chưa kiểm chứng đầy đủ mọi chủ đề/phong cách, mọi sai sót 
 ### Advisory sau triển khai function
 
 Security Advisor hiện có nhóm cảnh báo RPC SECURITY DEFINER hiện hữu và leaked-password protection, cùng INFO RLS bật nhưng không có policy ở bảng private. Function quota AI mới dùng SECURITY INVOKER và chỉ service_role có execute; không nới quyền hay sửa RPC cũ trong đợt này. Tham khảo [kiểm soát RPC đặc quyền](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable), [bảo vệ mật khẩu](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) và [RLS không policy](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy). Không coi việc kiểm thử AI đạt là đã xử lý toàn bộ advisory của project.
+
+## Nghiệm thu kỹ thuật v1.27 — 08/11/2026
+
+Website online đối chiếu release.json đúng revision `5f1ae5b9bd5b0bf7e83328d1c78243cd8516ffe7`. [Validate/SQL/Playwright](https://github.com/infiniti-money/Web-Design/actions/runs/42436952367), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42436952441), [browser sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42436986181), [payOS cách ly/SDK](https://github.com/infiniti-money/Web-Design/actions/runs/42436952446) và [SEO/Lighthouse](https://github.com/infiniti-money/Web-Design/actions/runs/42436986182) đều thành công. Node: 141 bài, 140 đạt, 1 gửi lead thật bỏ qua; 2/2 an toàn route PC đạt.
+
+AI backend đã triển khai, model Gemini đã kiểm tra trực tiếp HTTP 200. SQL quota đã kiểm tra trên PostgreSQL 17 cách ly và thử production trong transaction rollback; không giữ counter thử hoặc ghi khách. Trực tiếp kiểm tra UI Pages ở 390 px: opt-in chưa chọn, AI tắt thì không POST, human handoff điền nhu cầu nhưng giữ liên hệ/consent trống. Cửa sổ không tràn ngang. Kiểm toán online 31 trang/12 URL sitemap: 0 P1, 1 P2 robots gốc.
+
+Trạng thái chốt đợt: **AI_ENABLED=false**. Đang chờ chủ website xác nhận project của khóa Gemini thuộc Free tier/chưa liên kết thanh toán, đúng yêu cầu dùng miễn phí. Chưa nghiệm thu trả lời AI qua Turnstile thật của khách trên production; không coi health/model API thành công là hoàn tất bước này. Tawk.to và form tư vấn tiếp tục hoạt động. Không yêu cầu nạp OpenAI hoặc tự nâng gói Google.
+
+Gói [web v1.27.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.27.0) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42437279176) thành công. ZIP tải lại khớp SHA-256: `5b5a26d3da9b354142acefc97ca40b3c302d0d6a9d319493a35134c1c97f1479` (776894 byte). Cập nhật tài liệu sau tag không sửa gói hoặc giao diện.
