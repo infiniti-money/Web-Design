@@ -2,6 +2,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const {publicHeader,fontLinks}=require('./public-shell.cjs');
 const marker = "<!-- ATELIER GENERATED PROJECT PAGE -->";
 const categoryLabels = { apartment: "Căn hộ", villa: "Biệt thự", house: "Nhà phố", commercial: "Thương mại" };
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
@@ -95,8 +96,8 @@ function renderPage({ site, title, description, route, prefix, image, schema, no
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${escapeHtml(title)}"><meta name="twitter:description" content="${escapeHtml(description)}"><meta name="twitter:image" content="${escapeHtml(socialImage)}">
 <script type="application/ld+json">${jsonLd({ "@context": "https://schema.org", "@graph": schema })}</script>
 <link rel="stylesheet" href="${prefix}assets/service-pages.css"><link rel="stylesheet" href="${prefix}assets/project-pages.css">
-</head><body><a class="skip" href="#main">Bỏ qua điều hướng</a>
-<header class="site-header"><div class="wrap header-inner"><a class="brand" href="${prefix}index.html" aria-label="ATELIER HOME INTERIORS">ATELIER<small>HOME INTERIORS</small></a><details class="menu"><summary>Menu</summary><nav class="nav" aria-label="Điều hướng chính">${navigation(prefix)}</nav></details><nav class="nav" aria-label="Điều hướng chính">${navigation(prefix)}</nav><a class="button header-cta" href="${prefix}index.html#contact">Đặt lịch tư vấn ↗</a></div></header>
+${fontLinks(prefix)}</head><body class="public-page"><a class="skip" href="#main">Bỏ qua điều hướng</a>
+${publicHeader(prefix,{active:route.startsWith("catalog")?"catalog":"projects"})}
 ${content}
 <footer class="footer"><div class="wrap footer-inner"><p><strong>${escapeHtml(site.name)}</strong><br>Thiết kế nội thất · Thi công · Tư vấn trang trí</p><nav class="footer-links" aria-label="Liên kết cuối trang"><a href="${prefix}index.html">Trang chủ</a><a href="${prefix}dich-vu/">Dịch vụ</a><a href="${prefix}privacy.html">Quyền riêng tư</a></nav></div></footer></body></html>
 `;

@@ -150,3 +150,7 @@ Chủ website đã xác nhận project khóa Gemini đang Free tier và chưa li
 Kiểm tra live: request thiếu token hợp lệ bị chặn HTTP 403 CAPTCHA_REQUIRED trước khi gọi AI; giao diện Pages ở 390 px mở đúng trạng thái sẵn sàng, opt-in vẫn chưa chọn và nút gửi còn khóa trước xác minh. Không tự POST sang AI, không gọi Gemini trực tiếp từ browser, không ghi lead thật. Ảnh QA local: screenshots/ai-live-enabled-mobile.png.
 
 Luồng đã mở cho khách: trang chủ → Trợ lý AI tư vấn nội thất → chọn nhu cầu → đồng ý riêng → hoàn tất Turnstile → Nhận tư vấn AI. Chưa xác nhận UAT trọn luồng CAPTCHA thật với khách; kiểm tra tự động không giải hoặc bỏ qua CAPTCHA. Câu trả lời model trước đó đã được thử riêng thành công, không được dùng làm bằng chứng đã hoàn tất bước CAPTCHA production.
+
+## Đợt đồng nhất giao diện và hạn mức v1.28 — 08/11/2026
+
+Đổi tên trợ lý theo yêu cầu, nâng giới hạn theo ảnh Free tier model văn bản 15 RPM/250K TPM/500 RPD, giữ số lượt cũ và không nâng billing. Chuẩn hóa font local có hỗ trợ tiếng Việt cùng header/menu/lề/hero cho các trang công khai. Metadata, ảnh, URL và đích cũ được kiểm tra bảo toàn. [Phạm vi và bằng chứng nghiệm thu](PUBLIC_UI_ACCEPTANCE.md).

@@ -1,4 +1,4 @@
-/* Print media keeps the external font stylesheet out of the initial render path. */
+/* Print media keeps the local font stylesheet out of the initial render path. */
 (() => {
   "use strict";
   const sheet=document.getElementById("home-fonts");

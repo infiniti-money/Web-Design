@@ -66,7 +66,7 @@ jobs:
           PGPASSWORD: isolated-ci-only
         run: |
           psql -h 127.0.0.1 -U ci -d postgres -v ON_ERROR_STOP=1 -c 'CREATE DATABASE ai_budget_test'
-          psql -h 127.0.0.1 -U ci -d ai_budget_test -v ON_ERROR_STOP=1 -f tests/ai-budget-isolated.sql
+          psql -h 127.0.0.1 -U ci -d ai_budget_test -v ON_ERROR_STOP=1 -f tests/ai-budget-upgrade-isolated.sql
 
 
 
@@ -103,6 +103,8 @@ jobs:
         run: node tests/consultation-browser-smoke.cjs
       - name: Verify turnkey lead preparation and project comparison without production writes
         run: node tests/turnkey-browser.cjs
+      - name: Verify shared public layout and actual Vietnamese glyph fonts at mobile/tablet/desktop sizes
+        run: node tests/public-shell-browser.cjs
       - name: Verify opt-in Gemini advice, quotas and human fallback with fixtures
         env:
           SITE_URL: http://127.0.0.1:4173/

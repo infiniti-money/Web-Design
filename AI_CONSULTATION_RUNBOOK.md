@@ -1,5 +1,9 @@
 # Trợ lý tư vấn Gemini — v1.27.0
 
+
+## Cập nhật hiện tại v1.28 — 08/11/2026
+
+Tên hiển thị: **Trợ lý tư vấn thiết kế nội thất**. AI đang bật trên Free tier đã được chủ website xác nhận. Hạn mức mới theo ảnh AI Studio: **500 RPD, 15 RPM, 250K input TPM**, ngày theo Pacific như Google; chống lạm dụng 30 lượt/giờ theo mạng. Các ghi chú 20/ngày, 5/giờ và chờ bật ở đợt v1.27 bên dưới là lịch sử. [Nguồn hạn mức, chính sách token, kiểm thử và bố cục/font](PUBLIC_UI_ACCEPTANCE.md).
 Ngày 08/11/2026. Theo lựa chọn chủ website, chuyển từ OpenAI sang Gemini để dùng hạn mức miễn phí. Khóa Gemini nhập qua cửa sổ bảo mật cục bộ, kiểm tra API thành công. Không đưa khóa vào Git, trình duyệt, mã nguồn hoặc báo cáo. Khóa OpenAI đã tạo trước đó chỉ còn ở tệp local được Git bỏ qua; tính năng này không dùng và không tải khóa OpenAI lên Supabase.
 
 ## Phạm vi tư vấn

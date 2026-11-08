@@ -1,0 +1,25 @@
+const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http=require('node:http');
+const {buildPages}=require('../scripts/build-pages.cjs');
+(async()=>{
+ const output=fs.mkdtempSync(path.join(os.tmpdir(),'atelier-public-shell-'));buildPages({output});
+ const server=http.createServer((req,res)=>{try{let file=path.resolve(output,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));if(file!==output&&!file.startsWith(output+path.sep))throw Error();if(fs.statSync(file).isDirectory())file=path.join(file,'index.html');const ext=path.extname(file);res.setHeader('Content-Type',({'.css':'text/css','.js':'application/javascript','.woff2':'font/woff2','.svg':'image/svg+xml','.png':'image/png'})[ext]||'text/html; charset=utf-8');res.end(fs.readFileSync(file));}catch{res.writeHead(404).end();}});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const base='http://127.0.0.1:'+server.address().port+'/';let browser;
+ try{
+  browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{})});const context=await browser.newContext(),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await context.route('**/*',r=>r.request().url().startsWith(base)?r.continue():r.abort());
+  const pages=['','catalog.html','dich-vu/','dich-vu/thiet-ke-noi-that.html','du-an/','kien-thuc.html','kien-thuc/ho-so-vat-lieu-noi-that-can-doi-chieu/','privacy.html'];
+  const cdp=await context.newCDPSession(page);await cdp.send('DOM.enable');await cdp.send('CSS.enable');
+  for(const width of [1440,1024,390,320])for(const route of pages){
+   await page.setViewportSize({width,height:900});await page.goto(base+route,{waitUntil:'load'});await page.evaluate(()=>document.fonts.ready);
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,route+' overflow at '+width);
+   const header=page.locator('.public-header,.public-home-header'),brand=header.locator('.brand,.logo').first();const box=await brand.boundingBox();const expected=width>1312?(width-1240)/2:width<=620?18:36;assert.ok(Math.abs(box.x-expected)<2,route+' brand alignment '+box.x);
+   assert.equal(await page.locator('h1').count(),1);const {root}=await cdp.send('DOM.getDocument'),{nodeId}=await cdp.send('DOM.querySelector',{nodeId:root.nodeId,selector:'h1'});const {fonts}=await cdp.send('CSS.getPlatformFontsForNode',{nodeId});assert.ok(fonts.length>0);assert.ok(fonts.every(f=>f.familyName.includes('Playfair')),route+' uses fallback heading font: '+JSON.stringify(fonts));
+   assert.match(await page.locator('body').evaluate(el=>getComputedStyle(el).fontFamily),/Be Vietnam Pro/);
+   const paragraph=await cdp.send('DOM.querySelector',{nodeId:root.nodeId,selector:'p'});const bodyFonts=await cdp.send('CSS.getPlatformFontsForNode',{nodeId:paragraph.nodeId});assert.ok(bodyFonts.fonts.length>0);assert.ok(bodyFonts.fonts.every(f=>f.familyName.includes('Be Vietnam Pro')),route+' uses fallback body glyphs: '+JSON.stringify(bodyFonts.fonts));
+   if(width===1440&&route!=='')assert.equal(await header.locator('.public-header-cta').evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)','Header CTA must keep white text');
+   if(width<1181){if(route===''){await page.locator('#hamb').click();assert.equal(await page.locator('#site-menu').isVisible(),true);await page.locator('#hamb').click();}else{await page.locator('details.menu summary').focus();await page.keyboard.press('Enter');assert.equal(await page.locator('details.menu[open] .public-links').isVisible(),true);await page.keyboard.press('Enter');}}
+   if((width===1440||width===390)&&['catalog.html','dich-vu/','du-an/'].includes(route)){fs.mkdirSync('screenshots',{recursive:true});await page.screenshot({path:'screenshots/public-shell-'+route.replaceAll('/','-').replace('.html','')+'-'+width+'.png'});}
+  }
+  const fallback=await browser.newContext({viewport:{width:390,height:844},javaScriptEnabled:false});await fallback.route('**/*',r=>r.request().url().startsWith(base)&&!r.request().url().endsWith('.woff2')?r.continue():r.abort());const p=await fallback.newPage();await p.goto(base+'dich-vu/');assert.equal(await p.locator('h1').isVisible(),true);await p.locator('details.menu summary').click();assert.equal(await p.locator('details.menu[open] nav').isVisible(),true);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+  assert.deepEqual(errors,[]);console.log('Public shell PASS: same header/brand alignment, Vietnamese heading fonts rendered from local WOFF2, 8 routes at 1440/1024/390/320 px, keyboard menus, no-JS/font failure fallback and no overflow. No production writes.');
+ }finally{if(browser)await browser.close();await new Promise(resolve=>server.close(resolve));}
+})().catch(e=>{console.error(e);process.exitCode=1;});
