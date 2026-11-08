@@ -1,3 +1,30 @@
+# Hiện trạng cập nhật — 08/11/2026
+
+Thương hiệu **ATELIER HOME**, canonical **https://infiniti-money.github.io/Web-Design/**. Giữ Admin/Supabase, URL cũ và metadata/hình ảnh nguồn cũ. Các ghi chú ngày 04/11 phía dưới là lịch sử, không phải tình trạng phát hành hiện tại.
+
+## Kết quả đợt Catalog và kiểm toán
+
+- Bản dựng từ API công khai có 1 mục Catalog; 0 mục được xác nhận nội dung/quyền ảnh. Có trang HTML riêng theo ID ổn định và trang danh mục; các trang mới noindex, không vào sitemap, không xuất ảnh chưa xác nhận. Không biến dữ liệu mẫu thành hàng hóa/công trình thật.
+- Bốn bài hướng dẫn gốc đã có trong nguồn. Bài mới về đối chiếu hồ sơ vật liệu không dùng ảnh hay tuyên bố kỹ thuật/giá không có nguồn. Trang dịch vụ, bài viết CMS đã duyệt, schema, canonical, OG và sitemap tiếp tục dùng bộ dựng hiện có.
+- Kiểm toán artifact công khai trước phát hành: 30 trang HTML, không có P1 về trạng thái URL, liên kết/neo, canonical, metadata hoặc index/noindex. Private Admin/tài khoản phải noindex; không ép metadata quảng bá cho màn hình riêng tư. JSON-LD được kiểm tra cú pháp, chưa phải kết quả Rich Results Test của Google.
+- 127 kiểm thử Node: 126 đạt, 1 gửi lead thật chủ động bỏ qua; 2 kiểm thử an toàn PC đạt. Catalog mới đọc được không JavaScript, kiểm tra bàn phím và 320/390/1440 px; Catalog công khai động và quản trị cũ qua kiểm thử fixture.
+- Workflow Public SEO audit chạy GET-only hàng ngày và sau deploy không theo lịch; không đăng nhập, không gửi biểu mẫu, tin nhắn hoặc tạo giao dịch thật. Lỗi P1 làm job thất bại; báo cáo JSON giữ 14 ngày trong Actions. Cùng job đo Lighthouse mobile trang chủ (một mẫu lab) và lưu HTML/JSON; không dùng số đo đơn lẻ làm cam kết tốc độ hoặc CWV. Chưa tích hợp cảnh báo qua kênh bên ngoài.
+
+## Danh sách ưu tiên đang mở
+
+| Mức | Việc | Điều kiện xử lý |
+| --- | --- | --- |
+| P1 nội dung | Xác minh thông tin doanh nghiệp, liên hệ và vùng phục vụ | Chủ website cung cấp; chưa gắn tên pháp lý/địa phương giả vào schema |
+| P1 nội dung | Công trình thật và quyền sử dụng ảnh | Chủ website đã hẹn gửi hồ sơ; giữ dự án mẫu ngoài sitemap |
+| P1 nghiệm thu | Vai trò nhân sự thật, UAT nâng cấp PC và ký mã | Các kiểm thử fixture/build không thay thế UAT người dùng thật |
+| P2 | robots.txt ở gốc hostname | Kiểm tra online khi phát hành; file trong /Web-Design/ không quản lý gốc infiniti-money.github.io. Không chặn triển khai vì 404 ở gốc |
+| P2 | Search Console, coverage và CWV thực địa | Cần quyền chủ sở hữu; chưa tuyên bố Google đã index hay đạt CWV |
+| P2 | Theo dõi LCP và tài nguyên ngoài | Báo cáo số đo thực trong PERFORMANCE_BASELINE.md; không cam kết dưới 3 giây cho mọi mạng |
+
+Chi tiết vận hành: [duyệt Catalog](content/CATALOG_PUBLISHING.md), [cụm nội dung](SEO_CONTENT_PLAN.md), [lộ trình](WEBSITE_ROADMAP.md). Trạng thái triển khai và kiểm toán online được ghi ở phần xác minh phát hành sau khi Actions hoàn tất.
+
+---
+
 # Kiểm toán nền tảng website — 04/11/2026
 
 Repo được kiểm tra: [infiniti-money/Web-Design](https://github.com/infiniti-money/Web-Design), nhánh `main` tại thời điểm clone. Báo cáo phân biệt dữ kiện trong mã nguồn với thông tin cần chủ website xác nhận.

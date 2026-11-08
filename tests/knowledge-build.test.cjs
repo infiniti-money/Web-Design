@@ -3,7 +3,7 @@ const {buildPages}=require("../scripts/build-pages.cjs"),{markdown,fetchPublicPo
 const root=path.resolve(__dirname,".."),temp=()=>fs.mkdtempSync(path.join(os.tmpdir(),"atelier-knowledge-"));
 const post=(overrides={})=>({slug:"bai-da-duyet",title:"Nội dung đã duyệt",excerpt:"Mô tả bài đã xuất bản để kiểm tra trang HTML công khai.",category:"Hướng dẫn",body_markdown:"## Nội dung gốc\n\n"+"Thông tin đã duyệt. ".repeat(30),status:"published",published_at:"2026-01-01T00:00:00Z",updated_at:"2026-01-02T00:00:00Z",...overrides});
 test("Published knowledge has server-rendered content, canonical schema and sitemap without JavaScript",()=>{
-  const output=temp(),result=buildPages({output,cmsPosts:[post()]});assert.equal(result.knowledge.articles,4);
+  const output=temp(),result=buildPages({output,cmsPosts:[post()]});assert.equal(result.knowledge.articles,5);
   const html=fs.readFileSync(path.join(output,"kien-thuc/bai-da-duyet/index.html"),"utf8"),index=fs.readFileSync(path.join(output,"kien-thuc.html"),"utf8"),sitemap=fs.readFileSync(path.join(output,"sitemap.xml"),"utf8");
   assert.match(html,/Thông tin đã duyệt/);assert.match(html,/"@type":"Article"/);assert.match(html,/"@type":"BreadcrumbList"/);assert.match(html,/rel="canonical" href="https:\/\/infiniti-money.github.io\/Web-Design\/kien-thuc\/bai-da-duyet\/"/);
   assert.doesNotMatch(html,/noindex|script src=/);assert.match(index,/bai-da-duyet\//);assert.match(sitemap,/kien-thuc\/bai-da-duyet\//);assert.equal((html.match(/<h1>/g)||[]).length,1);

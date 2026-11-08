@@ -1,4 +1,12 @@
-# Lộ trình website chuyên nghiệp ATELIER HOME
+### Cập nhật thực hiện — 08/11/2026
+
+Đợt v1.25 tiếp tục chặng 2/3/6: Catalog có HTML tĩnh theo ID, giữ URL cũ và dữ liệu Admin; thêm bài gốc đối chiếu hồ sơ vật liệu; bổ sung kiểm toán SEO GET-only theo lịch và sau deploy. Không index nội dung chưa xác minh, không xuất ảnh chưa xác nhận. Kiểm tra trước phát hành: 126/127 Node đạt (1 gửi thật bỏ qua), 2 bài an toàn PC đạt, Catalog không JavaScript/bàn phím/mobile và Catalog cũ đạt. Chờ xác minh Actions/URL online ở phần cập nhật phát hành.
+
+Các ghi chú phía dưới phản ánh từng thời điểm. Cổng backup/quote-history từng còn mở ở v1.24 đã được xử lý trong đợt payOS sau đó: có sao lưu độc lập, thử phục hồi cách ly, bảo vệ lịch sử báo giá; thu đại trà đã được chủ website yêu cầu và kích hoạt sau thử 10.000 đồng cùng xác nhận ngân hàng. Xem PAYOS_GENERAL_RELEASE.md để đối chiếu bằng chứng, không coi những việc này là thay đổi trong đợt Catalog.
+
+Còn mở: dữ liệu pháp lý/liên hệ/vùng phục vụ, công trình và quyền ảnh thật; nghiệm thu tài khoản/PC thực; Search Console và CWV thực địa. Thứ tự tiếp theo là duyệt nội dung thật → xuất bản công trình/catalog đủ hồ sơ → UAT nhân sự/PC → theo dõi chuyển đổi/CWV. Không đánh dấu hoàn tất toàn bộ sáu chặng.
+
+ Lộ trình website chuyên nghiệp ATELIER HOME
 
 Ngày lập: 05/11/2026. Giữ GitHub Pages, thương hiệu ATELIER HOME, Supabase và tài khoản hiện tại. Thời lượng dưới đây là ước lượng công việc, không phải cam kết lịch khi thiếu dữ liệu/nghiệm thu.
 

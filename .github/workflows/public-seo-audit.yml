@@ -1,0 +1,35 @@
+name: Public SEO audit
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '35 0 * * *'
+  workflow_run:
+    workflows: [Deploy ATELIER HOME to GitHub Pages]
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'schedule')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit published HTML, index policy and links (GET only)
+        run: node scripts/audit-public.cjs
+      - name: Measure homepage Lighthouse lab performance
+        if: always()
+        run: |
+          mkdir -p dist/audits
+          npm install --prefix "$RUNNER_TEMP/atelier-lighthouse" --no-package-lock --no-save lighthouse@13.6.0
+          node "$RUNNER_TEMP/atelier-lighthouse/node_modules/lighthouse/cli/index.js" https://infiniti-money.github.io/Web-Design/ --quiet --chrome-flags="--headless=new --no-sandbox --disable-gpu" --only-categories=performance,accessibility,best-practices,seo --output=json --output=html --output-path=dist/audits/home-mobile
+      - name: Save audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-seo-audit
+          path: dist/audits/
+          retention-days: 14

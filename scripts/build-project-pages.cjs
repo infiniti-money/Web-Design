@@ -75,10 +75,10 @@ function navigation(prefix) {
   return `<a href="${prefix}index.html#about">Về chúng tôi</a><a href="${prefix}du-an/">Dự án</a><a href="${prefix}dich-vu/">Dịch vụ</a><a href="${prefix}catalog.html">Catalog</a><a href="${prefix}index.html#contact">Liên hệ</a>`;
 }
 
-function renderPage({ site, title, description, route, prefix, image, schema, noindex = false, content }) {
+function renderPage({ site, title, description, route, prefix, image, schema, noindex = false, content, generatedMarker = marker }) {
   const url = new URL(route, site.baseUrl).href;
   const socialImage = image ? absoluteImage(image.src, site.baseUrl) : new URL("assets/og-card.png", site.baseUrl).href;
-  return `${marker}
+  return `${generatedMarker}
 <!doctype html>
 <html lang="vi"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#1e2c27">
@@ -186,4 +186,4 @@ if (require.main === module) {
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }
 
-module.exports = { buildProjectPages, validateProjects };
+module.exports = { buildProjectPages, validateProjects, renderPage };

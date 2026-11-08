@@ -1,3 +1,19 @@
+# Đo cập nhật — 08/11/2026
+
+Ba lần đo liên tiếp trên trang chủ online revision `0706a8adbce5e9f69bd16795b6c70122e1372079`, trước đợt Catalog v1.25. Lighthouse 13.6.0, Microsoft Edge/Chromium 157 headless trên Windows, mobile mặc định (throttling mô phỏng). Dùng profile kiểm thử riêng, không đăng nhập. Trang chủ không được sửa trong đợt Catalog; các số này là phép đo lại, không phải bằng chứng cải thiện nhờ thay đổi lần này.
+
+| Lần | Performance | Accessibility | Best practices | SEO | FCP | LCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | 95 | 100 | 100 | 100 | 1,46 s | 2,93 s | 39 ms | 0 |
+| 2 | 95 | 100 | 100 | 100 | 1,06 s | 2,26 s | 225 ms | 0 |
+| 3 | 98 | 100 | 100 | 100 | 1,08 s | 2,26 s | 59 ms | 0,00075 |
+
+Trung vị LCP 2,265 giây, Performance 95. Chưa có số CWV thực địa, INP từ người dùng thật hoặc Search Console. Không cam kết mọi mạng dưới 3 giây; TBT và tốc độ tài nguyên ngoài còn dao động. Báo cáo HTML/JSON local: `dist/audits/home-2026-11-08-{1,2,3}.report.*`. Điểm tổng hợp không thay thế nghiệm thu bàn phím, người dùng có nhu cầu truy cập đặc biệt hoặc kiểm chứng dữ liệu doanh nghiệp.
+
+Workflow Public SEO audit mới đo lại Lighthouse mobile trang chủ hàng ngày và sau triển khai không theo lịch, giữ báo cáo 14 ngày. Mỗi lần CI là một mẫu lab để theo dõi xu hướng; không đặt chốt tốc độ tuyệt đối theo một mẫu. Các bản ghi bên dưới là lịch sử.
+
+---
+
 # Đo kiểm ban đầu — 05/11/2026
 
 Nguồn giao diện online: `4f3c9e4aeab4c0bcb40edbf2deed232f217f1c92`. Lighthouse 13.6.0, chạy CLI trên máy hiện tại bằng Chromium/Cốc Cốc, cấu hình mobile mặc định. Mỗi URL đo một lần; số đo phụ thuộc máy, mạng và tài nguyên ngoài. Không phải dữ liệu CWV thực địa hay bảo đảm thứ hạng Google.

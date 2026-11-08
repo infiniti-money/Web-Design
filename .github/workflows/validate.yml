@@ -101,6 +101,8 @@ jobs:
         env:
           SITE_URL: http://127.0.0.1:4173/
         run: node tests/catalog-browser-smoke.cjs
+      - name: Verify standalone catalog HTML without JavaScript at desktop and mobile sizes
+        run: node tests/catalog-static-browser.cjs
       - name: Verify delivery admin/manager/employee and synthetic create
         env:
           SITE_URL: http://127.0.0.1:4173/
