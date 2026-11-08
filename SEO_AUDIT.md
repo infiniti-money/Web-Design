@@ -6,8 +6,8 @@ Thương hiệu **ATELIER HOME**, canonical **https://infiniti-money.github.io/W
 
 - Bản dựng từ API công khai có 1 mục Catalog; 0 mục được xác nhận nội dung/quyền ảnh. Có trang HTML riêng theo ID ổn định và trang danh mục; các trang mới noindex, không vào sitemap, không xuất ảnh chưa xác nhận. Không biến dữ liệu mẫu thành hàng hóa/công trình thật.
 - Bốn bài hướng dẫn gốc đã có trong nguồn. Bài mới về đối chiếu hồ sơ vật liệu không dùng ảnh hay tuyên bố kỹ thuật/giá không có nguồn. Trang dịch vụ, bài viết CMS đã duyệt, schema, canonical, OG và sitemap tiếp tục dùng bộ dựng hiện có.
-- Kiểm toán artifact công khai trước phát hành: 30 trang HTML, không có P1 về trạng thái URL, liên kết/neo, canonical, metadata hoặc index/noindex. Private Admin/tài khoản phải noindex; không ép metadata quảng bá cho màn hình riêng tư. JSON-LD được kiểm tra cú pháp, chưa phải kết quả Rich Results Test của Google.
-- 127 kiểm thử Node: 126 đạt, 1 gửi lead thật chủ động bỏ qua; 2 kiểm thử an toàn PC đạt. Catalog mới đọc được không JavaScript, kiểm tra bàn phím và 320/390/1440 px; Catalog công khai động và quản trị cũ qua kiểm thử fixture.
+- Kiểm toán artifact công khai trước phát hành: 31 trang HTML, không có P1 về trạng thái URL, liên kết/neo, canonical, metadata hoặc index/noindex. Private Admin/tài khoản phải noindex; không ép metadata quảng bá cho màn hình riêng tư. JSON-LD được kiểm tra cú pháp, chưa phải kết quả Rich Results Test của Google.
+- 128 kiểm thử Node: 127 đạt, 1 gửi lead thật chủ động bỏ qua; 2 kiểm thử an toàn PC đạt. Catalog mới đọc được không JavaScript, kiểm tra bàn phím và 320/390/1440 px; Catalog công khai động và quản trị cũ qua kiểm thử fixture.
 - Workflow Public SEO audit chạy GET-only hàng ngày và sau deploy không theo lịch; không đăng nhập, không gửi biểu mẫu, tin nhắn hoặc tạo giao dịch thật. Lỗi P1 làm job thất bại; báo cáo JSON giữ 14 ngày trong Actions. Cùng job đo Lighthouse mobile trang chủ (một mẫu lab) và lưu HTML/JSON; không dùng số đo đơn lẻ làm cam kết tốc độ hoặc CWV. Chưa tích hợp cảnh báo qua kênh bên ngoài.
 
 ## Danh sách ưu tiên đang mở
@@ -89,3 +89,13 @@ Browser smoke trên bản local đã đạt sau khi đồng bộ cách kiểm tr
 - Chủ website sẽ gửi hồ sơ công trình thật và ảnh được phép đăng; có thể đưa vào mẫu `content/project.template.json` khi có dữ liệu.
 - Khu vực nhận dự án, thông tin pháp lý/liên hệ và mức chi tiết địa điểm nào được phép công khai.
 - Quyền truy cập Search Console/Analytics (nếu đã thiết lập). Repo không cho biết trạng thái xác minh hoặc dữ liệu hiệu suất tìm kiếm.
+
+## Xác minh phát hành v1.25 — 08/11/2026
+
+Website online đối chiếu `release.json` đúng revision `044282a2390563185bfa75107653a3dadf5b1442`. [Validate/SQL cách ly/Playwright](https://github.com/infiniti-money/Web-Design/actions/runs/42431723403), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42431723447), [browser sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42431766545) và [SEO/Lighthouse tự động](https://github.com/infiniti-money/Web-Design/actions/runs/42431766564) đều thành công. Node mới nhất 128 bài: 127 đạt, 1 gửi thật bỏ qua.
+
+Kiểm toán online GET-only: **31 trang HTML, 12 URL trong sitemap, 0 P1, 1 P2**. P2 là robots ở gốc hostname trả HTTP 404; file robots của project trả 200 và trỏ đúng sitemap. Mục Catalog hiện có chưa được chủ website duyệt hồ sơ: giữ noindex, không xuất ảnh và không vào sitemap. Bài hướng dẫn vật liệu mới đã xuất HTML và có trong sitemap. Không có thay đổi database, tài khoản, hình ảnh nguồn cũ hoặc giao dịch thật trong đợt này.
+
+Đã mở trên trình duyệt độc lập online ở 390 px khi tắt JavaScript: Catalog → chi tiết, menu bằng bàn phím và bài hướng dẫn đều đạt, không tràn ngang. Local còn kiểm tra 320/1440 px và URL cũ/bộ lọc/quản trị bằng fixture. Báo cáo JSON local: `dist/audits/public-seo-live-2026-11-08.json`; ảnh kiểm tra local: `screenshots/catalog-live-mobile.png`. Đây không phải nghiệm thu nội dung doanh nghiệp hay kiểm chứng quyền ảnh.
+
+Gói [web v1.25.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.25.0) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42431918553) thành công. Tải lại ZIP nguồn và đối chiếu SHA-256 với SHA256SUMS.txt đạt: `d073fa12391c445ea64e3d9aebe6bb7bab2e498607684467a96c0775e0591b95` (716773 byte). Tag giữ nguồn revision trên; bản cập nhật tài liệu sau đó không đổi gói hoặc giao diện.

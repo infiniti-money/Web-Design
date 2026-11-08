@@ -1,6 +1,6 @@
 ### Cập nhật thực hiện — 08/11/2026
 
-Đợt v1.25 tiếp tục chặng 2/3/6: Catalog có HTML tĩnh theo ID, giữ URL cũ và dữ liệu Admin; thêm bài gốc đối chiếu hồ sơ vật liệu; bổ sung kiểm toán SEO GET-only theo lịch và sau deploy. Không index nội dung chưa xác minh, không xuất ảnh chưa xác nhận. Kiểm tra trước phát hành: 126/127 Node đạt (1 gửi thật bỏ qua), 2 bài an toàn PC đạt, Catalog không JavaScript/bàn phím/mobile và Catalog cũ đạt. Chờ xác minh Actions/URL online ở phần cập nhật phát hành.
+Đợt v1.25 tiếp tục chặng 2/3/6: Catalog có HTML tĩnh theo ID, giữ URL cũ và dữ liệu Admin; thêm bài gốc đối chiếu hồ sơ vật liệu; bổ sung kiểm toán SEO GET-only theo lịch và sau deploy. Không index nội dung chưa xác minh, không xuất ảnh chưa xác nhận. Kiểm tra trước phát hành: 127/128 Node đạt (1 gửi thật bỏ qua), 2 bài an toàn PC đạt, Catalog không JavaScript/bàn phím/mobile và Catalog cũ đạt. Chờ xác minh Actions/URL online ở phần cập nhật phát hành.
 
 Các ghi chú phía dưới phản ánh từng thời điểm. Cổng backup/quote-history từng còn mở ở v1.24 đã được xử lý trong đợt payOS sau đó: có sao lưu độc lập, thử phục hồi cách ly, bảo vệ lịch sử báo giá; thu đại trà đã được chủ website yêu cầu và kích hoạt sau thử 10.000 đồng cùng xác nhận ngân hàng. Xem PAYOS_GENERAL_RELEASE.md để đối chiếu bằng chứng, không coi những việc này là thay đổi trong đợt Catalog.
 
@@ -96,3 +96,9 @@ Mỗi đợt có ghi chú phạm vi, kiểm thử, URL đang chạy và giới h
 - Công việc: sau khi đổi tiến độ, đọc lại `status` theo RLS trước khi báo thành công, tránh PostgREST UPDATE 0 hàng không lỗi; yêu cầu xác nhận khi mở lại việc đã hoàn thành. Bảng/đếm lỗi không được coi là dữ liệu hợp lệ.
 - CMS: thêm bộ kiểm tra trước xuất bản, lối tắt bài chờ duyệt, xác nhận xuất bản, đổi liên kết kiểm tra HTML sang đường dẫn thật `kien-thuc/<slug>/`. Bài hẹn giờ/chưa triển khai chưa được tuyên bố đã hiện trên Pages.
 - Không tăng quyền dữ liệu, không thay schema/RLS, không xuất bản bài mới hoặc thao tác khách hàng thật từ CI. Kiểm thử trình duyệt dùng fixture Supabase trong bộ nhớ; UAT tài khoản thật vẫn cần nghiệm thu riêng.
+
+## Nghiệm thu đợt v1.25
+
+Đã triển khai và đối chiếu revision `044282a2390563185bfa75107653a3dadf5b1442`. Validate, PostgreSQL cách ly, Pages, browser sau triển khai và SEO/Lighthouse đều thành công. Báo cáo online 31 trang: 0 P1, 1 P2 robots gốc. [Bằng chứng và việc còn mở](SEO_AUDIT.md). Catalog và bài vật liệu đọc được không JavaScript; không sửa DB hoặc tạo dữ liệu/giao dịch doanh nghiệp thật. Các đầu vào còn thiếu phía trên tiếp tục để mở.
+
+Gói [web v1.25.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.25.0) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42431918553) thành công. Tải lại ZIP nguồn và đối chiếu SHA-256 với SHA256SUMS.txt đạt: `d073fa12391c445ea64e3d9aebe6bb7bab2e498607684467a96c0775e0591b95` (716773 byte). Tag giữ nguồn revision trên; bản cập nhật tài liệu sau đó không đổi gói hoặc giao diện.
