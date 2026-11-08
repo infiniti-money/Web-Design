@@ -50,3 +50,11 @@ Phạm vi đợt này: web có thêm `operations.html` (Admin/Quản lý), giao 
 Web triển khai từ `main` qua GitHub Pages và có smoke sau triển khai. Khi cần khôi phục giao diện, revert commit nâng cấp / triển khai lại commit Pages đã kiểm tra; không khôi phục hoặc sửa dữ liệu Supabase. Windows Manager chỉ nhận trang này khi phát hành bản desktop kế tiếp; **không phát hành bộ cài tự động** trong đợt web.
 
 Xem thêm: `WEBSITE_ROADMAP.md`, `QUOTE_VERSION_GUARD_ROLLOUT.md`, `RELEASE_HISTORY.md`.
+
+## Nghiệm thu phát hành v1.25.1 — 08/11/2026
+
+Online release.json khớp `f0db0853c600db7f0071af779e9f6ae1a84881f3`. [Validate trước triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42432751205), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42432751049), [browser sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42432788286) và [SEO/Lighthouse](https://github.com/infiniti-money/Web-Design/actions/runs/42432788274) đều thành công. Node: 130 bài, 129 đạt và 1 gửi lead thật bỏ qua; an toàn route PC: 2/2 đạt.
+
+Kiểm tra lại operations-browser-smoke.cjs trực tiếp trên Pages cũng đạt toàn bộ tình huống vai trò, thu hồi quyền, timeout/thử lại, logout/phản hồi muộn và offline/online. Dữ liệu Auth/count chỉ là fixture trong bộ nhớ, không xác nhận UAT bằng tài khoản thật. CMS/báo giá, tư vấn, công trình và Catalog đều qua kiểm tra fixture; không ghi dữ liệu production hoặc phát hành bộ cài PC trong đợt này.
+
+Gói [web v1.25.1](https://github.com/infiniti-money/Web-Design/releases/tag/v1.25.1) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42432940589) thành công. Đã tải lại ZIP và xác minh SHA-256 với SHA256SUMS.txt: `525ff5bb709ffa673a5c3b68e7348a9e4ad59e7bb5dd5593aeec606c07ec04bf` (721987 byte). Cập nhật tài liệu sau tag không sửa giao diện hoặc gói đã phát hành.

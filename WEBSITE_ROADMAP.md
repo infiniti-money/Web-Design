@@ -106,3 +106,11 @@ Gói [web v1.25.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.
 ## Đợt vận hành v1.25.1 — 08/11/2026
 
 Đối chiếu các mục chặng 4/5 và CRM/Catalog/CMS: phần nền đã có, đợt này xử lý thêm số liệu vận hành cũ và thay đổi quyền trong lúc tải. Xóa snapshot khi refresh/logout/offline, giới hạn 15 giây, kiểm tra lại cùng tài khoản/vai trò active sau khi đọc; hủy/loại phản hồi cũ. Không sửa schema/RLS hoặc tạo dữ liệu doanh nghiệp. [Ma trận đối chiếu, cách vận hành và giới hạn UAT](OPERATIONS_RUNBOOK.md). Bằng chứng online được bổ sung sau khi triển khai và Actions hoàn tất.
+
+## Nghiệm thu phát hành v1.25.1 — 08/11/2026
+
+Online release.json khớp `f0db0853c600db7f0071af779e9f6ae1a84881f3`. [Validate trước triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42432751205), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42432751049), [browser sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42432788286) và [SEO/Lighthouse](https://github.com/infiniti-money/Web-Design/actions/runs/42432788274) đều thành công. Node: 130 bài, 129 đạt và 1 gửi lead thật bỏ qua; an toàn route PC: 2/2 đạt.
+
+Kiểm tra lại operations-browser-smoke.cjs trực tiếp trên Pages cũng đạt toàn bộ tình huống vai trò, thu hồi quyền, timeout/thử lại, logout/phản hồi muộn và offline/online. Dữ liệu Auth/count chỉ là fixture trong bộ nhớ, không xác nhận UAT bằng tài khoản thật. CMS/báo giá, tư vấn, công trình và Catalog đều qua kiểm tra fixture; không ghi dữ liệu production hoặc phát hành bộ cài PC trong đợt này.
+
+Gói [web v1.25.1](https://github.com/infiniti-money/Web-Design/releases/tag/v1.25.1) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42432940589) thành công. Đã tải lại ZIP và xác minh SHA-256 với SHA256SUMS.txt: `525ff5bb709ffa673a5c3b68e7348a9e4ad59e7bb5dd5593aeec606c07ec04bf` (721987 byte). Cập nhật tài liệu sau tag không sửa giao diện hoặc gói đã phát hành.
