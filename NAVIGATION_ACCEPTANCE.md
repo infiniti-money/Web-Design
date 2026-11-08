@@ -16,3 +16,11 @@ Chuyển stylesheet phông và biểu mẫu sang media=all; script tương thíc
 ## Phạm vi
 
 Đây là sửa tải phông và chuyển trang website công khai. Trình duyệt không hỗ trợ native transition dùng điều hướng bình thường; trình duyệt có thể bỏ snapshot khi tải quá lâu. Không cam kết mọi thiết bị/mạng hết mọi nhấp nháy. Không sửa dữ liệu, RLS, khóa API hay ứng dụng PC. Kiểm tra bản Pages và CI ghi bổ sung sau triển khai.
+
+## Bản Pages đã kiểm tra
+
+Revision 212978d432e49d7496e321b5d5a40889453828cd phục vụ từ release.json. Kiểm tra trực tiếp ở 1440px/390px và reduced motion: ảnh hero bị giữ nhưng phông đã sẵn sàng, H1 ổn định; liên kết năm mục và Back/Forward hiện nội dung đúng. Có snapshot native trên desktop/mobile; browser có thể bỏ một snapshot khi chuyển tiếp nhanh. Reduced motion không tạo snapshot ở cả năm lần nhấp.
+
+Ba lượt Lighthouse riêng trên Pages: Performance 97/98/98, LCP 2.525/2.241/2.243 giây, CLS 0 ở cả ba. Đây là phép đo phòng thử nghiệm, không phải số liệu CWV người dùng thật. Báo cáo cục bộ dist/audits/home-v1-28-1-2026-11-08-{1,2,3}.report.json/html.
+
+CI đầu phát hiện fixture giữ nhiều request ảnh nhưng chỉ giải phóng request cuối (khác biệt srcset giữa Chromium/Edge). Đã sửa fixture giải phóng toàn bộ request giữ; không đổi mã sản phẩm để vượt kiểm thử. Bài kiểm tra yêu cầu ít nhất một snapshot native thay vì giả định browser bắt buộc dùng snapshot trong mọi lần nhấp.
