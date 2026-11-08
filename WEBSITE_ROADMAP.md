@@ -164,3 +164,7 @@ Kiểm tra trực tiếp Catalog, dịch vụ và dự án ở 1440/390 px: glyp
 Kiểm toán online 31 trang, 12 URL sitemap: 0 P1, 1 P2 robots gốc. Ba mẫu Lighthouse mobile trang chủ LCP 2,406 / 2,238 / 2,250 giây, CLS 0; [chi tiết hiệu suất](PERFORMANCE_BASELINE.md). Không suy diễn thành CWV thực địa hay bảo đảm tốc độ trên mọi mạng.
 
 Gói [web v1.28.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.28.0) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42453199615) thành công. ZIP tải lại khớp SHA-256: `7d90e1d4e792e86b6da0f751484a2c856aa5eb4e245d8a175accf64e86798c7a` (984037 byte). Tài liệu sau tag không thay đổi giao diện hoặc gói đã phát hành.
+
+### 08/11/2026 — Sửa chuyển trang nhấp nháy (v1.28.1)
+
+Loại bỏ phụ thuộc phông trang chủ vào ảnh hero; CSS tư vấn tải cùng trang; preload phông chính, mốc render và native transition không hiệu ứng, hỗ trợ reduced motion. Kiểm thử điều hướng/ảnh chậm/mobile/history bổ sung vào CI. Bằng chứng tại NAVIGATION_ACCEPTANCE.md; không thay backend hay dữ liệu.

@@ -9,5 +9,6 @@ function publicHeader(prefix,{active='',legacy=''}={}){
  const links=Object.entries(labels).map(([key,label])=>'<a href="'+esc(hrefs[key])+'"'+(active===key?' aria-current="page"':'')+'>'+label+'</a>').join('');
  return '<header class="site-header public-header"><div class="wrap public-header-inner"><a class="brand public-brand" href="'+esc(anchors[0]?.[1]||hrefs.home)+'" aria-label="ATELIER HOME INTERIORS">ATELIER<small>HOME INTERIORS</small></a><details class="menu public-menu"><summary>Menu</summary><nav class="nav public-links" aria-label="Điều hướng chính">'+links+'</nav></details><nav class="nav public-links public-desktop-nav" aria-label="Điều hướng chính">'+links+'</nav><a class="button header-cta public-header-cta" href="'+esc(cta)+'">Đặt lịch tư vấn ↗</a></div></header>';
 }
-function fontLinks(prefix){return '<link rel="stylesheet" href="'+prefix+'assets/public-fonts.css"><link rel="stylesheet" href="'+prefix+'assets/public-shell.css">';}
-module.exports={publicHeader,fontLinks};
+function fontPreloads(prefix){return ['be-vietnam-pro-400-latin.woff2','be-vietnam-pro-400-vietnamese.woff2','playfair-display-400-600-latin.woff2','playfair-display-400-600-vietnamese.woff2'].map(file=>'<link rel="preload" as="font" type="font/woff2" crossorigin href="'+prefix+'assets/fonts/'+file+'">').join('');}
+function fontLinks(prefix){return fontPreloads(prefix)+'<link rel="expect" href="#public-ready" blocking="render"><link rel="stylesheet" href="'+prefix+'assets/public-fonts.css"><link rel="stylesheet" href="'+prefix+'assets/public-shell.css">';}
+module.exports={publicHeader,fontLinks,fontPreloads};

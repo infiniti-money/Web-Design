@@ -5,3 +5,6 @@
 .public-menu[open] .public-links{max-height:calc(100svh - 100px);overflow-y:auto}@media(max-width:620px){.hero-content{width:calc(100% - 36px)}}
 
 .public-header .public-header-cta{color:#fff}.public-page .hero h1{text-wrap:balance}
+
+/* Keep the previous document until the destination is ready; no fade/zoom. */
+html{scrollbar-gutter:stable;background:#f7f5f0}@view-transition{navigation:auto}::view-transition-group(root){animation-duration:0s}::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}::view-transition-old(root){display:none}@media(prefers-reduced-motion:reduce){@view-transition{navigation:none}}

@@ -105,6 +105,8 @@ jobs:
         run: node tests/turnkey-browser.cjs
       - name: Verify shared public layout and actual Vietnamese glyph fonts at mobile/tablet/desktop sizes
         run: node tests/public-shell-browser.cjs
+      - name: Verify navigation, slow-image font startup and reduced-motion fallback
+        run: node tests/navigation-browser.cjs
       - name: Verify opt-in Gemini advice, quotas and human fallback with fixtures
         env:
           SITE_URL: http://127.0.0.1:4173/

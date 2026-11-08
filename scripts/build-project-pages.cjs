@@ -98,7 +98,7 @@ function renderPage({ site, title, description, route, prefix, image, schema, no
 <link rel="stylesheet" href="${prefix}assets/service-pages.css"><link rel="stylesheet" href="${prefix}assets/project-pages.css">
 ${fontLinks(prefix)}</head><body class="public-page"><a class="skip" href="#main">Bỏ qua điều hướng</a>
 ${publicHeader(prefix,{active:route.startsWith("catalog")?"catalog":"projects"})}
-${content}
+${content.replace(/<\/h1>/,"</h1><span id=\"public-ready\" hidden></span>")}
 <footer class="footer"><div class="wrap footer-inner"><p><strong>${escapeHtml(site.name)}</strong><br>Thiết kế nội thất · Thi công · Tư vấn trang trí</p><nav class="footer-links" aria-label="Liên kết cuối trang"><a href="${prefix}index.html">Trang chủ</a><a href="${prefix}dich-vu/">Dịch vụ</a><a href="${prefix}privacy.html">Quyền riêng tư</a></nav></div></footer></body></html>
 `;
 }
