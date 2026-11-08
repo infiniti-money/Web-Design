@@ -24,3 +24,9 @@ Revision 212978d432e49d7496e321b5d5a40889453828cd phục vụ từ release.json.
 Ba lượt Lighthouse riêng trên Pages: Performance 97/98/98, LCP 2.525/2.241/2.243 giây, CLS 0 ở cả ba. Đây là phép đo phòng thử nghiệm, không phải số liệu CWV người dùng thật. Báo cáo cục bộ dist/audits/home-v1-28-1-2026-11-08-{1,2,3}.report.json/html.
 
 CI đầu phát hiện fixture giữ nhiều request ảnh nhưng chỉ giải phóng request cuối (khác biệt srcset giữa Chromium/Edge). Đã sửa fixture giải phóng toàn bộ request giữ; không đổi mã sản phẩm để vượt kiểm thử. Bài kiểm tra yêu cầu ít nhất một snapshot native thay vì giả định browser bắt buộc dùng snapshot trong mọi lần nhấp.
+
+## CI cuối và nghiệm thu triển khai
+
+Revision cuối ff8d57f459e9521ba6dbebe4a3fc424adce33fc6 đã xác nhận từ Pages release.json. [Validate 42455134138](https://github.com/infiniti-money/Web-Design/actions/runs/42455134138): tất cả job thành công, gồm Chromium navigation regression, toàn bộ UI fixture và SQL cách ly. [Pages 42455134235](https://github.com/infiniti-money/Web-Design/actions/runs/42455134235), [browser smoke 42455170041](https://github.com/infiniti-money/Web-Design/actions/runs/42455170041), [SEO/Lighthouse CI 42455170007](https://github.com/infiniti-money/Web-Design/actions/runs/42455170007) đều thành công. Node 143 đạt/1 lead thật chủ động bỏ qua; desktop security 2 đạt. Không phát sinh yêu cầu AI hay giao dịch thật trong kiểm thử.
+
+[Release v1.28.1](https://github.com/infiniti-money/Web-Design/releases/tag/v1.28.1), workflow 42455308783 thành công. Đã tải ZIP 992139 byte và đối chiếu SHA256 04b1d2339433ef8afa8e62d4f511ddb0aabfa46c06e3189dcf28a55768dbffc1 với digest GitHub: khớp. Không có bộ cài PC mới.

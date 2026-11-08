@@ -80,3 +80,15 @@ Báo cáo local `dist/audits/home-v1-26-2026-11-08-{1,2,3}.report.*`. Kiểm to�
 | 3 | 95 | 100 | 100 | 100 | 1,33 s | 2,250 s | 216 ms | 0 |
 
 Trung vị LCP 2,250 giây, Performance 94. Cả ba mẫu dưới 3 giây; không phải cam kết cho mọi mạng hoặc dữ liệu CWV thực địa. TBT vẫn đáng theo dõi, không khẳng định điểm tổng thể cải thiện so với v1.26. Phông local có Vietnamese subsets và giấy phép; bộ font gồm 183.108 byte, chỉ tải face đang dùng. Trang chủ giữ chiến lược ưu tiên ảnh trước font. Báo cáo local: `dist/audits/home-v1-28-2026-11-08-{1,2,3}.report.*`.
+
+## Chuyển trang và phông v1.28.1 — 08/11/2026
+
+Thay thế chiến lược chờ ảnh trước phông của v1.28: phông và CSS tư vấn tải ngay, preload bốn subset chính. Ba mẫu trên Pages revision 212978d432e49d7496e321b5d5a40889453828cd, Lighthouse 13.6.0/Edge 157, mobile mặc định:
+
+| Lần | Performance | Accessibility | Best practices | SEO | FCP | LCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | 97 | 100 | 100 | 100 | 1,302 s | 2,525 s | 33 ms | 0 |
+| 2 | 98 | 100 | 100 | 100 | 1,356 s | 2,241 s | 78 ms | 0 |
+| 3 | 98 | 100 | 100 | 100 | 1,346 s | 2,243 s | 107 ms | 0 |
+
+Trung vị LCP 2,243 giây, Performance 98; không phải bảo đảm tốc độ mọi thiết bị/mạng hoặc CWV thực địa. Báo cáo local dist/audits/home-v1-28-1-2026-11-08-{1,2,3}.report.*. Revision ff8d57f sau đó chỉ sửa fixture kiểm thử và tài liệu, không đổi mã website.
