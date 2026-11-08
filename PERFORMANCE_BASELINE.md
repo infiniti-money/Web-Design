@@ -54,3 +54,17 @@ Nhóm thử nghiệm agentic-browsing vẫn 50, audit accessibility-tree còn m�
 70 bài Node: 69 đạt, 1 bài gửi lead thật bỏ qua. Home experience kiểm tra font/cached stylesheet/lỗi mạng, ảnh responsive, nhãn, bàn phím, mobile và liên hệ không JavaScript đạt. Browser smoke hiện có cũng đạt; ghi thử CRM/form dùng fixture.
 
 Bằng chứng CI: [triển khai Pages](https://github.com/infiniti-money/Web-Design/actions/runs/41942318389), [kiểm thử sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/41942382336), [gói web v1.20.0](https://github.com/infiniti-money/Web-Design/actions/runs/41942326763) đều thành công. Các cập nhật tài liệu sau đó không thay đổi artifact giao diện.
+
+## Đợt giao diện trọn gói v1.26 — 08/11/2026
+
+Ba lần đo trang chủ online sau khi giao diện mới được triển khai. Mã giao diện `26e687b28e0a8131d920543ea29ad51ac8dc1806`; commit `66a270a87ac63a1807eabf8de24ed80760b2e1ea` tiếp theo chỉ sửa kiểm thử, không sửa giao diện. Lighthouse 13.6.0, Edge 157 headless, mobile mặc định, cùng máy và ba lần liên tiếp.
+
+| Lần | Performance | Accessibility | Best practices | SEO | FCP | LCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | 87 | 100 | 100 | 100 | 1,57 s | 3,26 s | 248 ms | 0 |
+| 2 | 98 | 100 | 100 | 100 | 1,14 s | 2,23 s | 112 ms | 0 |
+| 3 | 96 | 100 | 100 | 100 | 1,16 s | 2,23 s | 188 ms | 0,00077 |
+
+Trung vị LCP 2,227 giây, Performance 96. **Một lần vượt 3 giây**, nên chưa thể coi mục tiêu dưới 3 giây là ổn định. Không suy diễn cải thiện dài hạn so với mẫu trước, không có dữ liệu CWV thực địa/INP. Giữ ảnh hero và metadata cũ; video không có nguồn và không tải lúc vào trang. Giao diện thêm CSS/JS nhỏ, không thêm framework hoặc thư viện animation. Hướng tiếp tục là theo dõi tài nguyên ngoài, cache và chi phí khởi tạo trên các mẫu độc lập, chưa đổi hostname hoặc dữ liệu để chạy theo một lần đo.
+
+Báo cáo local `dist/audits/home-v1-26-2026-11-08-{1,2,3}.report.*`. Kiểm toán online 31 trang: 12 URL trong sitemap, 0 P1, 1 P2 robots gốc. Đây là kiểm toán cấu trúc/cú pháp JSON-LD và liên kết, không phải xác nhận Google index hay Rich Results Test.

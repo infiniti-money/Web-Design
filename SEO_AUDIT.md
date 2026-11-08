@@ -99,3 +99,7 @@ Kiểm toán online GET-only: **31 trang HTML, 12 URL trong sitemap, 0 P1, 1 P2*
 Đã mở trên trình duyệt độc lập online ở 390 px khi tắt JavaScript: Catalog → chi tiết, menu bằng bàn phím và bài hướng dẫn đều đạt, không tràn ngang. Local còn kiểm tra 320/1440 px và URL cũ/bộ lọc/quản trị bằng fixture. Báo cáo JSON local: `dist/audits/public-seo-live-2026-11-08.json`; ảnh kiểm tra local: `screenshots/catalog-live-mobile.png`. Đây không phải nghiệm thu nội dung doanh nghiệp hay kiểm chứng quyền ảnh.
 
 Gói [web v1.25.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.25.0) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42431918553) thành công. Tải lại ZIP nguồn và đối chiếu SHA-256 với SHA256SUMS.txt đạt: `d073fa12391c445ea64e3d9aebe6bb7bab2e498607684467a96c0775e0591b95` (716773 byte). Tag giữ nguồn revision trên; bản cập nhật tài liệu sau đó không đổi gói hoặc giao diện.
+
+## Giao diện trọn gói v1.26 — 08/11/2026
+
+Đã giữ metadata, ảnh và mọi đích/ID cũ, bổ sung CTA/ID cho dự toán và hồ sơ công trình. H1 thay theo thiết kế mới. Kiểm toán online 31 trang, 12 URL sitemap: 0 P1, 1 P2 robots gốc; không thêm LocalBusiness/VideoObject, trang địa phương hoặc công trình thiếu bằng chứng. [Bằng chứng và cấu hình](TURNKEY_ROLLOUT.md).

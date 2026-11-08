@@ -59,3 +59,13 @@ Giữ form tư vấn và tawk.to theo lựa chọn mới. CRM hiện có xuất 
 Node kiểm tra giá chưa duyệt/hết hạn, công thức, biên đầu vào, video/quyền ảnh, portfolio tối đa năm, chi phí công khai, nhật ký và fallback. Playwright trên artifact fixture kiểm tra 320/390/1440 px, chuyển nhu cầu giữ form/consent, không tự POST, không tải video lúc vào trang, slider bằng bàn phím và không JavaScript. Hình thật cũ được xem lại trên preview, không tràn ngang; tiếp tục chạy kiểm thử tư vấn và trang chủ hiện có.
 
 Các bộ kiểm tra này không phải UAT video/công trình/đơn giá thật, không chứng minh xưởng hay chính sách bảo hành. Kết quả CI, triển khai online và số đo Lighthouse được cập nhật sau phát hành; không cam kết tốc độ dưới ba giây trên mọi mạng.
+
+## Xác minh triển khai v1.26 — 08/11/2026
+
+Bản online đối chiếu release.json revision `66a270a87ac63a1807eabf8de24ed80760b2e1ea`. [Validate/SQL cách ly/Playwright](https://github.com/infiniti-money/Web-Design/actions/runs/42434145973), [Pages](https://github.com/infiniti-money/Web-Design/actions/runs/42434146004), [browser sau triển khai](https://github.com/infiniti-money/Web-Design/actions/runs/42434184720) và [SEO/Lighthouse](https://github.com/infiniti-money/Web-Design/actions/runs/42434184663) đều thành công. Node: 135 bài, 134 đạt, 1 gửi thật bỏ qua; an toàn route PC 2/2.
+
+Kiểm tra thêm trực tiếp bản Pages ở 390 px: sáu bước, diện tích 95 m² chuyển vào form, họ tên/điện thoại trống và consent chưa chọn; không POST/không tạo lead thật. Config giá tắt, video không có src, 0 công trình thật. Kiểm toán GET-only 31 trang/12 URL sitemap: 0 P1, 1 P2 robots gốc. Ba mẫu Lighthouse cho LCP 3,26/2,23/2,23 giây, một mẫu vượt 3 giây; [bảng số đo và giới hạn](PERFORMANCE_BASELINE.md).
+
+Không đánh dấu video/công trình/đơn giá thật hoặc gửi Zalo/Email đạt nghiệm thu khi chưa có đầu vào. Bản này là website, không phát hành bộ cài PC mới.
+
+Gói [web v1.26.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.26.0) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42434352733) thành công. ZIP tải lại khớp SHA-256 trong SHA256SUMS.txt: `028894c1ca8d6f64ba93c52917f073adfd93eabcdd032e51dae9fdc2a53f5e5e` (744136 byte). Tài liệu cập nhật sau tag không sửa giao diện/gói đã phát hành.
