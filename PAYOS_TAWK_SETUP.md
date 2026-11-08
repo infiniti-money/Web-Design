@@ -1,5 +1,9 @@
 # payOS và tawk.to — lựa chọn đã chốt 07/11/2026
 
+## Cập nhật 08/11/2026: payOS đã mở thu chính thức
+
+Đã xác minh webhook và pilot chuyển khoản 10.000 VND thực tế; chủ website xác nhận ngân hàng nhận tiền. Theo yêu cầu tiếp theo, đã gỡ giới hạn pilot và mở đặt cọc cho các báo giá đủ điều kiện, chỉ Admin tạo link, không vượt phần còn lại. [Bản phát hành và CI](PAYOS_GENERAL_RELEASE.md). Các ghi chú chưa bật/chưa có backend bên dưới là lịch sử.
+
 ## Cập nhật 08/11/2026: backend đã triển khai, vẫn tắt thu tiền
 
 Sau khi chủ website lưu ba secret, health của Edge Function xác nhận đủ giá trị cấu hình (`credentialsPresent:true`) và thanh toán đang tắt (`paymentsEnabled:false`). Hai endpoint đã triển khai phiên bản 1; POST trả 503 `PAYMENTS_DISABLED`. Chưa xác minh merchant/ngân hàng, đăng ký webhook hoặc tạo link thu tiền. Các đoạn “không có endpoint” bên dưới ghi lại đợt chuẩn bị trước.

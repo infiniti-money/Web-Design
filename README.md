@@ -2,7 +2,7 @@
 
 Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub Pages.
 
-[Chương trình nâng cấp UI/UX, hiệu suất, bảo toàn SEO, đặt cọc và chat nhân viên](UPGRADE_SCOPE_20261107.md): phạm vi website + quản trị/PC, ngày công và tiêu chí nghiệm thu. Chat tawk.to đã bật, chủ website xác nhận mở được. Backend payOS đã triển khai ở chế độ tắt thu tiền; ba secret đã xác nhận hiện diện, chưa xác minh merchant. [Trạng thái tích hợp](PAYOS_TAWK_SETUP.md) · [Backend và điều kiện mở thanh toán](PAYOS_BACKEND_STAGING.md) · [Hướng dẫn sao lưu và thử khôi phục](SUPABASE_BACKUP_RESTORE_GUIDE.md).
+[Chương trình nâng cấp UI/UX, hiệu suất, bảo toàn SEO, đặt cọc và chat nhân viên](UPGRADE_SCOPE_20261107.md): phạm vi website + quản trị/PC, ngày công và tiêu chí nghiệm thu. Chat tawk.to đã bật, chủ website xác nhận mở được. payOS đã qua pilot thực tế và **mở thu đặt cọc cho các báo giá đủ điều kiện**; Admin tạo link trong phần còn lại và xử lý đối soát. [Bản phát hành thu chính thức](PAYOS_GENERAL_RELEASE.md) · [Hướng dẫn đối soát](PAYOS_RECONCILIATION_ADMIN.md) · [Hướng dẫn sao lưu và thử khôi phục](SUPABASE_BACKUP_RESTORE_GUIDE.md).
 
 Bản nâng cấp web: [v1.24.0 — Quản trị công trình tin cậy](RELEASE_NOTES_V1_24_0.md). [Nghiệm thu công trình](PROJECT_ADMIN_ACCEPTANCE.md) · [Nghiệm thu kiến thức](KNOWLEDGE_EXPERIENCE_ACCEPTANCE.md) · [Nghiệm thu Catalog](CATALOG_PUBLIC_ACCEPTANCE.md) · [Nghiệm thu tư vấn](CONSULTATION_ACCEPTANCE.md) · [Kết quả đo và các điểm tiếp tục tối ưu](PERFORMANCE_BASELINE.md).
 

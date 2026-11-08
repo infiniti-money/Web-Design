@@ -1,5 +1,9 @@
 # Backend đặt cọc payOS — chế độ chuẩn bị
 
+## Đã mở thu đại trà — 08/11/2026
+
+Đã bật general availability ở database và runtime sau yêu cầu của chủ website. Health xác minh paymentsEnabled=true, pilotOnly=false. Admin được tạo đặt cọc cho các báo giá accepted theo phần còn lại, giữ khoản pilot đã thu, kiểm tra số dư, Auth/RLS, chữ ký và audit. [Bằng chứng phát hành](PAYOS_GENERAL_RELEASE.md). Các giới hạn pilot hoặc trạng thái tắt bên dưới là lịch sử các đợt trước.
+
 ## Pilot thực tế đã xác nhận — 08/11/2026
 
 Chủ website đã xác minh merchant webhook, tạo yêu cầu 10.000 VND và thực hiện chuyển khoản. Kiểm tra trực tiếp thấy một intent paid và một receipt paid 10.000 VND; chủ website xác nhận “Đã thấy tiền vào” ngân hàng trong chat. [Biên bản và CI](PAYOS_RECONCILIATION_ADMIN.md). Chưa có xác nhận bank_confirmed trong nhật ký app tại thời điểm kiểm tra; không giả lập hoặc tự ghi thay xác nhận của chủ tài khoản. Giữ giới hạn một yêu cầu pilot, chưa mở thu đại trà. Các trạng thái chưa kiểm chứng/tắt thu tiền bên dưới là lịch sử các đợt trước.

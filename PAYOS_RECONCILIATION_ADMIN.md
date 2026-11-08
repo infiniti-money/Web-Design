@@ -1,5 +1,7 @@
 # Thu tiền và đối soát ATELIER HOME — 08/11/2026
 
+**Cập nhật: đã mở thu đại trà theo yêu cầu chủ website.** [Trạng thái phát hành và kiểm chứng](PAYOS_GENERAL_RELEASE.md). Không còn giới hạn một khoản 10.000 VND; vẫn bắt buộc Admin, báo giá accepted, số dư và webhook hợp lệ. Phần pilot bên dưới ghi lại lịch sử kiểm chứng trước khi mở chính thức.
+
 ## Kết quả kiểm chứng thực tế
 
 **Đã đạt kiểm chứng pilot 10.000 VND.** Sau khi chủ website thao tác trên giao diện thật:
