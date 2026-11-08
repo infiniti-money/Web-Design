@@ -142,3 +142,11 @@ AI backend đã triển khai, model Gemini đã kiểm tra trực tiếp HTTP 20
 Trạng thái chốt đợt: **AI_ENABLED=false**. Đang chờ chủ website xác nhận project của khóa Gemini thuộc Free tier/chưa liên kết thanh toán, đúng yêu cầu dùng miễn phí. Chưa nghiệm thu trả lời AI qua Turnstile thật của khách trên production; không coi health/model API thành công là hoàn tất bước này. Tawk.to và form tư vấn tiếp tục hoạt động. Không yêu cầu nạp OpenAI hoặc tự nâng gói Google.
 
 Gói [web v1.27.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.27.0) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42437279176) thành công. ZIP tải lại khớp SHA-256: `5b5a26d3da9b354142acefc97ca40b3c302d0d6a9d319493a35134c1c97f1479` (776894 byte). Cập nhật tài liệu sau tag không sửa gói hoặc giao diện.
+
+## Kích hoạt phục vụ khách — 08/11/2026
+
+Chủ website đã xác nhận project khóa Gemini đang Free tier và chưa liên kết tài khoản thanh toán. Đã đặt **AI_ENABLED=true** trên Supabase; health production HTTP 200 trả enabled=true, provider=gemini, model=gemini-3.5-flash-lite. Đây là trạng thái mới nhất, thay thế việc chờ Free tier ở các ghi chú trước. Không nâng gói Google, không dùng OpenAI, không thay hạn mức 20 lượt/ngày toàn website và 5 lượt/giờ theo mạng.
+
+Kiểm tra live: request thiếu token hợp lệ bị chặn HTTP 403 CAPTCHA_REQUIRED trước khi gọi AI; giao diện Pages ở 390 px mở đúng trạng thái sẵn sàng, opt-in vẫn chưa chọn và nút gửi còn khóa trước xác minh. Không tự POST sang AI, không gọi Gemini trực tiếp từ browser, không ghi lead thật. Ảnh QA local: screenshots/ai-live-enabled-mobile.png.
+
+Luồng đã mở cho khách: trang chủ → Trợ lý AI tư vấn nội thất → chọn nhu cầu → đồng ý riêng → hoàn tất Turnstile → Nhận tư vấn AI. Chưa xác nhận UAT trọn luồng CAPTCHA thật với khách; kiểm tra tự động không giải hoặc bỏ qua CAPTCHA. Câu trả lời model trước đó đã được thử riêng thành công, không được dùng làm bằng chứng đã hoàn tất bước CAPTCHA production.
