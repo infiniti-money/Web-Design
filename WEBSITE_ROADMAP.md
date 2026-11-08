@@ -114,3 +114,7 @@ Online release.json khớp `f0db0853c600db7f0071af779e9f6ae1a84881f3`. [Validate
 Kiểm tra lại operations-browser-smoke.cjs trực tiếp trên Pages cũng đạt toàn bộ tình huống vai trò, thu hồi quyền, timeout/thử lại, logout/phản hồi muộn và offline/online. Dữ liệu Auth/count chỉ là fixture trong bộ nhớ, không xác nhận UAT bằng tài khoản thật. CMS/báo giá, tư vấn, công trình và Catalog đều qua kiểm tra fixture; không ghi dữ liệu production hoặc phát hành bộ cài PC trong đợt này.
 
 Gói [web v1.25.1](https://github.com/infiniti-money/Web-Design/releases/tag/v1.25.1) đã phát hành; [workflow đóng gói](https://github.com/infiniti-money/Web-Design/actions/runs/42432940589) thành công. Đã tải lại ZIP và xác minh SHA-256 với SHA256SUMS.txt: `525ff5bb709ffa673a5c3b68e7348a9e4ad59e7bb5dd5593aeec606c07ec04bf` (721987 byte). Cập nhật tài liệu sau tag không sửa giao diện hoặc gói đã phát hành.
+
+## Đợt chuyển đổi trọn gói v1.26 — 08/11/2026
+
+Theo yêu cầu bố cục hero/portfolio/quy trình sáu bước và dự toán, bổ sung trang chủ cùng mẫu hồ sơ chuyên sâu có vật liệu, nhật ký và đối chiếu ảnh. Chủ website xác nhận chưa có đơn giá: công cụ chỉ tổng hợp/chuyển nhu cầu vào form, chờ cấu hình được duyệt. Giữ tawk.to và tiếp nhận hiện tại; chưa tự gửi Zalo/Email. Video thật, công trình, giá, xưởng và các cam kết chưa xác nhận không được thay bằng dữ liệu giả. [Phạm vi, cấu hình và nghiệm thu](TURNKEY_ROLLOUT.md).

@@ -190,7 +190,7 @@ test("All browser scripts and inline scripts are valid JavaScript", () => {
     let n=0;
     for(const match of read(file).matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)){
       if(/\bsrc\s*=/.test(match[1])) continue;
-      if(/\btype\s*=\s*["']application\/ld\+json["']/i.test(match[1])) continue;
+      if(/\btype\s*=\s*["']application\/(?:ld\+)?json["']/i.test(match[1])){assert.doesNotThrow(()=>JSON.parse(match[2]),file+' inline JSON');continue;}
       if(!match[2].trim()) continue;
       assert.doesNotThrow(()=>new vm.Script(match[2],{filename:file+" inline "+(++n)}));
     }

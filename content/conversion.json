@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "heroVideo": null,
+  "estimate": {
+    "enabled": false,
+    "approved": false,
+    "version": null,
+    "validUntil": null,
+    "packages": null
+  }
+}
