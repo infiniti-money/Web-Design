@@ -1,0 +1,87 @@
+/* ATELIER HOME full-bleed image gallery.
+ * The original <img class="hero-photo"> remains the LCP asset and no-JS fallback.
+ * Secondary scenes are decorative and fetched only when requested. */
+.hero#home{
+  isolation:isolate;
+  min-height:max(690px,calc(100svh - 110px));
+  width:100%;
+  background:#172a25;
+}
+.hero#home .hero-photo{z-index:0;object-position:center center}
+.hero#home .hero-slides{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.hero#home .hero-slide{
+  position:absolute;inset:0;opacity:0;
+  background-position:center;background-size:cover;background-repeat:no-repeat;
+  filter:brightness(.72);
+  transition:opacity 1s ease-in-out;
+  will-change:opacity;
+}
+.hero#home .hero-slide.is-active{opacity:1}
+.hero#home::after{
+  z-index:1;pointer-events:none;
+  background:linear-gradient(90deg,rgba(12,26,22,.84) 0%,rgba(12,26,22,.57) 45%,rgba(12,26,22,.12) 100%);
+}
+.hero#home .hero-content{
+  z-index:2;
+  padding-block:clamp(80px,10vh,145px) clamp(135px,13vh,180px);
+  width:min(1240px,calc(100% - 88px));
+}
+.hero#home h1{max-width:870px;font-size:clamp(44px,5.8vw,88px);line-height:1.08;letter-spacing:-.042em;text-wrap:balance}
+.hero#home .hero-content>p:not(.eyebrow):not(.hero-caption){
+  max-width:585px;font-size:clamp(15px,1.3vw,19px);line-height:1.75;
+}
+.hero#home .hero-buttons{gap:14px}
+.hero#home .hero-buttons .btn{min-height:48px}
+.hero#home .hero-indicator{z-index:3;bottom:42px;right:max(44px,calc((100% - 1240px)/2));letter-spacing:.15em;font-size:11px}
+.hero-carousel-controls{
+  display:flex;align-items:center;gap:10px;
+  position:absolute;left:max(44px,calc((100% - 1240px)/2));bottom:27px;
+  z-index:3;color:#fff;
+}
+html:not(.hero-gallery-ready) .hero-carousel-controls{display:none}
+.hero-carousel-controls button{
+  display:grid;place-items:center;min-width:46px;min-height:46px;
+  border:1px solid rgba(255,255,255,.55);border-radius:999px;
+  background:rgba(16,30,25,.25);color:#fff;font:600 20px/1 system-ui,sans-serif;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  transition:background-color .2s,border-color .2s,transform .2s;
+}
+.hero-carousel-controls button:hover{background:rgba(255,255,255,.2);border-color:#fff;transform:translateY(-1px)}
+.hero-carousel-controls button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.hero-carousel-controls .hero-carousel-pause{font-size:13px;padding:0 14px;min-width:80px;letter-spacing:.015em}
+.hero-carousel-announcement{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.hero#home .hero-caption{max-width:620px}
+@media(min-width:1600px){
+  .hero#home .hero-content{width:min(1320px,calc(100% - 120px))}
+  .hero#home h1{font-size:clamp(64px,5.5vw,100px)}
+}
+@media(max-width:900px){
+  .hero#home{min-height:max(665px,calc(100svh - 92px))}
+  .hero#home .hero-content{width:calc(100% - 52px);padding-block:84px 150px}
+  .hero#home h1{font-size:clamp(42px,7vw,68px);max-width:690px}
+  .hero#home .hero-indicator{right:26px;bottom:40px}
+  .hero-carousel-controls{left:26px;bottom:26px}
+  .hero#home::after{background:linear-gradient(90deg,rgba(10,25,20,.85),rgba(10,25,20,.46) 74%,rgba(10,25,20,.22))}
+}
+@media(max-width:600px){
+  .hero#home{min-height:max(680px,calc(100svh - 68px));align-items:flex-start}
+  .hero#home .hero-photo{object-position:60% center}
+  .hero#home .hero-content{width:calc(100% - 36px);padding-block:60px 162px}
+  .hero#home h1{font-size:clamp(36px,10vw,52px);line-height:1.14}
+  .hero#home .hero-content>p:not(.eyebrow):not(.hero-caption){font-size:15px;line-height:1.7}
+  .hero#home .hero-buttons{display:grid;grid-template-columns:1fr;width:100%;max-width:355px}
+  .hero#home .hero-buttons .btn{min-height:48px;width:100%;justify-content:space-between;padding:12px 15px;font-size:11px}
+  .hero#home .turnkey-tags{max-width:100%;flex-wrap:wrap}
+  .hero#home .hero-indicator{left:18px;right:auto;bottom:96px;font-size:10px}
+  .hero-carousel-controls{left:18px;bottom:22px;gap:9px}
+  .hero-carousel-controls button{min-width:44px;min-height:44px}
+  .hero#home::after{background:linear-gradient(180deg,rgba(9,24,19,.72),rgba(9,24,19,.46) 54%,rgba(9,24,19,.58))}
+}
+@media(max-width:360px){
+  .hero#home .hero-content{padding-top:48px;padding-bottom:170px}
+  .hero#home h1{font-size:35px}
+  .hero#home .hero-content>p:not(.eyebrow):not(.hero-caption){font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero#home .hero-slide,.hero-carousel-controls button{transition:none!important}
+}
