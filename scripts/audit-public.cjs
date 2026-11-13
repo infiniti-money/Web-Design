@@ -42,6 +42,23 @@ async function audit({base='https://infiniti-money.github.io/Web-Design/',fetche
  try{const r=await get(manifestUrl);if(r.status!==200)throw Error('HTTP '+r.status);const data=JSON.parse(r.body);if(data.schema!==1||!Array.isArray(data.items)||data.items.length>5000)throw Error('Invalid catalog publication manifest');
   let any=false;for(const item of data.items){if(!/^catalog\/muc-[0-9a-f-]{36}\/$/.test(item.path)||typeof item.indexable!=='boolean')throw Error('Invalid catalog route');const u=new URL(item.path,base).href;expected.set(pageKey(u),item.indexable);add(u);any||=item.indexable;if(indexed.includes(u)!==item.indexable)issue('P1','catalog-sitemap',u,'Catalog review and sitemap disagree');}const u=new URL('catalog/',base).href;expected.set(pageKey(u),any);add(u);if(indexed.includes(u)!==any)issue('P1','catalog-sitemap',u,'Catalog listing review and sitemap disagree');
  }catch(e){issue('P1','catalog-manifest',manifestUrl,e.message);}
+ // Cross-check the deployment receipt against the public article pages and sitemap.
+ // Local articles have no receipt entry; only CMS rows are verified here.
+ const cmsManifestUrl=new URL('cms-publication.json',base).href,cmsRevisions=new Map();
+ try{
+  const r=await get(cmsManifestUrl);if(r.status!==200)throw Error('HTTP '+r.status);
+  const data=JSON.parse(r.body);
+  if(data.schema!==1||!Array.isArray(data.posts)||data.posts.length>200)throw Error('Invalid CMS publication manifest');
+  for(const post of data.posts){
+   if(!post||typeof post.slug!=='string'||post.slug.length>100||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(post.slug))throw Error('Invalid CMS article slug');
+   if(post.updated_at!==null&&(typeof post.updated_at!=='string'||!Number.isFinite(Date.parse(post.updated_at))))throw Error('Invalid CMS article revision');
+   const u=new URL('kien-thuc/'+post.slug+'/',base).href;
+   if(cmsRevisions.has(u))throw Error('Duplicate CMS article slug');
+   cmsRevisions.set(u,post.updated_at);
+   expected.set(pageKey(u),true);add(u);
+   if(!indexed.includes(u))issue('P1','cms-sitemap',u,'Published CMS article is missing from sitemap');
+  }
+ }catch(e){issue('P1','cms-manifest',cmsManifestUrl,e.message);}
  const seen=new Map(),anchors=[];
  for(let i=0;i<queue.length&&i<200;i++){
   const url=queue[i];let r;try{r=await get(url);}catch(e){issue('P1','fetch',url,e.message);continue;}
@@ -54,6 +71,11 @@ async function audit({base='https://infiniti-money.github.io/Web-Design/',fetche
   if(!privateDocument&&data.h1!==1)issue('P2','heading',url,'Expected one H1; found '+data.h1);
   if(expected.has(url)&&(/\bnoindex\b/i.test(data.robots)===expected.get(url)))issue('P1','index-policy',url,'Robots disagrees with publication policy');
   if(expected.get(url)===true&&(!data.ogTitle||!data.ogImage))issue('P1','open-graph',url,'Missing Open Graph title/image');
+  if(cmsRevisions.has(url)){
+   const article=data.jsonld.filter(x=>x.valid).flatMap(x=>Array.isArray(x.value?.['@graph'])?x.value['@graph']:[x.value]).find(x=>x?.['@type']==='Article'&&x.mainEntityOfPage===url);
+   if(!article)issue('P1','cms-article',url,'Published CMS page is missing matching Article JSON-LD');
+   else if(cmsRevisions.get(url)!==null&&article.dateModified!==cmsRevisions.get(url))issue('P1','cms-revision',url,'Article revision differs from deployed CMS receipt');
+  }
   if(data.jsonld.some(x=>!x.valid))issue('P1','json-ld',url,'Invalid JSON-LD');
   if(expected.get(url)===true&&!data.jsonld.length)issue('P2','schema-missing',url,'No JSON-LD on indexed page');
   for(const href of data.hrefs){let target;try{target=new URL(href,url);}catch{continue;}if(!inProject(target.href,base))continue;if(!/\.html$|\/$/.test(target.pathname))continue;const key=pageKey(target.href);add(key);if(target.hash){let id;try{id=decodeURIComponent(target.hash.slice(1));}catch{continue;}anchors.push({from:url,to:key,id});}}
