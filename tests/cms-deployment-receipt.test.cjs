@@ -26,6 +26,9 @@ test("CMS receipt contains only public published slug and exact edit timestamp",
   ]);
   assert.deepEqual(receipt,{schema:1,posts:[{slug:"duyet-kiem-tra",updated_at:"2026-01-02T00:00:00Z"}]});
   assert.ok(fs.existsSync(path.join(output,"kien-thuc","duyet-kiem-tra","index.html")));
+  const articleHtml=fs.readFileSync(path.join(output,"kien-thuc","duyet-kiem-tra","index.html"),"utf8");
+  assert.match(articleHtml,/Cập nhật <time datetime="2026-01-02T00:00:00Z">/);
+  assert.match(articleHtml,/dateModified":"2026-01-02T00:00:00Z"/);
   for(const slug of ["ban-nhap","da-luu-tru","dang-hen-gio"])
     assert.ok(!fs.existsSync(path.join(output,"kien-thuc",slug)));
   assert.doesNotMatch(JSON.stringify(receipt),/author_id|private-should-not-export|body_markdown/);
