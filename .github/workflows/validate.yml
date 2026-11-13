@@ -107,6 +107,10 @@ jobs:
         run: node tests/public-shell-browser.cjs
       - name: Verify navigation, slow-image font startup and reduced-motion fallback
         run: node tests/navigation-browser.cjs
+      - name: Verify full-viewport hero gallery across mobile, tablet and desktop
+        env:
+          SITE_URL: http://127.0.0.1:4173/
+        run: node tests/hero-gallery-browser.cjs
       - name: Verify opt-in Gemini advice, quotas and human fallback with fixtures
         env:
           SITE_URL: http://127.0.0.1:4173/

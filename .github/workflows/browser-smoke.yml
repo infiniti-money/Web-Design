@@ -67,6 +67,10 @@ jobs:
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
         run: node tests/home-experience.cjs
+      - name: Check full-screen gallery and no-JavaScript fallback after deploy
+        env:
+          SITE_URL: https://infiniti-money.github.io/Web-Design/
+        run: node tests/hero-gallery-browser.cjs
       - name: Check consultation recovery with synthetic requests
         env:
           SITE_URL: https://infiniti-money.github.io/Web-Design/
