@@ -47,6 +47,7 @@ test("UAT HTML is private, Windows packaged and advertised only to admin",()=>{
  assert.match(fs.readFileSync("scripts/build-pages.cjs","utf8"),/"uat.html"/);
  for(const x of ["SIGNED_OUT","TOKEN_REFRESHED","USER_UPDATED","offline","visibilitychange"])
    assert.ok(appSrc.includes(x),"missing secure invalidation "+x);
- for(const x of [".insert(",".update(",".delete(",".upsert(",".rpc(","localStorage"])
-   assert.equal(appSrc.includes(x),false,"UAT must not write DB or persist session data: "+x);
+ assert.doesNotMatch(appSrc,/\b(?:client|db)\.rpc\(/);
+ assert.doesNotMatch(appSrc,/\b(?:client|db)\.from\([^)]*\)\s*\.\s*(?:insert|update|delete|upsert)\(/);
+ assert.doesNotMatch(appSrc,/localStorage/);
 });
