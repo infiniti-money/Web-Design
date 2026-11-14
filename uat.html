@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Trung tâm nghiệm thu và phục hồi | ATELIER HOME</title>
+  <link rel="stylesheet" href="./assets/admin-workspace.css">
+  <style>
+    body{margin:0;background:var(--bg,#f4f6f3);color:var(--ink,#25372d);font:15px/1.6 system-ui,sans-serif}
+    .uat-wrap{max-width:1140px;margin:0 auto;padding:28px;box-sizing:border-box}
+    .uat-heading{display:flex;gap:20px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+    .uat-heading h1{margin:6px 0 8px}
+    .uat-kicker{color:#4b715a;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+    .uat-notice{border-left:4px solid #aa8246;padding:14px 16px;background:#fff9ef;border-radius:6px;margin:18px 0;color:#523f23}
+    .uat-heading button,#uat-export{border:1px solid #284e3c;background:#284e3c;color:#fff;border-radius:9px;padding:12px 16px;font:inherit;cursor:pointer;min-height:44px}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .uat-shell{background:var(--white,#fff);border:1px solid var(--line,#dce6df);border-radius:14px;padding:24px;margin:18px 0}
+    .uat-gates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .uat-gate{display:flex;align-items:flex-start;gap:12px;border:1px solid #e0e8e0;border-radius:12px;padding:17px;background:var(--bg,#fafbf9);cursor:pointer}
+    .uat-gate input{margin:4px 0 0;width:20px;height:20px;accent-color:#2f6d49;flex:none}
+    .uat-gate-copy{display:grid;gap:4px}
+    .uat-gate-copy strong{font-size:15px}
+    .uat-gate-copy small{font-size:13px;line-height:1.5;color:var(--muted,#617369)}
+    .uat-pill{display:inline-flex;background:#f0e4c7;border-radius:999px;color:#744f1a;padding:5px 12px;font-size:12px;font-weight:700}
+    .uat-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .uat-steps article{border:1px solid var(--line,#ddd);border-radius:10px;padding:16px;min-width:0}
+    .uat-steps strong{display:block;margin-bottom:7px}
+    .uat-steps p{margin:0}
+    .uat-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:18px}
+    .uat-foot p{margin:0}
+    .uat-link{color:#236448}
+    #uat-status{min-height:24px}
+    @media(max-width:740px){.uat-wrap{padding:16px}.uat-gates{grid-template-columns:1fr}.uat-steps{grid-template-columns:1fr}.uat-shell{padding:16px}}
+  </style>
+</head>
+<body>
+<main class="uat-wrap">
+  <a class="uat-link" href="./admin.html">← Quay lại quản trị</a>
+  <div class="uat-heading">
+    <div>
+      <p class="uat-kicker">ATELIER HOME · an toàn vận hành</p>
+      <h1>Trung tâm nghiệm thu &amp; phục hồi</h1>
+      <p>Theo dõi điều kiện còn thiếu trước khi chốt nghiệm thu production, không thao tác trực tiếp trên dữ liệu thật.</p>
+    </div>
+    <button id="uat-refresh" type="button">Làm mới quyền</button>
+  </div>
+  <p class="uat-notice"><strong>Quan trọng:</strong> Tích chọn chỉ là <em>khai báo thủ công, chưa được xác minh</em>. Không thể xác nhận backup thật, đăng nhập Nhân viên hoặc bảo mật production chỉ bằng các ô này.</p>
+  <p id="uat-status" role="status" aria-live="polite">Đang kiểm tra quyền Admin…</p>
+  <section id="uat-panel" hidden aria-busy="false" aria-label="Danh sách kiểm tra nghiệm thu">
+    <div class="uat-shell">
+      <span class="uat-pill">Bằng chứng cần thẩm tra độc lập</span>
+      <h2>Các điều kiện nghiệm thu</h2>
+      <p>Chỉ chọn sau khi đã tự thực hiện công việc trên hệ thống được phép. Không nhập dữ liệu khách hàng, email, khóa bí mật hoặc mật khẩu vào trang này.</p>
+      <div id="uat-gates" class="uat-gates"></div>
+      <div class="uat-foot">
+        <p id="uat-progress" role="status" aria-live="polite">0 / 8 khai báo</p>
+        <button id="uat-export" type="button" disabled>Xuất bản khai chưa xác minh (JSON)</button>
+      </div>
+    </div>
+  </section>
+  <section class="uat-shell" aria-label="Quy trình nghiệm thu">
+    <h2>Quy trình theo lộ trình đã duyệt</h2>
+    <div class="uat-steps">
+      <article><strong>1. Backup và phục hồi</strong>
+        <p>Lấy bản sao lưu mới trên máy tin cậy; băm SHA-256 rồi khôi phục cách ly. Công cụ <code>scripts/verify-recovery-evidence.cjs</code> chỉ kiểm hash và dữ liệu đối chiếu do người vận hành cung cấp.</p></article>
+      <article><strong>2. Quyền tài khoản thật</strong>
+        <p>Admin duyệt nhân viên chính thức rồi thử 3 vai trò trên hồ sơ trình duyệt/Windows riêng. Kiểm tra từ chối máy chủ, quyền cũ và phiên đăng xuất.</p></article>
+      <article><strong>3. Xác nhận trước phát hành</strong>
+        <p>Kiểm thử dữ liệu, Windows, Search Console/CWV và đối chiếu tài liệu. Chỉ người được ủy quyền mới ký nghiệm thu; CI không thay thế UAT thật.</p></article>
+    </div>
+    <p>Xem <a class="uat-link" href="https://github.com/infiniti-money/Web-Design/blob/main/UAT_ROADMAP_20261114.md" target="_blank" rel="noopener noreferrer">ma trận phân quyền</a> và <a class="uat-link" href="https://github.com/infiniti-money/Web-Design/blob/main/SUPABASE_BACKUP_RESTORE_GUIDE.md" target="_blank" rel="noopener noreferrer">quy trình backup/restore</a>.</p>
+  </section>
+</main>
+<script src="./app-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0"></script>
+<script src="./assets/admin-workspace.js"></script>
+<script src="./assets/uat-readiness.js"></script>
+<script>window.AtelierUatReadiness.mount(document,window);</script>
+</body>
+</html>
