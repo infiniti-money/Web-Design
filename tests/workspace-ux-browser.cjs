@@ -63,6 +63,12 @@ const {buildPages}=require("../scripts/build-pages.cjs");
   await page.setViewportSize({width:390,height:844});
   await page.locator(".workspace-menu").click();
   assert.equal(await page.locator("body.workspace-drawer-open").count(),1);
+  // The drawer animates transform for 200ms: do not read its first animation frame.
+  // Wait for the actual bounding box to reach the visible state, not just the body class.
+  await page.waitForFunction(()=>{
+    const drawer=document.querySelector(".workspace-sidebar");
+    return !!drawer && Math.abs(drawer.getBoundingClientRect().x)<2;
+  },null,{timeout:3000});
   const drawerBox=await page.locator(".workspace-sidebar").boundingBox();
   assert.ok(drawerBox&&Math.abs(drawerBox.x)<2,"Mobile drawer must be visible");
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"Mobile page overflow");
