@@ -1,3 +1,5 @@
+> **Tiến độ mới ngày 14/11/2026:** RLS initPlan 8/8 đã áp dụng production, Performance Advisor không còn cảnh báo initPlan. Website v1.28.6 / Windows Manager 1.2.2 bổ sung `uat.html` và công cụ xác minh SHA256 dump cục bộ. Bản backup ngày 08/11 có chứng cứ khôi phục database ở `BACKUP_RESTORE_EVIDENCE_20261108.md`, nhưng **chưa có chứng cứ backup mới/restore Auth service hiện tại**. Auth production hiện vẫn 1 Admin, 1 Quản lý, 0 Nhân viên. Tích chọn trong dashboard và `REVIEW_REQUIRED` từ công cụ chỉ là khai báo cần thẩm tra, **không phải UAT thật**. Các mốc cũ bên dưới là lịch sử tại thời điểm viết.
+
 # UAT & bảo mật ATELIER HOME — đợt 14/11/2026
 
 ## Phạm vi và nguyên tắc
