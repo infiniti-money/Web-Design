@@ -22,6 +22,19 @@ const {_electron}=require("playwright"),assert=require("node:assert/strict"),fs=
     assert.equal(await page.evaluate(()=>fetch("atelier://app/main.cjs").then(response=>response.status)),404);
     const update=await page.evaluate(()=>window.atelierDesktop.getUpdateState());assert.equal(update.status,"unavailable");
     await page.screenshot({path:path.join(output,"desktop-login.png")});
+    // Synthetic session: verify packaged web/PC administration navigation
+    // without authenticating against production or storing real customer data.
+    await page.evaluate(()=>window.dispatchEvent(new CustomEvent("atelier:session",{
+      detail:{role:"admin",name:"Admin kiểm thử",email:"fixture@example.invalid"}
+    })));
+    await page.locator(".workspace-sidebar").waitFor();
+    assert.equal(await page.locator('.workspace-modules-grid a[href$="reports-advanced.html"]').count(),1);
+    assert.equal(await page.locator('.workspace-modules-grid a[href$="payments.html"]').count(),1);
+    await page.locator(".workspace-settings-button").click();
+    await page.locator("#workspace-theme-select").selectOption("dark");
+    assert.equal(await page.locator("body.workspace-theme-dark").count(),1);
+    await page.evaluate(()=>window.dispatchEvent(new CustomEvent("atelier:session",{detail:null})));
+    assert.equal(await page.locator(".workspace-sidebar").count(),0);
     await page.goto("atelier://app/commercial.html");
     await page.waitForFunction(()=>!!window.AtelierQuoteEditor);
     await page.evaluate(()=>window.AtelierQuoteEditor.preview({quote:{title:"BÁO GIÁ KIỂM THỬ PDF",status:"draft"},customer:{full_name:"Dữ liệu kiểm thử"},version:{version_no:1,total_amount:25000,content:{schema_version:1,items:[{description:"Hạng mục kiểm thử",unit:"gói",quantity:2.5,unit_price:10000,amount:25000}],subtotal:25000,discount:0,tax_amount:0,total:25000}}}));
