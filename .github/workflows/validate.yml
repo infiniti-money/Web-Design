@@ -124,6 +124,10 @@ jobs:
         env:
           SITE_URL: http://127.0.0.1:4173/
         run: node tests/advanced-reports-browser.cjs
+      - name: Verify Admin-only UAT readiness with synthetic sessions and local evidence
+        env:
+          SITE_URL: http://127.0.0.1:4173/
+        run: node tests/uat-readiness-browser.cjs
       - name: Verify opt-in Gemini advice, quotas and human fallback with fixtures
         env:
           SITE_URL: http://127.0.0.1:4173/
@@ -160,7 +164,7 @@ jobs:
         run: node tests/payments-browser.cjs
 
   windows-manager-qa:
-    name: Windows Manager 1.2.1 smoke and installer QA
+    name: Windows Manager 1.2.2 smoke and installer QA
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
@@ -192,7 +196,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: atelier-home-manager-1.2.1-qa
+          name: atelier-home-manager-1.2.2-qa
           path: |
             desktop/dist/*.exe
             desktop/dist/*.blockmap
