@@ -1,6 +1,6 @@
 # ATELIER HOME — Website thiết kế nội thất
 
-> **Bản hiện hành (14/11/2026):** Website **v1.28.5** và Windows Manager **v1.2.1**. Đợt nâng cấp tăng an toàn phiên đăng nhập cho Báo cáo nâng cao, thêm lọc/tìm kiếm/xuất CSV theo quyền. [Release notes web](RELEASE_NOTES_V1_28_5.md) · [Release notes Windows](desktop/RELEASE_NOTES_1_2_1.md) · [Lộ trình và các cổng UAT chưa đạt](UAT_ROADMAP_20261114.md).
+> **Bản hiện hành (14/11/2026):** Website **v1.28.6** và Windows Manager **v1.2.2**. Bổ sung Trung tâm nghiệm thu dành riêng cho Admin, bảng tự kiểm không chứng nhận production và công cụ đối chiếu checksum backup offline. [Release notes web](RELEASE_NOTES_V1_28_6.md) · [Release notes Windows](desktop/RELEASE_NOTES_1_2_2.md) · [Lộ trình và các cổng UAT chưa đạt](UAT_ROADMAP_20261114.md).
 
 
 Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub Pages.
