@@ -17,9 +17,13 @@ test("Web and packaged Windows share one role-aware workspace and persistent app
  assert.match(style,/@media\(max-width:760px\)/);
  assert.match(style, /prefers-reduced-motion:reduce/);
 });
-test("Advanced manager report no longer renders employee-only view",()=>{
- assert.match(reports,/!\["admin","manager"\]\.includes\(sp\.role\)/);
- assert.match(reports,/sp\.role!==user\.app_metadata\?\.role/);
+test("Advanced manager report delegates authorization to the shared tested module",()=>{
+ const script=fs.readFileSync("assets/reports-advanced.js","utf8");
+ assert.match(reports,/assets\/reports-advanced\.js/);
+ assert.match(reports,/id="report" hidden/);
+ assert.match(script,/allowedRoles=new Set\(\["admin","manager"\]\)/);
+ assert.match(script,/profile\.role!==user\.app_metadata\.role/);
+ assert.match(script,/onAuthStateChange/);
 });
 test("Staged RLS initplan optimization cannot grant roles, disable RLS or mutate rows",()=>{
  assert.equal((sql.match(/ALTER POLICY /g)||[]).length,8);

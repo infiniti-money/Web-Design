@@ -1,5 +1,8 @@
 # ATELIER HOME — Website thiết kế nội thất
 
+> **Bản hiện hành (14/11/2026):** Website **v1.28.5** và Windows Manager **v1.2.1**. Đợt nâng cấp tăng an toàn phiên đăng nhập cho Báo cáo nâng cao, thêm lọc/tìm kiếm/xuất CSV theo quyền. [Release notes web](RELEASE_NOTES_V1_28_5.md) · [Release notes Windows](desktop/RELEASE_NOTES_1_2_1.md) · [Lộ trình và các cổng UAT chưa đạt](UAT_ROADMAP_20261114.md).
+
+
 Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub Pages.
 
 [Chương trình nâng cấp UI/UX, hiệu suất, bảo toàn SEO, đặt cọc và chat nhân viên](UPGRADE_SCOPE_20261107.md): phạm vi website + quản trị/PC, ngày công và tiêu chí nghiệm thu. Chat tawk.to đã bật, chủ website xác nhận mở được. payOS đã qua pilot thực tế và **mở thu đặt cọc cho các báo giá đủ điều kiện**; Admin tạo link trong phần còn lại và xử lý đối soát. [Bản phát hành thu chính thức](PAYOS_GENERAL_RELEASE.md) · [Hướng dẫn đối soát](PAYOS_RECONCILIATION_ADMIN.md) · [Hướng dẫn sao lưu và thử khôi phục](SUPABASE_BACKUP_RESTORE_GUIDE.md).

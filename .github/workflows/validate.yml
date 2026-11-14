@@ -120,6 +120,10 @@ jobs:
         run: node tests/hero-gallery-browser.cjs
       - name: Verify role-aware workspace, theme and mobile navigation with synthetic sessions
         run: node tests/workspace-ux-browser.cjs
+      - name: Verify secure advanced reports, CSV gating and expired sessions with fixtures
+        env:
+          SITE_URL: http://127.0.0.1:4173/
+        run: node tests/advanced-reports-browser.cjs
       - name: Verify opt-in Gemini advice, quotas and human fallback with fixtures
         env:
           SITE_URL: http://127.0.0.1:4173/
@@ -156,7 +160,7 @@ jobs:
         run: node tests/payments-browser.cjs
 
   windows-manager-qa:
-    name: Windows Manager 1.2.0 smoke and installer QA
+    name: Windows Manager 1.2.1 smoke and installer QA
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
@@ -188,7 +192,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: atelier-home-manager-1.2.0-qa
+          name: atelier-home-manager-1.2.1-qa
           path: |
             desktop/dist/*.exe
             desktop/dist/*.blockmap
