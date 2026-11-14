@@ -1,3 +1,9 @@
+### Đợt triển khai v1.28.4 / Windows Manager 1.2.0 — 14/11/2026
+
+Tiếp nối giao diện công khai toàn khung v1.28.3, chuẩn bị workspace dùng chung GitHub Pages và Windows Manager: sidebar theo nhóm chức năng, danh mục điều hành dạng thẻ, dark/light/system, thao tác responsive, cập nhật trang báo cáo nâng cao theo phân quyền Admin/Quản lý. CI bổ sung Playwright mô phỏng Admin/Quản lý/Nhân viên, Electron smoke và RLS policy equivalence trên PostgreSQL 17 biệt lập.
+
+Đã kiểm tra production: tài khoản Auth Admin 1, Quản lý 1, Nhân viên 0; Security Advisor còn 4 RPC SECURITY DEFINER và leaked-password protection tắt, Performance Advisor thêm 8 auth_rls_initplan WARN và 17 FK INFO. SQL tối ưu RLS mới chỉ ở `supabase/rls-initplan-review.sql`, **không triển khai production** khi chưa có backup mới và UAT vai trò thật. [Ma trận nghiệm thu và giới hạn](UAT_ROADMAP_20261114.md). Cổng Pages/Windows release chỉ được ký nhận sau khi có bằng chứng CI và deploy thực tế.
+
 ### Cập nhật thực hiện — 08/11/2026
 
 Đợt v1.25 tiếp tục chặng 2/3/6: Catalog có HTML tĩnh theo ID, giữ URL cũ và dữ liệu Admin; thêm bài gốc đối chiếu hồ sơ vật liệu; bổ sung kiểm toán SEO GET-only theo lịch và sau deploy. Không index nội dung chưa xác minh, không xuất ảnh chưa xác nhận. Kiểm tra trước phát hành: 127/128 Node đạt (1 gửi thật bỏ qua), 2 bài an toàn PC đạt, Catalog không JavaScript/bàn phím/mobile và Catalog cũ đạt. Chờ xác minh Actions/URL online ở phần cập nhật phát hành.
