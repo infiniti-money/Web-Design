@@ -1,0 +1,81 @@
+name: Promote Windows Manager after main validation
+
+on:
+  workflow_run:
+    workflows: [Validate ATELIER HOME]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: desktop-release-promotion
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Publish version only after trusted main CI
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact validated main revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Verify commit still is main and version files agree
+        shell: bash
+        env:
+          VALIDATED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          test "$(git rev-parse origin/main)" = "$VALIDATED_SHA" || {
+            echo "Main moved since validation; a newer CI must finish before promotion."
+            exit 0
+          }
+          node - <<'NODE'
+          const fs=require('fs');
+          const manifest=require('./desktop/package.json');
+          const lock=require('./desktop/package-lock.json');
+          if(!/^\d+\.\d+\.\d+$/.test(manifest.version))throw Error('Expected stable semantic version');
+          if(lock.version!==manifest.version||lock.packages[''].version!==manifest.version)throw Error('Desktop package-lock version mismatch');
+          const notes='desktop/RELEASE_NOTES_'+manifest.version.replaceAll('.','_')+'.md';
+          if(!fs.existsSync(notes))throw Error('Release notes missing: '+notes);
+          console.log('Validated desktop version:',manifest.version);
+          NODE
+
+      - name: Tag new validated version and dispatch Windows release build
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VALIDATED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          if [ "$(git rev-parse origin/main)" != "$VALIDATED_SHA" ]; then
+            echo "New main revision arrived; skipping obsolete promotion."
+            exit 0
+          fi
+          version="$(node -p 'require("./desktop/package.json").version')"
+          tag="desktop-v${version}"
+          if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+            echo "Version already tagged: $tag; no repeat release."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" "$VALIDATED_SHA" -m "ATELIER HOME Manager $version (validated main)"
+          git push origin "refs/tags/$tag"
+          # A GITHUB_TOKEN tag push does not trigger tag-push workflows.
+          # workflow_dispatch explicitly starts the existing release workflow on the tagged ref.
+          gh workflow run desktop-release.yml --ref "$tag"
+          echo "Dispatched release build for $tag at $VALIDATED_SHA."
