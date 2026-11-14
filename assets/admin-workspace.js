@@ -27,6 +27,7 @@
   function clear(){
     if(tabHome&&sidebar?.querySelector(".tabs"))tabHome.before(sidebar.querySelector(".tabs"));
     for(const el of [sidebar,topbar,mask,command,settings])el?.remove();
+    document.querySelector(".workspace-modules")?.remove();
     updateCleanup?.();updateCleanup=null;
     networkCleanup?.();networkCleanup=null;
     themeCleanup?.();themeCleanup=null;
@@ -110,7 +111,7 @@
     if(rootTabs){
       if(!tabHome){tabHome=document.createComment("workspace tabs home");rootTabs.before(tabHome);}
       rootTabs.setAttribute("aria-orientation","vertical");
-      for(const button of rootTabs.querySelectorAll(".tab")){const label=button.textContent;button.title=label;if(!button.querySelector(".workspace-icon")){button.textContent="";button.append(icon(button.id.slice(4)),node("span",label,"workspace-nav-label"));}links.push([`./admin.html#${button.id.slice(4)}`,label]);}
+      for(const button of rootTabs.querySelectorAll(".tab")){const id=button.id.slice(4);const required=tabs.find(tab=>tab[0]===id)?.[2]||"admin";button.classList.toggle("hide",level[profile.role]<level[required]);if(level[profile.role]<level[required])continue;const label=button.textContent;button.title=label;if(!button.querySelector(".workspace-icon")){button.textContent="";button.append(icon(button.id.slice(4)),node("span",label,"workspace-nav-label"));}links.push([`./admin.html#${button.id.slice(4)}`,label]);}
       sidebar.append(rootTabs);
       rootTabs.onkeydown=event=>{if(!["ArrowDown","ArrowUp","Home","End"].includes(event.key))return;const buttons=[...rootTabs.querySelectorAll(".tab:not(.hide)")];let index=buttons.indexOf(document.activeElement);index=event.key==="Home"?0:event.key==="End"?buttons.length-1:(index+(event.key==="ArrowDown"?1:-1)+buttons.length)%buttons.length;event.preventDefault();buttons[index]?.focus();buttons[index]?.click();};
     }else{
