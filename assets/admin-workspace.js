@@ -2,20 +2,20 @@
 (() => {
   "use strict";
   const tabs = [["overview","Tổng quan","admin"],["projects","Dự án","admin"],["inquiries","Khách hàng","admin"],["tasks","Công việc nhóm","manager"],["my-tasks","Công việc của tôi","employee"],["reports","Báo cáo","manager"],["staff","Nhân sự & tài khoản","admin"]];
-  const modules = [["operations.html","Trung tâm vận hành","manager"],["delivery.html","Điều phối công trình","manager"],["admin-posts.html","Bài viết","manager"],["admin-catalog.html","Catalog & vật liệu","admin"],["commercial.html","Báo giá & hợp đồng","manager"],["payments.html","Thu tiền & đối soát","admin"],["notifications.html","Thông báo nội bộ","employee"]];
+  const modules = [["operations.html","Trung tâm vận hành","manager"],["delivery.html","Điều phối công trình","manager"],["reports-advanced.html","Báo cáo nâng cao","manager"],["admin-posts.html","Bài viết","manager"],["admin-catalog.html","Catalog & vật liệu","admin"],["commercial.html","Báo giá & hợp đồng","manager"],["payments.html","Thu tiền & đối soát","admin"],["notifications.html","Thông báo nội bộ","employee"]];
   const level = { admin:3, manager:2, employee:1 };
   const roleNames = { admin:"Quản trị viên", manager:"Quản lý", employee:"Nhân viên" };
   const rootAdmin = !!document.getElementById("dashboard");
   const cfg = window.ATELIER_CONFIG;
   const normalize=value=>String(value).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/đ/g,"d").trim();
   const preferences={read(key){try{return localStorage.getItem("atelier-workspace-"+key);}catch{return null;}},write(key,value){try{localStorage.setItem("atelier-workspace-"+key,value);}catch{/* Preferences are optional. */}}};
-  let sidebar, topbar, mask, command, settings, tabHome, user, client, updateCleanup, networkCleanup;
+  let sidebar, topbar, mask, command, settings, tabHome, user, client, updateCleanup, networkCleanup, themeCleanup;
   const node = (tag, text, cls) => { const el=document.createElement(tag); if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el; };
   const icon = (key="overview") => {
     const paths={overview:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',projects:'<path d="M3 21V6l9-3 9 3v15M8 8v2m8-2v2M8 14v2m8-2v2M10 21v-3h4v3"/>',inquiries:'<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3m2-16a3 3 0 0 1 0 6m4 10v-3a6 6 0 0 0-3-5"/>',tasks:'<rect x="4" y="4" width="16" height="17" rx="2"/><path d="M9 3h6v4H9zm-2 9 2 2 4-4m-6 8h10"/>',reports:'<path d="M4 3v17h17M8 16v-5m5 5V6m5 10V9"/>',staff:'<circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>',posts:'<path d="M5 3h10l4 4v14H5zM14 3v5h5M8 12h8m-8 4h6"/>',catalog:'<path d="m12 3 9 5-9 5-9-5zm-9 9 9 5 9-5m-18 5 9 5 9-5"/>',operations:'<path d="M3 3h18v18H3zM7 15l3-3 3 2 4-5M7 7h10"/>',commercial:'<rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18m-12 5h3m4 0h2"/>',notifications:'<path d="M6 9a6 6 0 0 1 12 0c0 7 3 7 3 8H3c0-1 3-1 3-8m3 11a3 3 0 0 0 6 0"/>'};
     const span=node("span",undefined,"workspace-icon");span.setAttribute("aria-hidden","true");span.innerHTML='<svg viewBox="0 0 24 24">'+(paths[key]||paths.tasks)+'</svg>';return span;
   };
-  const moduleKey=file=>({"operations.html":"operations","delivery.html":"projects","admin-posts.html":"posts","admin-catalog.html":"catalog","commercial.html":"commercial","payments.html":"commercial","notifications.html":"notifications"}[file]);
+  const moduleKey=file=>({"operations.html":"operations","delivery.html":"projects","admin-posts.html":"posts","admin-catalog.html":"catalog","commercial.html":"commercial","payments.html":"commercial","reports-advanced.html":"reports","notifications.html":"notifications"}[file]);
   const currentFile = () => location.pathname.split("/").pop() || "admin.html";
   function setDrawer(open){
     const mobile=matchMedia("(max-width:760px)").matches;
@@ -29,13 +29,66 @@
     for(const el of [sidebar,topbar,mask,command,settings])el?.remove();
     updateCleanup?.();updateCleanup=null;
     networkCleanup?.();networkCleanup=null;
-    document.body.classList.remove("workspace-ready","workspace-drawer-open");user=null;
+    themeCleanup?.();themeCleanup=null;
+    document.body.classList.remove("workspace-ready","workspace-drawer-open","workspace-theme-dark");user=null;
   }
   function navigate(href){
     setDrawer(false);
     const url=new URL(href,location.href);
     if(rootAdmin&&url.pathname.endsWith("/admin.html")&&url.hash){document.querySelector(`#tab-${url.hash.slice(1)}`)?.click();return;}
     location.href=url.href;
+  }
+  function applyTheme(mode){
+    const selected=["system","light","dark"].includes(mode)?mode:"system";
+    const dark=selected==="dark"||(selected==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);
+    document.body.classList.toggle("workspace-theme-dark",dark);
+    document.body.dataset.workspaceTheme=selected;
+  }
+  function renderModuleHub(profile){
+    const panel=document.getElementById("panel-overview");if(!panel)return;
+    panel.querySelector(".workspace-modules")?.remove();
+    const section=node("section",undefined,"workspace-modules");
+    section.setAttribute("aria-label","Danh mục chức năng quản trị");
+    const heading=node("div",undefined,"workspace-modules-heading");
+    heading.append(node("p","TRUNG TÂM ĐIỀU HÀNH","workspace-modules-kicker"),node("h2","Lựa chọn công việc cần thực hiện"));
+    section.append(heading);
+    const grid=node("div",undefined,"workspace-modules-grid");
+    const descriptions={
+      projects:"Quản lý hồ sơ, ảnh và tiến độ công trình",
+      inquiries:"Khách hàng, yêu cầu tư vấn và CRM",
+      tasks:"Phân công và theo dõi đội ngũ",
+      "my-tasks":"Theo dõi những việc được giao",
+      reports:"Tổng hợp hiệu quả công việc",
+      staff:"Mời, duyệt và phân quyền tài khoản",
+      "operations.html":"Hàng đợi và cảnh báo vận hành",
+      "delivery.html":"Điều phối triển khai công trình",
+      "reports-advanced.html":"Phân tích, báo cáo và xuất dữ liệu",
+      "admin-posts.html":"Quản trị nội dung trên website",
+      "admin-catalog.html":"Sản phẩm, vật tư và danh mục",
+      "commercial.html":"Báo giá, phê duyệt và hợp đồng",
+      "payments.html":"Theo dõi giao dịch và đối soát",
+      "notifications.html":"Thông báo theo tài khoản"
+    };
+    const add=(key,label,href,iconName)=>{
+      const card=node("a",undefined,"workspace-module");
+      card.href=href;
+      card.append(icon(iconName));
+      const details=node("span",undefined,"workspace-module-body");
+      details.append(node("strong",label),node("small",descriptions[key]||"Mở trang chức năng"));
+      card.append(details,node("span","↗","workspace-module-arrow"));
+      grid.append(card);
+    };
+    for(const [id,label,min] of tabs){
+      if(id==="overview"||level[profile.role]<level[min])continue;
+      add(id,label,"./admin.html#"+id,id);
+    }
+    for(const [file,label,min] of modules){
+      if(level[profile.role]<level[min])continue;
+      add(file,label,"./"+file,moduleKey(file));
+    }
+    section.append(grid);
+    const welcome=panel.querySelector(".workspace-welcome");
+    if(welcome)welcome.after(section);else panel.prepend(section);
   }
   function makeDialog(title){
     const dialog=node("dialog",undefined,"workspace-dialog");const head=node("header");head.append(node("h2",title));const close=node("button","✕");close.type="button";close.setAttribute("aria-label","Đóng");close.onclick=()=>dialog.close();head.append(close);dialog.append(head);document.body.append(dialog);return dialog;
@@ -45,6 +98,11 @@
     document.body.classList.add("workspace-ready");
     document.body.classList.toggle("workspace-compact",preferences.read("density")==="compact");
     document.body.classList.toggle("workspace-collapsed",preferences.read("sidebar")==="collapsed");
+    applyTheme(preferences.read("theme")||"system");
+    const scheme=matchMedia("(prefers-color-scheme: dark)");
+    const syncSystemTheme=()=>{if((preferences.read("theme")||"system")==="system")applyTheme("system");};
+    scheme.addEventListener("change",syncSystemTheme);
+    themeCleanup=()=>scheme.removeEventListener("change",syncSystemTheme);
     sidebar=node("aside",undefined,"workspace-sidebar");sidebar.setAttribute("aria-label","Điều hướng quản trị");
     const logo=node("a","ATELIER", "workspace-logo");logo.href="./admin.html";logo.append(node("small","HOME · MANAGER"));sidebar.append(logo,node("p","Không gian làm việc","workspace-group"));
     const links=[];
@@ -58,12 +116,33 @@
     }else{
       for(const [id,label,min] of tabs){if(level[profile.role]<level[min])continue;const a=node("a",undefined,"workspace-link");a.href=`./admin.html#${id}`;a.title=label;a.append(icon(id),node("span",label,"workspace-nav-label"));sidebar.append(a);links.push([a.getAttribute("href"),label]);}
     }
-    sidebar.append(node("p","Website & kinh doanh","workspace-group"));
-    for(const [file,label,min] of modules){if(level[profile.role]<level[min])continue;const a=node("a",undefined,"workspace-link");a.href="./"+file;a.title=label;a.append(icon(moduleKey(file)),node("span",label,"workspace-nav-label"));if(currentFile()===file)a.setAttribute("aria-current","page");sidebar.append(a);links.push(["./"+file,label]);}
+    const groups=[
+      ["Điều hành",["operations.html","delivery.html","reports-advanced.html"]],
+      ["Nội dung & vật liệu",["admin-posts.html","admin-catalog.html"]],
+      ["Kinh doanh",["commercial.html","payments.html"]],
+      ["Cộng tác",["notifications.html"]]
+    ];
+    for(const [name,files] of groups){
+      const available=modules.filter(([file,,min])=>files.includes(file)&&level[profile.role]>=level[min]);
+      if(!available.length)continue;
+      sidebar.append(node("p",name,"workspace-group"));
+      for(const [file,label] of available){
+        const a=node("a",undefined,"workspace-link");
+        a.href="./"+file;a.title=label;
+        a.append(icon(moduleKey(file)),node("span",label,"workspace-nav-label"));
+        if(currentFile()===file)a.setAttribute("aria-current","page");
+        sidebar.append(a);links.push(["./"+file,label]);
+      }
+    }
     const collapse=node("button","Thu gọn menu","workspace-collapse");collapse.type="button";collapse.title="Thu gọn / mở rộng menu";collapse.setAttribute("aria-label",collapse.title);const syncCollapse=()=>{const compact=document.body.classList.contains("workspace-collapsed");collapse.textContent=compact?"»":"« Thu gọn menu";collapse.setAttribute("aria-expanded",String(!compact));};collapse.onclick=()=>{document.body.classList.toggle("workspace-collapsed");preferences.write("sidebar",document.body.classList.contains("workspace-collapsed")?"collapsed":"expanded");syncCollapse();};syncCollapse();sidebar.append(collapse);
-    const footer=node("div",undefined,"workspace-user");footer.append(node("span",profile.name||profile.email,"workspace-user-name"),node("p",roleNames[profile.role],"workspace-user-role"));const logout=node("button","Đăng xuất");logout.type="button";logout.onclick=async()=>{if(rootAdmin)document.getElementById("logout").click();else{await client.auth.signOut();location.href="./admin.html";}};footer.append(logout);sidebar.append(footer);document.body.append(sidebar);
+    const footer=node("div",undefined,"workspace-user");
+    const initials=String(profile.name||profile.email||"?").trim().split(/\s+/).slice(-2).map(p=>p[0]?.toUpperCase()||"").join("");
+    footer.append(node("span",initials,"workspace-avatar"),node("span",profile.name||profile.email,"workspace-user-name"),node("p",roleNames[profile.role],"workspace-user-role"));const logout=node("button","Đăng xuất");logout.type="button";logout.onclick=async()=>{if(rootAdmin)document.getElementById("logout").click();else{await client.auth.signOut();location.href="./admin.html";}};footer.append(logout);sidebar.append(footer);document.body.append(sidebar);
     mask=node("button",undefined,"workspace-mask");mask.type="button";mask.setAttribute("aria-label","Đóng menu quản trị");mask.onclick=()=>setDrawer(false);document.body.append(mask);
-    topbar=node("header",undefined,"workspace-topbar");const menu=node("button","☰","workspace-menu");menu.type="button";menu.setAttribute("aria-label","Mở menu quản trị");menu.setAttribute("aria-expanded","false");menu.onclick=()=>setDrawer(!document.body.classList.contains("workspace-drawer-open"));topbar.append(menu,node("span","ATELIER HOME / Quản lý","workspace-location"));const actions=node("div",undefined,"workspace-top-actions");const search=node("button",undefined,"workspace-search");search.type="button";search.append(document.createTextNode("Đi đến chức năng…"),node("kbd","Ctrl K"));search.onclick=()=>command.showModal();const connection=node("span",undefined,"workspace-connection");const online=()=>{connection.textContent=navigator.onLine?"Trực tuyến":"Mất kết nối";connection.classList.toggle("offline",!navigator.onLine);};online();window.addEventListener("online",online);window.addEventListener("offline",online);networkCleanup=()=>{window.removeEventListener("online",online);window.removeEventListener("offline",online);};const prefs=node("button","Ứng dụng","workspace-settings-button");prefs.type="button";prefs.onclick=()=>settings.showModal();actions.append(search,connection,prefs);topbar.append(actions);document.body.append(topbar);
+    topbar=node("header",undefined,"workspace-topbar");const menu=node("button","☰","workspace-menu");menu.type="button";menu.setAttribute("aria-label","Mở menu quản trị");menu.setAttribute("aria-expanded","false");menu.onclick=()=>setDrawer(!document.body.classList.contains("workspace-drawer-open"));topbar.append(menu,node("span","ATELIER HOME / Quản lý","workspace-location"));const actions=node("div",undefined,"workspace-top-actions");const search=node("button",undefined,"workspace-search");search.type="button";search.append(document.createTextNode("Đi đến chức năng…"),node("kbd","Ctrl K"));search.onclick=()=>command.showModal();const connection=node("span",undefined,"workspace-connection");const online=()=>{connection.textContent=navigator.onLine?"Trực tuyến":"Mất kết nối";connection.classList.toggle("offline",!navigator.onLine);};online();window.addEventListener("online",online);window.addEventListener("offline",online);networkCleanup=()=>{window.removeEventListener("online",online);window.removeEventListener("offline",online);};const prefs=node("button","Ứng dụng","workspace-settings-button");prefs.type="button";prefs.onclick=()=>settings.showModal();const refresh=node("button","↻","workspace-refresh");
+    refresh.type="button";refresh.title="Làm mới dữ liệu";refresh.setAttribute("aria-label","Làm mới dữ liệu");
+    refresh.onclick=()=>location.reload();
+    actions.append(search,connection,refresh,prefs);topbar.append(actions);document.body.append(topbar);
     command=makeDialog("Đi đến chức năng");const input=node("input");input.type="search";input.placeholder="Tìm dự án, bài viết, nhân sự…";input.setAttribute("aria-label","Tìm chức năng");command.append(input);const choices=node("div",undefined,"workspace-command-links");command.append(choices);
     let commandIndex=0;
     const selectCommand=index=>{const items=[...choices.querySelectorAll("a")];commandIndex=items.length?(index+items.length)%items.length:0;items.forEach((a,i)=>a.classList.toggle("workspace-command-active",i===commandIndex));items[commandIndex]?.scrollIntoView({block:"nearest"});};
@@ -74,7 +153,17 @@
       const show=state=>{status.textContent=`Phiên bản ${state.currentVersion} · ${state.message}`;progress.hidden=state.status!=="downloading";progress.value=state.progress||0;install.hidden=state.status!=="downloaded";check.disabled=["checking","downloading"].includes(state.status);};window.atelierDesktop.getUpdateState().then(show);updateCleanup=window.atelierDesktop.onUpdateState(show);
     }else{const site=node("a","Xem website công khai ↗","text-link");site.href="https://infiniti-money.github.io/Web-Design/";site.target="_blank";site.rel="noopener noreferrer";update.append(site);}
     settings.append(update);setDrawer(false);
-    const appearance=node("section",undefined,"workspace-update");appearance.append(node("strong","Cách hiển thị"),node("p","Chọn khoảng cách phù hợp với màn hình làm việc của bạn."));const density=node("button",undefined,"btn ghost");density.type="button";const syncDensity=()=>{const compact=document.body.classList.contains("workspace-compact");density.textContent=compact?"Mật độ: Gọn":"Mật độ: Thoáng";density.setAttribute("aria-pressed",String(compact));};density.onclick=()=>{document.body.classList.toggle("workspace-compact");preferences.write("density",document.body.classList.contains("workspace-compact")?"compact":"comfortable");syncDensity();};syncDensity();appearance.append(density);settings.append(appearance);
+    const appearance=node("section",undefined,"workspace-update");appearance.append(node("strong","Cách hiển thị"),node("p","Chọn khoảng cách phù hợp với màn hình làm việc của bạn."));const density=node("button",undefined,"btn ghost");density.type="button";const syncDensity=()=>{const compact=document.body.classList.contains("workspace-compact");density.textContent=compact?"Mật độ: Gọn":"Mật độ: Thoáng";density.setAttribute("aria-pressed",String(compact));};density.onclick=()=>{document.body.classList.toggle("workspace-compact");preferences.write("density",document.body.classList.contains("workspace-compact")?"compact":"comfortable");syncDensity();};syncDensity();appearance.append(density);
+    const themeLabel=node("label","Giao diện sáng / tối","workspace-theme-label");
+    themeLabel.htmlFor="workspace-theme-select";
+    const theme=node("select",undefined,"workspace-theme-select");theme.id="workspace-theme-select";
+    for(const [value,label] of [["system","Theo hệ thống"],["light","Sáng"],["dark","Tối"]]){
+      const option=node("option",label);option.value=value;theme.append(option);
+    }
+    theme.value=preferences.read("theme")||"system";
+    theme.onchange=()=>{preferences.write("theme",theme.value);applyTheme(theme.value);};
+    appearance.append(themeLabel,theme);settings.append(appearance);
+    if(rootAdmin)renderModuleHub(profile);
     const current=rootAdmin?tabs.find(tab=>document.getElementById("tab-"+tab[0])?.getAttribute("aria-selected")==="true")?.[1]:modules.find(module=>module[0]===currentFile())?.[1];topbar.querySelector(".workspace-location").textContent="ATELIER HOME / "+(current||"Không gian làm việc");
     const main=document.querySelector("body>main");if(main&&!document.querySelector(".workspace-skip")){main.id=main.id||"workspace-main";main.tabIndex=-1;const skip=node("a","Đến nội dung chính","workspace-skip");skip.href="#"+main.id;skip.onclick=event=>{event.preventDefault();main.focus();};document.body.prepend(skip);}
   }
