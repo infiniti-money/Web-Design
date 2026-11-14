@@ -2,7 +2,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
-const read = (path)=>fs.readFileSync(path,"utf8").replace(/^\\s*--.*$/gm,"");
+const read = (path)=>fs.readFileSync(path,"utf8").replace(/^\s*--.*$/gm,"");
 const opt=read("supabase/rls-initplan-review.sql");
 const rollback=read("supabase/rls-initplan-rollback.sql");
 const candidate=read("supabase/index-candidates-review.sql");
