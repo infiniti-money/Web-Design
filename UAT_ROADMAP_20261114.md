@@ -36,3 +36,9 @@ Website công khai `v1.28.3` đã nghiệm thu Deploy, browser, SEO. Đợt `v1.
 - Windows 1.2.0: smoke Electron trong workflow Windows → build Setup và Portable → tag `desktop-v1.2.0` sau nghiệm thu tự động → kiểm tra checksum/feed. Xác minh cài đè, ký số và dữ liệu DPAPI trên máy thật là cổng riêng.
 - Search Console/CWV: kiểm tra quyền sở hữu domain, index coverage, Lighthouse lab và Web Vitals thực địa; không suy từ điểm phòng lab thành xếp hạng SEO.
 - Công trình thật, giá, ảnh bản quyền và nội dung pháp lý phải được chủ doanh nghiệp phê duyệt trước khi xuất bản.
+
+## Tự động phát hành PC sau CI — cấu hình triển khai
+
+Workflow `.github/workflows/desktop-promote.yml` chỉ kích hoạt khi `Validate ATELIER HOME` đạt **success trên push main thuộc repository chính**, không dùng build từ fork/PR để tạo tag. Nó so SHA validated với `origin/main`, xác minh `desktop/package.json` và `desktop/package-lock.json` cùng phiên bản và có release notes rồi mới tạo `desktop-v<version>`. Nếu tag đã có thì bỏ qua. Tag được tạo bằng `GITHUB_TOKEN` không tự khởi chạy workflow theo push, nên sử dụng `workflow_dispatch` để gọi workflow đóng gói Windows trên đúng tag. Quy trình tạo GitHub Release và cập nhật `desktop-stable/latest.yml` do `desktop-release.yml` đảm nhiệm.
+
+**Cổng kiểm chứng sau phát hành:** workflow `desktop-release.yml` thành công; tag đúng source SHA; download Setup, Portable; kiểm tra feed `latest.yml`, SHA-512 và version; thông báo người dùng chỉ sau khi kiểm tra. Trường hợp tag tạo thành công nhưng workflow dispatch hoặc build thất bại, kiểm tra/rerun thủ công workflow từ tag thay vì tự tạo lại tag. Đây không thay thế nghiệm thu cài đè trên máy thật hoặc ký số.
