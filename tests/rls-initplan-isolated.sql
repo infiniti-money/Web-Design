@@ -4,10 +4,10 @@ DO $$ BEGIN
  IF current_database()<>'rls_perf_test' OR to_regclass('auth.users') IS NOT NULL
  THEN RAISE EXCEPTION 'Requires a new rls_perf_test database'; END IF;
 END $$;
-DO $ BEGIN
+DO $$ BEGIN
  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
-END $;
+END $$;
 CREATE SCHEMA auth;
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$
  SELECT (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid
