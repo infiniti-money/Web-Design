@@ -4,6 +4,7 @@ test("Desktop protocol accepts only packaged resources and rejects traversal or 
   const root=path.resolve("ui");
   assert.equal(trustedPage("atelier://app/admin.html#projects"),true);
   assert.equal(trustedPage("atelier://app/operations.html"),true);
+  assert.equal(trustedPage("atelier://app/uat.html"),true);
   assert.equal(trustedPage("atelier://app/payments.html"),true);
   for(const url of ["https://infiniti-money.github.io/Web-Design/admin.html","atelier://other/admin.html","atelier://app.evil/admin.html","atelier://user@app/admin.html","atelier://app/admin-posts.html/extra"])assert.equal(trustedPage(url),false);
   assert.equal(resolveAsset("atelier://app/assets/admin-workspace.css",root),path.join(root,"assets/admin-workspace.css"));
