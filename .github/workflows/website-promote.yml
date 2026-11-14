@@ -1,0 +1,79 @@
+name: Promote validated website release
+
+on:
+  workflow_run:
+    workflows: [Validate ATELIER HOME]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: atelier-website-release-promotion
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Tag only validated main and publish immutable source package
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm release contents and version agree with validated revision
+        shell: bash
+        env:
+          VALIDATED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          if [ "$(git rev-parse origin/main)" != "$VALIDATED_SHA" ]; then
+            echo "Main moved after validation; skipping superseded promotion."
+            exit 0
+          fi
+          node - <<'NODE'
+          const fs=require('fs'),m=require('./website-release.json');
+          const {validateRelease}=require('./scripts/package-release.cjs');
+          const {execFileSync}=require('child_process');
+          const names=execFileSync('git',['ls-tree','-r','--name-only','HEAD'],{encoding:'utf8'}).trim().split('\n');
+          validateRelease(m,names);
+          if(!fs.existsSync(m.notes))throw Error('Release notes missing');
+          console.log('Validated web version:',m.version);
+          NODE
+      - name: Tag version and dispatch trusted website package workflow
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VALIDATED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          if [ "$(git rev-parse origin/main)" != "$VALIDATED_SHA" ]; then
+            echo "Main moved; skipping obsolete tag."
+            exit 0
+          fi
+          version="$(node -p 'require("./website-release.json").version')"
+          tag="v$version"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "Tag already exists: $tag. No republishing."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" "$VALIDATED_SHA" -m "ATELIER HOME web $version (validated main)"
+          git push origin "refs/tags/$tag"
+          # GITHUB_TOKEN tag pushes do not trigger tag-push workflows: dispatch on exact ref.
+          gh workflow run publish.yml --ref "$tag"
+          echo "Dispatched immutable website release for $tag / $VALIDATED_SHA."
