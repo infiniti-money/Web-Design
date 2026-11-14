@@ -153,3 +153,43 @@ jobs:
         env:
           SITE_URL: http://127.0.0.1:4173/
         run: node tests/payments-browser.cjs
+
+  windows-manager-qa:
+    name: Windows Manager 1.2.0 smoke and installer QA
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - name: Install pinned Windows Manager dependencies
+        working-directory: desktop
+        run: npm ci
+      - name: Install Electron runtime
+        working-directory: desktop
+        run: node node_modules/electron/install.js
+      - name: Verify Electron sandbox and updater contracts
+        working-directory: desktop
+        run: npm test
+      - name: Prepare and smoke-test real Electron renderer
+        working-directory: desktop
+        run: |
+          npm run prepare:ui
+          npm run test:smoke
+      - name: Package unsigned Setup and Portable
+        working-directory: desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run dist:win
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: atelier-home-manager-1.2.0-qa
+          path: |
+            desktop/dist/*.exe
+            desktop/dist/*.blockmap
+            desktop/dist/latest.yml
+          retention-days: 7
