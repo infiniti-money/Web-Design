@@ -10,3 +10,10 @@ supabase/.temp/
 *.log
 _site/
 dist/
+
+# Local-only recovery/UAT evidence must not be committed
+*.dump
+*.pgdump
+*.backup
+*recovery-evidence*.json
+atelier-uat-self-report*.json

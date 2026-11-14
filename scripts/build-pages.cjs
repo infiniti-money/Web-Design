@@ -3,7 +3,7 @@ const fs=require("node:fs"),path=require("node:path");
 const {buildKnowledge,fetchPublicPosts}=require("./build-knowledge.cjs");
 const {buildCatalog,fetchPublicCatalog}=require("./build-catalog.cjs");
 const {buildConversion}=require("./build-conversion.cjs");
-const pages=["index.html","payment-return.html","404.html","admin.html","admin-posts.html","admin-catalog.html","commercial.html","payments.html","operations.html","delivery.html","notifications.html","reports-advanced.html","catalog.html","kien-thuc.html","bai-viet.html","privacy.html","register.html","complete-profile.html","reset-password.html","set-password.html"];
+const pages=["index.html","payment-return.html","404.html","admin.html","admin-posts.html","admin-catalog.html","commercial.html","payments.html","operations.html","delivery.html","notifications.html","reports-advanced.html","uat.html","catalog.html","kien-thuc.html","bai-viet.html","privacy.html","register.html","complete-profile.html","reset-password.html","set-password.html"];
 const files=[...pages,"admin.js","app-config.js","site-backend.js","robots.txt","sitemap.xml"];
 const directories=["assets","dich-vu","du-an"];
 const extensions=new Set([".html",".js",".css",".xml",".txt",".svg",".png",".jpg",".jpeg",".webp",".ico",".woff",".woff2",".mp4",".webm"]);

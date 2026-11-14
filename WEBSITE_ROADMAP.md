@@ -1,3 +1,7 @@
+### Đợt tiếp nối v1.28.6 / Windows Manager 1.2.2 — 14/11/2026
+
+Chặng 5/6 ưu tiên khả năng xác minh điều kiện **backup/restore**, **UAT nhân viên thật** và an toàn vận hành trước khi tự động mở rộng migration. Bổ sung `uat.html` Admin-only và verifier kiểm SHA-256 backup cục bộ `scripts/verify-recovery-evidence.cjs`; dữ liệu khai báo không tạo chứng nhận production. Release chỉ có thay đổi UI/công cụ offline, không thay đổi Auth/DB/RLS/SEO thật. Tham chiếu `PRODUCTION_UAT_NEXT_PHASE_20261114.md`, Issue #24/#29. Mọi bằng chứng thực tiếp tục chờ người quản trị/thiết bị được phép; **0 Employee** khi kiểm tra production.
+
 ### Đợt triển khai v1.28.4 / Windows Manager 1.2.0 — 14/11/2026
 
 Tiếp nối giao diện công khai toàn khung v1.28.3, chuẩn bị workspace dùng chung GitHub Pages và Windows Manager: sidebar theo nhóm chức năng, danh mục điều hành dạng thẻ, dark/light/system, thao tác responsive, cập nhật trang báo cáo nâng cao theo phân quyền Admin/Quản lý. CI bổ sung Playwright mô phỏng Admin/Quản lý/Nhân viên, Electron smoke và RLS policy equivalence trên PostgreSQL 17 biệt lập.

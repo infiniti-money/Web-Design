@@ -44,6 +44,7 @@ const {buildPages}=require("../scripts/build-pages.cjs");
   assert.equal(await page.locator(".workspace-modules-grid a[href$='payments.html']").count(),1);
   assert.equal(await page.locator(".workspace-modules-grid a[href$='reports-advanced.html']").count(),1);
   assert.equal(await page.locator(".workspace-modules-grid a[href$='#staff']").count(),1);
+  assert.equal(await page.locator(".workspace-modules-grid a[href$='uat.html']").count(),1);
   await page.locator(".workspace-settings-button").click();
   await page.locator("#workspace-theme-select").selectOption("dark");
   assert.equal(await page.locator("body.workspace-theme-dark").count(),1);
@@ -53,10 +54,11 @@ const {buildPages}=require("../scripts/build-pages.cjs");
   assert.equal(await page.locator(".workspace-sidebar a[href$='commercial.html']").count(),1);
   assert.equal(await page.locator(".workspace-sidebar a[href$='reports-advanced.html']").count(),1);
   assert.equal(await page.locator(".workspace-sidebar a[href$='payments.html']").count(),0);
+  assert.equal(await page.locator(".workspace-sidebar a[href$='uat.html']").count(),0);
   assert.equal(await page.locator(".workspace-sidebar #tab-staff:not(.hide)").count(),0);
   await login("employee");
   assert.equal(await page.locator(".workspace-sidebar a[href$='notifications.html']").count(),1);
-  for(const file of ["operations.html","payments.html","commercial.html","reports-advanced.html","admin-posts.html","admin-catalog.html"]){
+  for(const file of ["operations.html","uat.html","payments.html","commercial.html","reports-advanced.html","admin-posts.html","admin-catalog.html"]){
     assert.equal(await page.locator(".workspace-sidebar a[href$='"+file+"']").count(),0,file+" denied in employee navigation");
   }
   assert.equal(await page.locator(".workspace-sidebar #tab-staff:not(.hide)").count(),0);

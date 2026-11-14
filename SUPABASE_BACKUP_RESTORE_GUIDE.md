@@ -1,3 +1,5 @@
+> **Kiểm tra bổ sung từ bản v1.28.6 (14/11/2026):** Sau khi hoàn tất backup và restore trên máy được ủy quyền, có thể dùng `node scripts/verify-recovery-evidence.cjs /đường/dẫn/manifest.json` để băm SHA256 file dump và so số dòng được người vận hành ghi nhận. Đọc `PRODUCTION_UAT_NEXT_PHASE_20261114.md` về cấu trúc manifest và giới hạn: **công cụ không kết nối database, không xác nhận Auth/Storage tự động, không thay thế thử restore thực**, luôn kết luận `REVIEW_REQUIRED` hoặc `BLOCKED`. Không đưa backup/manifest chứa PII lên GitHub.
+
 # Sao lưu và thử khôi phục ATELIER HOME
 
 Ngày lập: 08/11/2026. Project nguồn đang chạy: `mswiegltusllzvuavjdh`.

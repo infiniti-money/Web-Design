@@ -4,7 +4,7 @@ test("Pages artifact contains working public routes and excludes private source 
   const output=fs.mkdtempSync(path.join(os.tmpdir(),"atelier-pages-"));
   const result=buildPages({output,revision:"a".repeat(40)});
   assert.ok(result.files>30);
-  for(const file of ["admin.html","admin.js","admin-posts.html","operations.html","assets/operations.js","assets/admin-workspace.js","assets/vendor/purify.min.js","dich-vu/thiet-ke-noi-that.html","du-an/index.html","sitemap.xml"]){assert.ok(fs.existsSync(path.join(output,file)),file);}
+  for(const file of ["admin.html","admin.js","admin-posts.html","uat.html","assets/uat-readiness.js","operations.html","assets/operations.js","assets/admin-workspace.js","assets/vendor/purify.min.js","dich-vu/thiet-ke-noi-that.html","du-an/index.html","sitemap.xml"]){assert.ok(fs.existsSync(path.join(output,file)),file);}
   for(const file of ["desktop","supabase","tests","cloudflare","content",".git",".github","README.md"]){assert.equal(fs.existsSync(path.join(output,file)),false,file);}
   assert.equal(JSON.parse(fs.readFileSync(path.join(output,"release.json"))).revision,"a".repeat(40));
   assert.throws(()=>buildPages({output}),/must be empty/);
