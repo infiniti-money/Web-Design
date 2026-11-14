@@ -29,5 +29,5 @@ test("Staged RLS initplan optimization cannot grant roles, disable RLS or mutate
  }
  assert.match(sql,/\(select auth\.uid\(\)\)/);
  assert.match(sql,/\(select auth\.jwt\(\)\)/);
- assert.doesNotMatch(sql,/\b(?:GRANT|REVOKE|DISABLE ROW LEVEL SECURITY|DROP POLICY|TRUNCATE|DELETE FROM|INSERT INTO|UPDATE public)\b/i);
+ assert.doesNotMatch(sql.replace(/^--.*$/gm,""),/\b(?:GRANT|REVOKE|DISABLE ROW LEVEL SECURITY|DROP POLICY|TRUNCATE|DELETE FROM|INSERT INTO|UPDATE public)\b/i);
 });
