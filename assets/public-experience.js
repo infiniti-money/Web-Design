@@ -10,7 +10,7 @@
  let observer,imageObserver,prepareObserver;const reveal=el=>{el.dataset.atelierReveal='done';observer?.unobserve(el);};
  if(!motion.matches&&'IntersectionObserver'in window){
   observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)reveal(entry.target);}),{rootMargin:'0px 0px -8% 0px',threshold:0.12});
-  const candidates=[...document.querySelectorAll('.intro-copy,.section-head,.turnkey-heading,.estimate-copy,.consult-copy,.process .step,.advantage-grid>article,.public-page .cards>*,.public-page .split>*,.public-page .faq>details')].filter(el=>el.getBoundingClientRect().top>innerHeight);
+  const candidates=[...document.querySelectorAll('.intro-copy h2,.intro-copy>p,.section-head h2,.section-head p,.turnkey-heading h2,.turnkey-heading>p,.estimate-copy h2,.consult-copy h2,.process .step h3,.advantage-grid h3,.public-page .cards>*,.public-page .split>*,.public-page .faq>details,.public-page .section h2')].filter(el=>el.getBoundingClientRect().top>innerHeight);
   candidates.forEach((el,index)=>{el.style.setProperty('--atelier-reveal-delay',(index%3)*70+'ms');el.dataset.atelierReveal='pending';observer.observe(el);});
  }
  // Frames clip image zoom without moving captions or changing image sources/dimensions.

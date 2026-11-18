@@ -190,3 +190,7 @@ Triển khai trang chủ/dịch vụ/công trình/Catalog/kiến thức và chi 
 ### 18/11/2026 — v1.29.2: chuẩn bị ảnh theo viewport
 
 Chỉ chuẩn bị khung zoom khi ảnh sắp vào màn hình, giảm công việc khi tải hero; giữ hành vi hover/touch và các điều kiện giảm chuyển động của v1.29.1.
+
+### 18/11/2026 — v1.29.3: glass hero và chữ chuyển động
+
+Bốn action kính mờ đồng bộ với Tạm dừng, ảnh nền hero phản hồi pointer thật, tiêu đề/mô tả xuất hiện theo nhịp. Kiểm chứng computed style và frame nội suy tại GLASS_HERO_ACCEPTANCE.md.
