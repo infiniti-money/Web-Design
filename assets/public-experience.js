@@ -35,9 +35,10 @@
   if(!motion.matches)imageObserver?.observe(frame);
  }
  document.querySelectorAll(imageSelector).forEach(registerImage);
- const main=document.querySelector('main');if(main)new MutationObserver(records=>records.forEach(record=>record.addedNodes.forEach(node=>{
-  if(node.nodeType!==1)return;if(node.matches('img'))registerImage(node);node.querySelectorAll('img').forEach(registerImage);
- }))).observe(main,{childList:true,subtree:true});
+ const main=document.querySelector('main');if(main)new MutationObserver(records=>records.forEach(record=>{
+  record.removedNodes.forEach(node=>{if(node.nodeType!==1||node.isConnected)return;if(node.matches('[data-atelier-media]'))imageObserver?.unobserve(node);node.querySelectorAll('[data-atelier-media]').forEach(frame=>imageObserver?.unobserve(frame));});
+  record.addedNodes.forEach(node=>{if(node.nodeType!==1)return;if(node.matches('img'))registerImage(node);node.querySelectorAll('img').forEach(registerImage);});
+ })).observe(main,{childList:true,subtree:true});
  function showAll(){observer?.disconnect();imageObserver?.disconnect();document.querySelectorAll('[data-atelier-reveal=pending]').forEach(el=>reveal(el));document.querySelectorAll('[data-atelier-media]').forEach(el=>{el.dataset.atelierImageState='shown';});}
  const observeImages=()=>document.querySelectorAll('[data-atelier-media]').forEach(el=>imageObserver?.observe(el));
  motion.addEventListener?.('change',event=>{if(event.matches)showAll();else observeImages();});
