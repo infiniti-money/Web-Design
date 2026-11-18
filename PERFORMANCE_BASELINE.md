@@ -92,3 +92,9 @@ Thay thế chiến lược chờ ảnh trước phông của v1.28: phông và C
 | 3 | 98 | 100 | 100 | 100 | 1,346 s | 2,243 s | 107 ms | 0 |
 
 Trung vị LCP 2,243 giây, Performance 98; không phải bảo đảm tốc độ mọi thiết bị/mạng hoặc CWV thực địa. Báo cáo local dist/audits/home-v1-28-1-2026-11-08-{1,2,3}.report.*. Revision ff8d57f sau đó chỉ sửa fixture kiểm thử và tài liệu, không đổi mã website.
+
+## Giao diện v1.29 — 18/11/2026
+
+Đo Pages bằng Lighthouse 13.6.0/Edge 157 mobile mặc định. Home revision ac784b4: Performance 90/95/98; LCP 3,401/2,385/2,386 giây (trung vị 2,386); CLS 0. Bản chỉnh tương phản 94d4136: home P89/A100/BP100/SEO100, LCP 2,745 giây, CLS 0; dịch vụ P97/A100/BP100/SEO100, LCP 1,950 giây, CLS 0.
+
+Có lần vượt 3 giây, hiệu năng dao động theo tài nguyên ngoài và môi trường; không xác nhận dưới 3 giây ổn định. Thẻ mobile dùng native scroll-snap, không wheel/touch interception hay thư viện animation; ảnh phụ gallery vẫn tải theo điều kiện v1.28.3. Bằng chứng chi tiết và giới hạn tại PUBLIC_EXPERIENCE_ACCEPTANCE.md; chưa có dữ liệu CWV/INP thực địa.

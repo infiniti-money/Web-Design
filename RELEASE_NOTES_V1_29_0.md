@@ -2,7 +2,7 @@
 
 Triển khai hệ thống giao diện mới cho website công khai, lấy cảm hứng từ cách trình bày và khám phá của EZVIZ, giữ phong cách xanh đậm/kem và phông chữ ATELIER HOME. Không sao chép tài nguyên hoặc mã EZVIZ.
 
-- Trang chủ: ảnh lớn bo góc, lối tắt bốn nhóm nhu cầu, bố cục dịch vụ/cảm hứng/công việc/quy trình/tư vấn đồng nhất.
+- Trang chủ: gallery toàn màn hình có điều khiển, thẻ bo góc, lối tắt bốn nhóm nhu cầu, bố cục dịch vụ/cảm hứng/công việc/quy trình/tư vấn đồng nhất.
 - Dịch vụ: bốn trang có ảnh minh họa đáp ứng màn hình và bố cục ảnh–nội dung.
 - Công trình, Catalog, kiến thức, trang chi tiết sinh tự động, bài viết cũ và quyền riêng tư dùng chung hệ thống giao diện. Không thêm công trình giả hay số liệu kinh doanh.
 - Mobile: dải thẻ vuốt native có nút trước/sau và bàn phím; menu đóng bằng Escape hoặc nhấp bên ngoài.

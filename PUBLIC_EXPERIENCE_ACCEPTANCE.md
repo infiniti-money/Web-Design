@@ -33,3 +33,17 @@ Hiệu ứng opacity/transform chỉ gắn vào khối ngoài màn hình sau khi
 Đã rebase lên aa07fa9 (web 1.28.6 / PC 1.2.2), giữ toàn bộ cải tiến Admin/UAT/RLS/reports và auto-release của main. Xử lý xung đột homepage theo hướng giữ gallery fullscreen và điều khiển/pause/reduced-motion; chỉ thêm giao diện/khám phá mới. Không sửa các migration hoặc triển khai backend. Kiểm thử gallery cũ bổ sung vào nghiệm thu bản hợp nhất.
 
 Sau hợp nhất: 175 kiểm thử Node, 174 đạt/1 lead thật chủ động bỏ qua; desktop security 2 đạt. Hero gallery kiểm tra ở 320/390/768/1024/1440/1920, đổi ảnh bằng tay/bàn phím, pause, reduced motion và no-JS đều đạt trên Edge. Bộ public-experience và navigation kiểm tra lại đạt. Giữ auto-promote website của main để chỉ phát hành sau Validate thành công.
+
+## Kiểm tra trực tiếp Pages
+
+Revision giao diện đầu ac784b43d54ac31b65b16408f8aa4e7a36c44ec0 và bản chỉnh tương phản 94d4136f27cf6056620dbf3611bb7768a5c5282b được xác nhận bằng release.json. Bộ kiểm tra live chạy 11 route tại 1440/390px (22 lượt), menu/rail/reduced-motion và fallback đều đạt; không phải bốn kích thước như thông điệp console dùng lại từ test local. Bộ local/CI mới là phần bốn kích thước.
+
+Lighthouse 13.6.0/Edge 157 mobile mặc định: ba lượt home đầu Performance 90/95/98, LCP 3,401/2,385/2,386 giây, CLS 0; Accessibility 97 trước sửa màu. Dịch vụ ban đầu Performance 99, LCP 2,094 giây, Accessibility 95. Đã sửa độ tương phản nhãn khám phá, phần triết lý, hướng dẫn tư vấn và CTA; bỏ aria-label logo ghi đè tên hiển thị. Lần kiểm chứng cuối trên revision 94d4136: home P89/A100/BP100/SEO100, LCP 2,745 giây, CLS 0; dịch vụ P97/A100/BP100/SEO100, LCP 1,950 giây, CLS 0.
+
+Có mẫu vượt 3 giây và điểm Performance dao động; không tuyên bố tốc độ dưới 3 giây ổn định hoặc tương đương mọi điện thoại. Báo cáo local tại dist/audits/{home,services}-v1-29{-final}-2026-11-18-*.report.{json,html}. Không đo CWV thực địa/INP hay conversion khách hàng thật trong đợt này.
+
+## Kết quả phát hành
+
+Bản cuối 94d4136f27cf6056620dbf3611bb7768a5c5282b: [Validate 44302192561](https://github.com/infiniti-money/Web-Design/actions/runs/44302192561) toàn bộ job đạt, gồm Windows Manager QA, SQL cách ly, Node và Chromium. [Pages 44302192439](https://github.com/infiniti-money/Web-Design/actions/runs/44302192439), [browser smoke 44302281832](https://github.com/infiniti-money/Web-Design/actions/runs/44302281832), [SEO/Lighthouse CI 44302281882](https://github.com/infiniti-money/Web-Design/actions/runs/44302281882) đều thành công. Auto-promote 44302804577 chỉ tạo tag sau khi Validate đạt; [release 44302878932](https://github.com/infiniti-money/Web-Design/actions/runs/44302878932) thành công.
+
+[Release v1.29.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.29.0) đã phát hành; ZIP 1093459 byte đã tải và SHA256 b53c02865e5c7588abd68c345d8ce4a41483e22adb03decbf7ae2c84b6f20bee khớp digest GitHub. PC giữ bản đã có 1.2.2, không xuất bản bộ cài mới trong đợt web này. Preview cục bộ đã dừng; website chính thức mở trong trình xem khi được hỗ trợ.
