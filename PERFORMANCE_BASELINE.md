@@ -98,3 +98,7 @@ Trung vị LCP 2,243 giây, Performance 98; không phải bảo đảm tốc đ�
 Đo Pages bằng Lighthouse 13.6.0/Edge 157 mobile mặc định. Home revision ac784b4: Performance 90/95/98; LCP 3,401/2,385/2,386 giây (trung vị 2,386); CLS 0. Bản chỉnh tương phản 94d4136: home P89/A100/BP100/SEO100, LCP 2,745 giây, CLS 0; dịch vụ P97/A100/BP100/SEO100, LCP 1,950 giây, CLS 0.
 
 Có lần vượt 3 giây, hiệu năng dao động theo tài nguyên ngoài và môi trường; không xác nhận dưới 3 giây ổn định. Thẻ mobile dùng native scroll-snap, không wheel/touch interception hay thư viện animation; ảnh phụ gallery vẫn tải theo điều kiện v1.28.3. Bằng chứng chi tiết và giới hạn tại PUBLIC_EXPERIENCE_ACCEPTANCE.md; chưa có dữ liệu CWV/INP thực địa.
+
+## Nút và chuyển động ảnh v1.29.2 — 18/11/2026
+
+Pages d20a0462d9131f26974b8eee8de14d3789478989, Lighthouse 13.6.0/Edge 157 mobile: home P84/P89/P82, LCP 3,364/3,005/3,151 giây (trung vị 3,151); dịch vụ P92, LCP 2,615 giây. A/BP/SEO 100, CLS 0 ở cả bốn mẫu. Không đạt dưới 3 giây ổn định. Không có dữ liệu CWV/INP hay đo FPS điện thoại vật lý. Kiểm chứng gesture và hiệu ứng riêng tại IMAGE_MOTION_ACCEPTANCE.md; báo cáo dist/audits/*-v1-29-2-2026-11-18-*.report.*.

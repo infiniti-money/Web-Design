@@ -33,3 +33,17 @@ CI, Pages và release ghi bổ sung sau triển khai. Không đánh dấu CWV/co
 ## Bản tối ưu tiếp v1.29.2
 
 Bản v1.29.1 đã phát hành. Phép đo lạnh tiếp theo còn phát hiện khởi tạo nhiều khung ảnh ngoài màn hình, nên v1.29.2 bổ sung prepareObserver rootMargin 280px: chỉ chuẩn bị ảnh sắp tới viewport, batch hình học rồi dùng imageObserver giữ ngưỡng 22% như trước. Ảnh ngoài vùng chuẩn bị không bị bọc/biến đổi lúc tải đầu. Test hover/touch sửa phần thiết lập vị trí để chờ ảnh tới vùng chuẩn bị; vẫn kiểm tra nội suy và gesture thực tế, không nới tiêu chí hiệu ứng. CSS/JS query cuối là 1.29.2.
+
+## Bằng chứng Pages v1.29.2
+
+Revision d20a0462d9131f26974b8eee8de14d3789478989 đã xác nhận từ release.json. Bộ image-motion chạy trực tiếp trên Pages đạt: bốn nút, hover nội suy, chạm cuộn dọc/vuốt ngang, reduced motion, ảnh động và cleanup, no-JS/CSS lỗi. Không dùng tài khoản thật hoặc gửi API ghi.
+
+Lighthouse mobile lab 13.6.0/Edge 157: ba lượt home Performance 84/89/82, LCP 3,364/3,005/3,151 giây; dịch vụ Performance 92, LCP 2,615 giây. Accessibility/Best Practices/SEO 100 và CLS 0 ở cả bốn. Chưa đạt mục tiêu dưới 3 giây ổn định, không suy ra CWV/INP hay độ mượt trên điện thoại vật lý từ điểm lab. Báo cáo local dist/audits/{home,services}-v1-29-2-2026-11-18-*.report.*.
+
+Phép đo lab gồm tải ban đầu và môi trường giả lập; khả năng cuộn/vuốt và nội suy ảnh được kiểm chứng riêng bằng gesture. Không coi Performance là bằng chứng đã hoặc chưa đạt FPS trên máy thật. Preview và browser QA do tác vụ tạo đã đóng sau kiểm tra.
+
+## Nghiệm thu phát hành cuối
+
+[Validate 44308651444](https://github.com/infiniti-money/Web-Design/actions/runs/44308651444) thành công tất cả job, gồm kiểm thử motion hover/touch mới, UI cũ, Node/SQL/Windows. [Pages 44308651391](https://github.com/infiniti-money/Web-Design/actions/runs/44308651391), [browser smoke 44308739084](https://github.com/infiniti-money/Web-Design/actions/runs/44308739084), [SEO/Lighthouse 44308738963](https://github.com/infiniti-money/Web-Design/actions/runs/44308738963) thành công. Smoke cuối xác nhận lại gallery no-JS, không bỏ qua lỗi ở bản đầu.
+
+[Release v1.29.2](https://github.com/infiniti-money/Web-Design/releases/tag/v1.29.2) do auto-promote 44309296846 sau Validate; workflow 44309381142 thành công. ZIP 1104680 byte đã tải kiểm chứng; SHA256 964fb0c5baf92df624664afb26e87779ad10d707da6f0d1d946e388e68129be1 khớp digest GitHub. Không phát hành bộ cài PC mới. Website đã phục vụ d20a0462d9131f26974b8eee8de14d3789478989 trước khi chốt release; commit nghiệm thu sau chỉ thay tài liệu.
