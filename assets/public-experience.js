@@ -19,6 +19,9 @@
  function registerPair(group){
   if(!group||group.dataset.atelierPair||motion.matches||!('IntersectionObserver'in window))return;
   const children=[...group.children].filter(el=>!el.hidden);if(children.length!==2)return;
+  // A paired row owns motion; remove older nested vertical reveals to avoid double movement.
+  children.forEach(child=>[child,...child.querySelectorAll('[data-atelier-reveal]')].forEach(el=>{observer?.unobserve(el);el.removeAttribute('data-atelier-reveal');el.style.removeProperty('--atelier-reveal-delay');}));
+  if(group.parentElement?.matches('.knowledge-card')){observer?.unobserve(group.parentElement);group.parentElement.removeAttribute('data-atelier-reveal');}
   children[0].dataset.atelierPairSide='left';children[1].dataset.atelierPairSide='right';
   if(matchMedia('(max-width:620px)').matches&&group.getBoundingClientRect().height>innerHeight*.72){group.dataset.atelierPair='individual';children.forEach(el=>{el.dataset.atelierEntry=el.getBoundingClientRect().top>innerHeight*.8?'pending':'done';if(el.dataset.atelierEntry==='pending')sideObserver.observe(el);});}
   else{group.dataset.atelierPair=group.getBoundingClientRect().top>innerHeight*.8?'pending':'done';if(group.dataset.atelierPair==='pending')pairObserver.observe(group);}
