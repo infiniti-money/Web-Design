@@ -99,5 +99,6 @@
   }
   hero.dataset.heroActive="1";
   document.documentElement.classList.add("hero-gallery-ready");
+  controls.hidden=false;
   schedule();
 })();

@@ -85,3 +85,5 @@ html:not(.hero-gallery-ready) .hero-carousel-controls{display:none}
 @media(prefers-reduced-motion:reduce){
   .hero#home .hero-slide,.hero-carousel-controls button{transition:none!important}
 }
+
+.hero-carousel-controls[hidden]{display:none}
