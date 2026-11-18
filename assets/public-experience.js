@@ -6,15 +6,42 @@
  function closeMenu(focus=false){if(menu?.open){menu.open=false;if(focus)menu.querySelector('summary').focus();}if(homeMenu?.classList.contains('menu-open')){homeMenu.classList.remove('menu-open');hamb?.setAttribute('aria-expanded','false');if(focus)hamb?.focus();}}
  document.addEventListener('keydown',event=>{if(event.key==='Escape')closeMenu(true);});
  document.addEventListener('click',event=>{if(menu?.open&&!menu.contains(event.target))closeMenu();if(homeMenu?.classList.contains('menu-open')&&!homeMenu.contains(event.target)&&!hamb?.contains(event.target))closeMenu();if(event.target.closest('.public-menu nav a'))closeMenu();});
- // Do not animate above-the-fold content or hide anything until observers exist.
- let observer;const reveal=el=>{el.dataset.atelierReveal='done';observer?.unobserve(el);};
+ // Trigger inside the viewport, not before the visitor can see the transition.
+ let observer,imageObserver;const reveal=el=>{el.dataset.atelierReveal='done';observer?.unobserve(el);};
  if(!motion.matches&&'IntersectionObserver'in window){
-  observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)reveal(entry.target);}),{rootMargin:'0px 0px 80px 0px',threshold:0});
-  document.querySelectorAll('.intro-grid,.section-head,.service-grid,.mosaic,.process-steps,.advantage-grid,.public-page .cards,.public-page .split,.public-page .faq,.project-gallery').forEach(el=>{if(el.getBoundingClientRect().top>innerHeight+40){el.dataset.atelierReveal='pending';observer.observe(el);}});
+  observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)reveal(entry.target);}),{rootMargin:'0px 0px -8% 0px',threshold:0.12});
+  const candidates=[...document.querySelectorAll('.intro-copy,.section-head,.turnkey-heading,.estimate-copy,.consult-copy,.process .step,.advantage-grid>article,.public-page .cards>*,.public-page .split>*,.public-page .faq>details')].filter(el=>el.getBoundingClientRect().top>innerHeight);
+  candidates.forEach((el,index)=>{el.style.setProperty('--atelier-reveal-delay',(index%3)*70+'ms');el.dataset.atelierReveal='pending';observer.observe(el);});
  }
- function showAll(){observer?.disconnect();document.querySelectorAll('[data-atelier-reveal=pending]').forEach(el=>reveal(el));}
- motion.addEventListener?.('change',event=>{if(event.matches)showAll();});
- addEventListener('pageshow',event=>{if(event.persisted)showAll();});
+ // Frames clip image zoom without moving captions or changing image sources/dimensions.
+ // Keep the priority hero/gallery images outside this enhancement.
+ const imageSelector='.intro-photo>img,.service img,.project .image img,.mosaic img,.atelier-service-visual img,.project-gallery img,.project-card img,.featured-card img,.public-page .item img,.article-cover,.project-cover,.knowledge-card img';
+ const registered=new WeakSet();
+ if('IntersectionObserver'in window)imageObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+  const ratio=entry.intersectionRatio;
+  if(ratio>=0.22)entry.target.dataset.atelierImageState='shown';
+  else if(!entry.isIntersecting)entry.target.dataset.atelierImageState='waiting';
+ }),{threshold:[0,0.22],rootMargin:'0px 0px -6% 0px'});
+ function registerImage(image){
+  if(registered.has(image)||!image.matches(imageSelector)||image.closest('[data-comparison]'))return;registered.add(image);
+  let frame=image.parentElement;
+  if(!frame.matches('.intro-photo,.service,.image,.atelier-media')){
+   frame=document.createElement('div');frame.className='atelier-media';
+   if(image.classList.contains('article-cover'))frame.classList.add('atelier-article-media');
+   image.before(frame);frame.append(image);
+  }
+  frame.classList.add('atelier-media');frame.setAttribute('data-atelier-media','');
+  const box=frame.getBoundingClientRect();frame.dataset.atelierImageState=box.top>=innerHeight?'waiting':'shown';
+  if(!motion.matches)imageObserver?.observe(frame);
+ }
+ document.querySelectorAll(imageSelector).forEach(registerImage);
+ const main=document.querySelector('main');if(main)new MutationObserver(records=>records.forEach(record=>record.addedNodes.forEach(node=>{
+  if(node.nodeType!==1)return;if(node.matches('img'))registerImage(node);node.querySelectorAll('img').forEach(registerImage);
+ }))).observe(main,{childList:true,subtree:true});
+ function showAll(){observer?.disconnect();imageObserver?.disconnect();document.querySelectorAll('[data-atelier-reveal=pending]').forEach(el=>reveal(el));document.querySelectorAll('[data-atelier-media]').forEach(el=>{el.dataset.atelierImageState='shown';});}
+ const observeImages=()=>document.querySelectorAll('[data-atelier-media]').forEach(el=>imageObserver?.observe(el));
+ motion.addEventListener?.('change',event=>{if(event.matches)showAll();else observeImages();});
+ addEventListener('pageshow',event=>{if(event.persisted){showAll();if(!motion.matches)observeImages();}});
  document.addEventListener('focusin',event=>{const group=event.target.closest('[data-atelier-reveal=pending]');if(group)reveal(group);});
  // Native overflow/snap handles touch, trackpads and keyboard. Buttons add a visible alternative.
  document.querySelectorAll('.atelier-home .service-grid,.atelier-home .project-grid,.atelier-home .mosaic').forEach((rail,index)=>{

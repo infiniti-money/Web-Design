@@ -182,3 +182,7 @@ Loại bỏ phụ thuộc phông trang chủ vào ảnh hero; CSS tư vấn tả
 ### 18/11/2026 — Giao diện công khai v1.29.0
 
 Triển khai trang chủ/dịch vụ/công trình/Catalog/kiến thức và chi tiết theo cùng hệ thống hình ảnh, thẻ, menu mobile và chuyển động nhẹ. Bổ sung rail native có nút/bàn phím, reduced-motion/no-JS, giữ URL/SEO/ảnh/dữ liệu. Kiểm chứng và phạm vi tại PUBLIC_EXPERIENCE_ACCEPTANCE.md.
+
+### 18/11/2026 — v1.29.1: nút đồng nhất và chuyển động ảnh
+
+Đưa AI opener vào cùng bốn action; ảnh có hover/focus và chuyển động vào viewport/vuốt mobile theo từng khung. Kiểm thử kích thước nút, transform nội suy và touch gesture thật trong browser. Bằng chứng tại IMAGE_MOTION_ACCEPTANCE.md.
