@@ -16,7 +16,7 @@
  // Frames clip image zoom without moving captions or changing image sources/dimensions.
  // Keep the priority hero/gallery images outside this enhancement.
  const imageSelector='.intro-photo>img,.service img,.project .image img,.mosaic img,.atelier-service-visual img,.project-gallery img,.project-card img,.featured-card img,.public-page .item img,.article-cover,.project-cover,.knowledge-card img';
- const registered=new WeakSet();
+ const registered=new WeakSet(),queuedFrames=new Set();
  if('IntersectionObserver'in window)imageObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
   const ratio=entry.intersectionRatio;
   if(ratio>=0.22)entry.target.dataset.atelierImageState='shown';
@@ -31,14 +31,17 @@
    image.before(frame);frame.append(image);
   }
   frame.classList.add('atelier-media');frame.setAttribute('data-atelier-media','');
-  const box=frame.getBoundingClientRect();frame.dataset.atelierImageState=box.top>=innerHeight?'waiting':'shown';
-  if(!motion.matches)imageObserver?.observe(frame);
+  queuedFrames.add(frame);
  }
+ // Read geometry in one batch after wrapping, then write states. Interleaving
+ // each image's DOM writes and layout reads forces a full page layout per image.
+ function flushImages(){const frames=[...queuedFrames];queuedFrames.clear();const waiting=frames.map(frame=>frame.getBoundingClientRect().top>=innerHeight);frames.forEach((frame,index)=>{frame.dataset.atelierImageState=waiting[index]?'waiting':'shown';if(!motion.matches)imageObserver?.observe(frame);});}
  document.querySelectorAll(imageSelector).forEach(registerImage);
- const main=document.querySelector('main');if(main)new MutationObserver(records=>records.forEach(record=>{
+ flushImages();
+ const main=document.querySelector('main');if(main)new MutationObserver(records=>{records.forEach(record=>{
   record.removedNodes.forEach(node=>{if(node.nodeType!==1||node.isConnected)return;if(node.matches('[data-atelier-media]'))imageObserver?.unobserve(node);node.querySelectorAll('[data-atelier-media]').forEach(frame=>imageObserver?.unobserve(frame));});
   record.addedNodes.forEach(node=>{if(node.nodeType!==1)return;if(node.matches('img'))registerImage(node);node.querySelectorAll('img').forEach(registerImage);});
- })).observe(main,{childList:true,subtree:true});
+ });flushImages();}).observe(main,{childList:true,subtree:true});
  function showAll(){observer?.disconnect();imageObserver?.disconnect();document.querySelectorAll('[data-atelier-reveal=pending]').forEach(el=>reveal(el));document.querySelectorAll('[data-atelier-media]').forEach(el=>{el.dataset.atelierImageState='shown';});}
  const observeImages=()=>document.querySelectorAll('[data-atelier-media]').forEach(el=>imageObserver?.observe(el));
  motion.addEventListener?.('change',event=>{if(event.matches)showAll();else observeImages();});
