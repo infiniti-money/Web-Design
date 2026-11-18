@@ -1,4 +1,17 @@
-/* Shared photographic scenes and readable frosted surfaces. */
+/* ATELIER HOME: continuous photographic canvas and shared glass surfaces. */
+:root{
+ --glass-fill:rgba(248,250,244,.78);
+ --glass-fill-strong:rgba(250,252,247,.9);
+ --glass-edge:rgba(255,255,255,.82);
+ --glass-shadow:0 18px 55px rgba(21,48,35,.07),inset 0 1px 0 rgba(255,255,255,.7);
+ --glass-radius:26px;
+ --glass-blur:14px;
+}
+body:is(.atelier-home,.public-page){isolation:isolate;background:#e5e9df;min-height:100svh}
+body:is(.atelier-home,.public-page)::before{
+ content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+ background:linear-gradient(110deg,rgba(240,244,232,.91),rgba(243,240,230,.82) 52%,rgba(218,231,216,.88)),url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=960&q=70') center/cover no-repeat;
+}
 .atelier-home .hero-story{max-width:880px;padding:28px 32px;border:1px solid #ffffff40;border-radius:24px;background:linear-gradient(120deg,#ffffff0a,#ffffff00 60%),#10251d54;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 #ffffff26,0 18px 55px #071b151a}
 .atelier-home .hero#home .hero-story h1{font-size:clamp(42px,5.2vw,76px);line-height:1.12;margin:15px 0 20px;max-width:100%}.atelier-home .hero#home .hero-story p:not(.eyebrow){font-size:16px;line-height:1.8;max-width:690px;margin:0}.atelier-home .hero#home .hero-buttons{margin-top:22px}
 .public-page .hero{position:relative;isolation:isolate;background:#21392e;padding:64px 0;color:white;overflow:hidden}
@@ -19,3 +32,79 @@
 @media(prefers-reduced-motion:no-preference){.hero#home .hero-story>.eyebrow{animation:atelier-title-arrive .75s cubic-bezier(.2,.65,.25,1) both}.hero#home .hero-story>h1{animation:atelier-title-arrive .95s .08s cubic-bezier(.2,.65,.25,1) both}.hero#home .hero-story>p:not(.eyebrow){animation:atelier-title-arrive .95s .18s cubic-bezier(.2,.65,.25,1) both}}
 @media(max-width:620px){.atelier-home .hero-story{padding:21px 19px;border-radius:18px}.atelier-home .hero#home .hero-story h1{font-size:clamp(31px,8.9vw,40px);line-height:1.17}.atelier-home .hero#home .hero-story p:not(.eyebrow){font-size:14px}.public-page .hero,.public-page .atelier-service-hero{padding:42px 0 54px}.glass-hero-copy{padding:23px 20px;border-radius:18px}.public-page .hero .glass-hero-copy h1{font-size:35px}.public-page .hero .glass-hero-copy p:not(.eyebrow){font-size:14px}.atelier-home .consult-copy{padding:24px 21px}}
 @media(prefers-reduced-motion:reduce){.public-page .hero:before,.public-page .knowledge-card:hover,.public-page .knowledge-card:focus-within{transform:none!important;transition:none!important}.hero#home .hero-story>*{animation:none!important}}
+
+/* Open sections reveal one continuous background. Only content gets a surface. */
+.atelier-home :is(.intro,.projects,.services,.process,.turnkey-section,.inspiration,.quote,.consult),
+.public-page :where(main,.section,.section.soft){background:transparent}
+.atelier-home :is(.intro,.projects,.services,.process,.featured-projects,.estimate-section,.inspiration,.quote)>.wrap,
+.public-page .section>.wrap:not(.catalog-static-detail),
+.public-page :is(.article-wrap,.catalog-static-detail,.privacy-surface){
+ background:var(--glass-fill);border:1px solid var(--glass-edge);border-radius:var(--glass-radius);
+ box-shadow:var(--glass-shadow);padding:clamp(22px,3.5vw,46px);
+ backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));
+}
+.public-page .privacy-surface{width:min(900px,calc(100% - 36px));margin:32px auto 70px;box-sizing:border-box}
+.public-page .article-wrap{box-sizing:border-box;width:min(900px,calc(100% - 36px));margin-top:32px}
+.atelier-home :is(.stats,.estimate-panel,.featured-empty,.project,.featured-card),
+.public-page :is(.card,.knowledge-card,.project-card,.item,.project-empty,.project-facts,.note,.faq details,.article-toc,.knowledge-empty){
+ background:var(--glass-fill);border:1px solid var(--glass-edge);border-radius:20px;
+ box-shadow:0 8px 28px #173c2607,inset 0 1px 0 #ffffffa6;
+}
+.atelier-home :is(.project,.featured-card),.public-page :is(.knowledge-card,.project-card,.item){overflow:hidden}
+.atelier-home .stats{padding:22px}
+.atelier-home .process .step,.atelier-home .atelier-discover-grid a{background:#ffffff70;border:1px solid #ffffffe0;border-radius:18px}
+.atelier-home .atelier-discover-grid a:hover{background:#fafff1c9}
+.atelier-home .turnkey-advantages>.wrap{background:#173d2bd9;border:1px solid #ffffff80;border-radius:var(--glass-radius);padding:clamp(24px,4vw,48px);box-shadow:var(--glass-shadow);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur))}
+.atelier-home .turnkey-advantages :is(h2,h3){color:#f7faf2}.atelier-home .turnkey-advantages p{color:#e0eadc}
+.atelier-home .quote{color:#24332e}.atelier-home .quote p{color:#4b5f4e}
+.atelier-home .consult{background:transparent}
+.atelier-home .consult-copy{background:#143427db;border-color:#ffffff80}
+.atelier-home .consult-card{background:var(--glass-fill-strong);box-shadow:var(--glass-shadow)}
+.atelier-home .consult-guide li{background:#ffffff16;border-color:#ffffff5c}
+.public-page .knowledge-card .card{background:transparent;box-shadow:none;border:0;border-radius:0}
+.public-page .item>a,.public-page .item button{background:transparent}
+.public-page :is(.toolbar,.knowledge-filters,.catalog-share){background:var(--glass-fill);border:1px solid var(--glass-edge);border-radius:20px;box-shadow:var(--glass-shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.public-page .catalog-share{padding:20px}
+.public-page :is(.book-page,.article-body pre){background:#fafdf5c9;border-color:#ffffffb3;border-radius:16px;box-shadow:0 8px 22px #173c2608}
+.public-page .article-body :is(th,td){background:#ffffff42;border-color:#aabca7}
+.public-page .cta{background:#e0ecd5a6;border-block:1px solid #ffffffb3;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+:is(.atelier-home,.public-page) :is(footer.footer,footer:not(.footer)){background:#173327e6;color:#f2f7ec;border-top:1px solid #ffffff80;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+:is(.atelier-home,.public-page) footer :is(a,p){color:#e6efdf}
+.public-header,.public-home-header.nav{background:#f8fbf1bd;border-bottom:1px solid #ffffffc9;box-shadow:0 7px 28px #1d3f2906}
+.public-menu[open] .public-links,.public-home-header .links.menu-open{background:#f4f9edf2;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid #fff;border-radius:18px;box-shadow:0 16px 42px #173c261a}
+
+/* Controls: shared geometry and translucent materials; state colors stay meaningful. */
+.public-page :where(.button,.tabs button,.knowledge-pagination button,.knowledge-filters button,.catalog-actions button,.catalog-pager button,.catalog-share button,.book-pager button,#catalog-retry),
+.atelier-home :where(.filter,.atelier-rail-controls button,.ai-actions button,.ai-close,.modal-close){border-radius:999px;min-height:44px;border:1px solid #9ab099;background:#f6fbefc4;color:#263f2c;box-shadow:inset 0 1px 0 #ffffffb3;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.public-page :is(.button,.knowledge-filters button[type=submit]),.public-page .tabs button[aria-pressed=true],.atelier-home .filter.active{background:#234c38dc;color:#fff;border-color:#ffffff80}
+.public-page .hero a.button{background:#ffffff24;color:#fff;border-color:#ffffff80}
+.atelier-home .btn:not(#home .btn){border-radius:999px;background:#234c38dc;color:#fff;border-color:#ffffff80}
+.atelier-home .btn.light:not(#home .btn),.atelier-home .btn.outline:not(#home .btn){background:#f6fbefb8;color:#23432e;border-color:#9fb59f}
+:is(.atelier-home,.public-page) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){background:#fcfff7db;color:#24372b;border-color:#9daf9b;border-radius:12px;box-shadow:inset 0 1px 3px #20452e06}
+:is(.atelier-home,.public-page) :is(.ai-dialog,.detail,.modal-panel){background:#f4faedf0;border:1px solid #fff;border-radius:24px;box-shadow:0 24px 90px #10291d38;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.atelier-home .ai-header{background:#f4faedf0;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.atelier-home .ai-answer{background:#ffffff9c;border-color:#fff;border-radius:16px}
+.public-page .detail::backdrop,.atelier-home .ai-dialog::backdrop{background:#10291d85;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.atelier-home .modal{background:#10291d99;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+
+@media(max-width:620px){
+ :root{--glass-radius:20px;--glass-blur:8px}
+ .atelier-home :is(.intro,.projects,.services,.process,.featured-projects,.estimate-section,.inspiration,.quote)>.wrap,.public-page .section>.wrap:not(.catalog-static-detail){padding:24px 18px}
+ .atelier-home .process .process-steps{grid-template-columns:1fr}
+ .public-page .article-wrap{padding:24px 20px}
+ .public-page :is(.toolbar,.knowledge-filters){padding:18px}
+}
+@media(prefers-reduced-transparency:reduce){
+ body:is(.atelier-home,.public-page) *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ :root{--glass-fill:#f3f7ed;--glass-fill-strong:#f7faf3}
+ body:is(.atelier-home,.public-page)::before{background:linear-gradient(110deg,#e6ede0,#eeeadd)}
+ .glass-hero-copy,.atelier-home .hero-story{background:#173629;backdrop-filter:none}
+ .atelier-home .turnkey-advantages>.wrap{background:#173d2b}
+ :is(.atelier-home,.public-page) :is(.ai-dialog,.detail,.modal-panel){background:#f4faed;backdrop-filter:none}
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ :root{--glass-fill:#f3f7edf5;--glass-fill-strong:#f7faf3}
+ .glass-hero-copy,.atelier-home .hero-story{background:#173629f0}
+}
+
+@media print{body:is(.atelier-home,.public-page){background:white}body:is(.atelier-home,.public-page)::before{display:none}:is(.atelier-home,.public-page) :is(.wrap,.article-wrap,.privacy-surface,.card,.note){background:white;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}}

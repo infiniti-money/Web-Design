@@ -121,6 +121,8 @@ jobs:
         run: node tests/public-shell-browser.cjs
       - name: Verify editorial redesign, touch rails, menus and motion fallbacks
         run: node tests/public-experience-browser.cjs
+      - name: Audit continuous canvas and glass surfaces across all public and utility routes
+        run: node tests/full-canvas-browser.cjs
       - name: Verify equal hero actions, hover interpolation and native touch image motion
         run: node tests/image-motion-browser.cjs
       - name: Verify navigation, slow-image font startup and reduced-motion fallback
@@ -179,7 +181,7 @@ jobs:
         run: node tests/payments-browser.cjs
 
   windows-manager-qa:
-    name: Windows Manager 1.3.0 smoke and installer QA
+    name: Windows Manager 1.3.1 smoke and installer QA
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
@@ -211,7 +213,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: atelier-home-manager-1.3.0-qa
+          name: atelier-home-manager-1.3.1-qa
           path: |
             desktop/dist/*.exe
             desktop/dist/*.blockmap

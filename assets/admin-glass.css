@@ -1,4 +1,17 @@
 /* One local, private workspace theme shared by web and Windows. No remote assets. */
+/* All private module surfaces, including operational queues and payment panels. */
+body :is(.ops-main,.delivery-main,.payments-main,.chat-main){background:transparent}
+body :is(.ops-metric,.ops-summary,.ops-next-steps,.ops-governance,.delivery-metrics article,.delivery-panel,.delivery-item,.payment-panel,.payment-checkout,.chat-panel,.workspace-update,.uat-shell,.uat-gate){background:linear-gradient(125deg,#fafff3a8,#f9fcf1dc);border:1px solid #ffffffd9;border-radius:22px;box-shadow:inset 0 1px 0 #fff,0 12px 35px #173c2608;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#243d30}
+body .table-wrap table{background:#ffffff73}body .ops-steps article{background:#ffffff80;border:1px solid #fff;border-radius:16px}
+body :is(.payment-panel,.delivery-panel) :is(input,select,textarea){border-radius:12px;background:#ffffffe0}
+body :is(.ops-button,.delivery-button,.payments-main button,.chat-main button){border-radius:999px;box-shadow:inset 0 1px 0 #ffffff59}
+body.workspace-theme-dark :is(.ops-metric,.ops-summary,.ops-next-steps,.ops-governance,.delivery-metrics article,.delivery-panel,.delivery-item,.payment-panel,.payment-checkout,.chat-panel,.workspace-update,.uat-shell,.uat-gate){background:linear-gradient(125deg,#1c3a2fd9,#172e26eb);border-color:#83a38a40;color:#eaf4e9}
+body.workspace-theme-dark .ops-steps article,body.workspace-theme-dark .table-wrap table{background:#294334ba;color:#eaf4e9}
+body.workspace-theme-dark :is(.ops-main,.delivery-main,.payments-main,.chat-main){color:#eaf4e9}
+body.workspace-theme-dark .ops-metric strong,body.workspace-theme-dark .ops-main a{color:#dcf1d5}
+body.workspace-theme-dark :is(.ops-muted,.ops-metric p,.ops-steps p,.ops-governance p){color:#c5d6c6}
+@media(max-width:760px){body :is(.ops-metric,.ops-summary,.ops-next-steps,.ops-governance,.delivery-panel,.payment-panel,.chat-panel){backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}}
+@media(prefers-reduced-transparency:reduce){body :is(.ops-metric,.ops-summary,.ops-next-steps,.ops-governance,.delivery-panel,.payment-panel,.chat-panel){backdrop-filter:none;background:#f3f8ee}body.workspace-theme-dark :is(.ops-metric,.ops-summary,.ops-next-steps,.ops-governance,.delivery-panel,.payment-panel,.chat-panel){background:#1b3528}}
 body{isolation:isolate;background:#e8eee7;--line:#c8d7cc;--muted:#4f6558;--ink:#243d30;color:var(--ink)}
 body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:#e8eee7 url('./workspace-backdrop.svg') center/cover no-repeat}
 body.workspace-ready{background:transparent;--bg:#e8eee7;--line:#c8d7cc;--muted:#4f6558}
@@ -24,3 +37,14 @@ body :is(.field input:not([type=checkbox]):not([type=radio]),.field select,.fiel
 
 /* Sidebar text must follow the glass surface rather than the former opaque dark theme. */
 body:not(.workspace-theme-dark) .workspace-logo{color:#203d2f!important}body:not(.workspace-theme-dark) .workspace-logo small,body:not(.workspace-theme-dark) .workspace-group,body:not(.workspace-theme-dark) .workspace-user-role{color:#526b5b}body:not(.workspace-theme-dark) .workspace-sidebar .tab,body:not(.workspace-theme-dark) .workspace-link{color:#2b4a37!important}body:not(.workspace-theme-dark) .workspace-user-name{color:#203d2f}body:not(.workspace-theme-dark) .workspace-collapse,body:not(.workspace-theme-dark) .workspace-user button{color:#2b4a37;background:#ffffff65;border-color:#aabdac}body:not(.workspace-theme-dark) .workspace-sidebar .tab:hover,body:not(.workspace-theme-dark) .workspace-link:hover{background:#dce9ddaa}body:not(.workspace-theme-dark) .workspace-user{border-color:#b4c7b8}
+
+/* Chat/CMS controls follow the same material without changing selected or danger states. */
+body .chat-main button{background:#f1f9eac7;border-color:#acc0a8;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+body .chat-main button[aria-pressed=true],body .chat-room[aria-current=true]{background:#d0e6cfde}
+body .chat-message{background:#f8fff1b3;border-color:#ffffffd9}body .chat-message.mine{background:#d3ead3c9}
+body.workspace-theme-dark .chat-main button{background:#294b38d9;color:#f2f7ee;border-color:#739478}
+body.workspace-theme-dark .chat-main button[aria-pressed=true],body.workspace-theme-dark .chat-room[aria-current=true]{background:#52704adb}
+body.workspace-theme-dark .chat-message{background:#2a4432c9;border-color:#71916a80}body.workspace-theme-dark .chat-message.mine{background:#3b5d3bdb}
+body .ops-button{background:#24513bd9;color:white}
+body:not(.workspace-theme-dark) :is(.cms-tools button,.cms-history button){background:#f5fbedc9;border:1px solid #a9bfa6;border-radius:12px}
+@media print{body:before{display:none}body{background:white!important}body :is(.ops-metric,.ops-summary,.delivery-panel,.payment-panel,.chat-panel,.uat-shell,.uat-gate){background:white!important;box-shadow:none;backdrop-filter:none}}
