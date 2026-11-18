@@ -148,3 +148,5 @@ body:is(.atelier-home,.public-page){--ink:var(--site-ink);--muted:var(--site-mut
 @media print{[data-atelier-pair-side]{transform:none!important;opacity:1!important;transition:none!important}}
 
 .article-layout .atelier-article-media{margin-top:0}
+
+@media(prefers-reduced-transparency:reduce){:root{--site-glass:#f3f7ed;--site-dark:#173726}}
