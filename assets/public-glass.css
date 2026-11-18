@@ -108,3 +108,6 @@ body:is(.atelier-home,.public-page)::before{
 }
 
 @media print{body:is(.atelier-home,.public-page){background:white}body:is(.atelier-home,.public-page)::before{display:none}:is(.atelier-home,.public-page) :is(.wrap,.article-wrap,.privacy-surface,.card,.note){background:white;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}}
+
+/* Small navigation labels need AA contrast over the continuous canvas. */
+.atelier-home .atelier-discover-title{color:#435840}
