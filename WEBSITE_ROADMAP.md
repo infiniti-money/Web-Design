@@ -178,3 +178,7 @@ Gói [web v1.28.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.
 ### 08/11/2026 — Sửa chuyển trang nhấp nháy (v1.28.1)
 
 Loại bỏ phụ thuộc phông trang chủ vào ảnh hero; CSS tư vấn tải cùng trang; preload phông chính, mốc render và native transition không hiệu ứng, hỗ trợ reduced motion. Kiểm thử điều hướng/ảnh chậm/mobile/history bổ sung vào CI. Bằng chứng tại NAVIGATION_ACCEPTANCE.md; không thay backend hay dữ liệu.
+
+### 18/11/2026 — Giao diện công khai v1.29.0
+
+Triển khai trang chủ/dịch vụ/công trình/Catalog/kiến thức và chi tiết theo cùng hệ thống hình ảnh, thẻ, menu mobile và chuyển động nhẹ. Bổ sung rail native có nút/bàn phím, reduced-motion/no-JS, giữ URL/SEO/ảnh/dữ liệu. Kiểm chứng và phạm vi tại PUBLIC_EXPERIENCE_ACCEPTANCE.md.
