@@ -17,3 +17,5 @@ Supabase skill read; project mswiegltusllzvuavjdh ACTIVE_HEALTHY. Official chang
 Need complete public/admin/desktop QA, CI + exact deployed revision, actual Windows installer release/update metadata, source release checksum and final honest limits (no real employee UAT/physical mobile/FPS evidence). Reuse existing website/desktop auto-promote workflows; do not push docs before promotion tags finish.
 
 Implementation completed locally: chat.html + text-only safe frontend, member-scoped live-session SQL, navigation and desktop allowlists, web1.30.0/PC1.3.0 manifests. Fresh restore59/59 COPY counts and 3 critical source hashes match. Migration applied production as20261118165744; metadata/grants/advisors checked, no business data changes. Node178pass1skip; chat3roles/desktop smoke/public responsive/motion pass. Pending exact CI/releases/deployed verification and final acceptance evidence.
+
+Release complete: web1.30.0/PC1.3.0 tagged exact9d576f8; all CI green (browser retry after native viewport-transition abort), deployed smoke and SEO pass. See GLASS_CHAT_ACCEPTANCE_20261119.md; real-account UAT remains separate.

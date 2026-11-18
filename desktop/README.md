@@ -13,9 +13,9 @@
 
 ## Cài đặt và sử dụng
 
-Bản vá mới: [Windows Manager 1.1.2](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.2), đóng gói quản trị công trình tin cậy và các cập nhật vận hành hiện tại. Xem [ghi chú 1.1.2](RELEASE_NOTES_1_1_2.md) và [bằng chứng phát hành/feed](../PROJECT_ADMIN_ACCEPTANCE.md); chỉ coi đã phát hành khi workflow và kiểm tra feed thành công. Bản 1.1.1 bổ sung tìm CRM không dấu; các đường dẫn 1.1.0 dưới đây là lịch sử nâng cấp giao diện.
+Bản mới: [Windows Manager 1.3.0](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.3.0), giao diện kính mờ, chat nội bộ và hộp thư tawk.to. Xem [ghi chú 1.3.0](RELEASE_NOTES_1_3_0.md), [bằng chứng kiểm thử/feed](../GLASS_CHAT_ACCEPTANCE_20261119.md) và [vận hành chat](../CHAT_RUNBOOK.md). Các phiên bản cũ bên dưới là lịch sử.
 
-Tải [Setup 1.1.2](https://github.com/infiniti-money/Web-Design/releases/download/desktop-v1.1.2/ATELIER-HOME-Manager-1.1.2-x64-Setup.exe) hoặc [Portable 1.1.2](https://github.com/infiniti-money/Web-Design/releases/download/desktop-v1.1.2/ATELIER-HOME-Manager-1.1.2-x64-Portable.exe). Mở Setup, cài theo từng bước và đăng nhập bằng tài khoản đã được cấp quyền. Tài khoản mới vẫn cần Admin duyệt. Đăng ký/khôi phục mật khẩu mở trang xác thực của website bằng trình duyệt; ứng dụng PC đăng nhập bằng email và mật khẩu.
+Tải [Setup 1.3.0](https://github.com/infiniti-money/Web-Design/releases/download/desktop-v1.3.0/ATELIER-HOME-Manager-1.3.0-x64-Setup.exe) hoặc [Portable 1.3.0](https://github.com/infiniti-money/Web-Design/releases/download/desktop-v1.3.0/ATELIER-HOME-Manager-1.3.0-x64-Portable.exe). Cài và đăng nhập bằng tài khoản đã cấp quyền; tài khoản mới cần Admin duyệt. Bản Setup tải cập nhật tự động, chỉ cài khi người dùng chọn; Portable cập nhật thủ công. Bộ cài chưa có chữ ký Authenticode.
 
 Bản 1.1.0 đã phát hành ngày 05/11/2026: [Tải bộ cài Windows](https://github.com/infiniti-money/Web-Design/releases/download/desktop-v1.1.0/ATELIER-HOME-Manager-1.1.0-x64-Setup.exe) · [Tất cả tệp phát hành](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.1.0). Feed `desktop-stable/latest.yml` đã được kiểm tra trả đúng phiên bản; bộ cài tải qua feed đã được đối chiếu SHA-512. Chưa kiểm thử việc cài nâng cấp trên một máy người dùng đã cài bản cũ.
 

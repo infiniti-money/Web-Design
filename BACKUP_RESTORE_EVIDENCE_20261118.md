@@ -11,3 +11,5 @@ Production: migration internal_staff_chat ghi trong lịch sử dịch vụ phi�
 Advisor không thêm cảnh báo bảo mật do chat; bốn index mới báo unused trên bảng trống là dự kiến. Các cảnh báo cũ về public definer nghiệp vụ, leaked-password protection và index nghiệp vụ vẫn chưa được giải quyết trong đợt này.
 
 Giới hạn: dump tuần tự không phải snapshot nguyên tử xuyên toàn hệ thống; chưa khôi phục Auth service/Storage blobs/Edge secrets, chưa có bản mã hóa trên thiết bị khác, chưa UAT tài khoản thật. Kết quả này chỉ xác nhận mức database.
+
+Tham chiếu các cảnh báo cũ: [public SECURITY DEFINER](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable), [bảo vệ mật khẩu bị rò rỉ](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). Chúng không do migration chat tạo ra.
