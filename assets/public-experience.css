@@ -32,7 +32,7 @@
 .atelier-discover-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .atelier-discover-grid a{display:grid;grid-template-columns:1fr auto;gap:14px;padding:22px 24px;border:1px solid #dfe3d8;border-radius:14px;background:#f1f2eb;transition:background .25s,transform .25s var(--atelier-ease)}
 .atelier-discover-grid a:hover{background:#e6ecdf;transform:translateY(-3px)}
-.atelier-discover-grid small{grid-column:1/-1;font-size:10px;color:#68725f;letter-spacing:.12em}
+.atelier-discover-grid small{grid-column:1/-1;font-size:10px;color:#506046;letter-spacing:.12em}
 .atelier-discover-grid strong{font-size:14px;font-weight:500}.atelier-discover-grid span{font-size:18px}
 .atelier-home .stats{background:transparent;padding:32px 0}.atelier-home .stats-inner{border-block:1px solid #dfe3d8;padding:27px 0}.atelier-home .stat strong{font-size:26px}.atelier-home .stat span{font-size:10px}
 .atelier-home .intro,.atelier-home .projects,.atelier-home .services,.atelier-home .inspiration,.atelier-home .consult,.atelier-home .turnkey-section{padding:100px 0}
@@ -46,7 +46,7 @@
 .atelier-home .turnkey-advantages{background:#24382d}.atelier-home .advantage-grid{gap:40px}.atelier-home .advantage-grid article{padding-top:26px}.atelier-home .advantage-grid h3{font-size:27px}.atelier-home .advantage-grid p{line-height:1.9}
 .atelier-home .featured-empty{background:#edf0e8;border:0;border-radius:18px;padding:34px;max-width:none}.atelier-home .featured-empty p{max-width:740px}.atelier-home .featured-card{border-radius:18px}
 .atelier-home .estimate-section{background:#f0eee5}.atelier-home .estimate-panel,.atelier-home .consult-card{border-radius:22px;padding:38px;border:1px solid #dce2d5;box-shadow:0 18px 70px #24332e06}
-.atelier-home .field input,.atelier-home .field select,.atelier-home .field textarea{border-radius:10px;background:#fafbf7;min-height:50px;font-size:14px}.atelier-home .field label{font-size:12px}.atelier-home .consult-copy h2{font-size:clamp(35px,4vw,54px)}.atelier-home .consult-guide li{border-left:0;border-radius:12px;padding:18px 20px;background:#e9eee2}.atelier-home .consult-guide span{line-height:1.8}
+.atelier-home .field input,.atelier-home .field select,.atelier-home .field textarea{border-radius:10px;background:#fafbf7;min-height:50px;font-size:14px}.atelier-home .field label{font-size:12px}.atelier-home .consult-copy h2{font-size:clamp(35px,4vw,54px)}.atelier-home .consult-guide li{border-left:0;border-radius:12px;padding:18px 20px;background:#e9eee2}.atelier-home .consult-guide span{line-height:1.8;color:#526347}
 .atelier-home .mosaic{gap:20px;height:480px}.atelier-home .mosaic img{border-radius:18px}.atelier-home .quote{background:#e9eee4;color:#24332e;padding:90px 0}.atelier-home .quote p{color:#576651}.atelier-home .quote h2{font-size:clamp(30px,3.5vw,48px);line-height:1.4}
 .atelier-home .consult{background:#f4f3ed}.atelier-home .footer{padding-top:64px}.atelier-home .floating{border-radius:50px;box-shadow:0 8px 30px #17261d24}
 /* Public listings and deep-dive pages share the same editorial system. */
@@ -74,3 +74,5 @@
 .atelier-home .hero#home{margin:0;width:100%;border-radius:0;min-height:max(740px,calc(100svh - 110px))}.atelier-home .hero#home .hero-content{width:min(1240px,calc(100% - 72px));padding:90px 0 140px}.atelier-home .hero#home h1{font-size:clamp(48px,6.3vw,88px);line-height:1.1}.atelier-home .hero#home .hero-indicator{display:block;bottom:42px}.atelier-home .hero-carousel-controls{bottom:26px}
 @media(max-width:620px){.atelier-home .hero#home{min-height:max(740px,calc(100svh - 100px))}.atelier-home .hero#home .hero-content{width:calc(100% - 36px);padding:54px 0 150px}.atelier-home .hero#home h1{font-size:clamp(39px,10.4vw,54px);line-height:1.13}.atelier-home .hero#home .hero-buttons{display:flex;max-width:none;gap:8px}.atelier-home .hero#home .hero-buttons .btn{width:auto;flex:1 1 calc(50% - 8px);font-size:10px;padding:12px 14px;white-space:normal;letter-spacing:.02em}.atelier-home .hero#home .hero-buttons .estimate-link{flex-basis:100%}.atelier-home .hero#home .hero-indicator{bottom:92px;font-size:10px}.atelier-home .hero-carousel-controls{bottom:22px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}.atelier-home *,.public-page *{animation:none!important;transition:none!important}.atelier-home .service:hover img,.atelier-home .project:hover img,.atelier-home .btn:hover,.public-page .button:hover{transform:none!important}[data-atelier-reveal]{opacity:1!important;transform:none!important}.atelier-home .service-grid,.atelier-home .project-grid,.atelier-home .mosaic{scroll-behavior:auto}}
+
+.public-page .cta p{color:#526347}
