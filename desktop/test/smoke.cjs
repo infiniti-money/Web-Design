@@ -44,6 +44,10 @@ const {_electron}=require("playwright"),assert=require("node:assert/strict"),fs=
     await app.evaluate(({dialog},filePath)=>{dialog.showSaveDialog=async()=>({canceled:false,filePath});},pdf);
     assert.equal(await page.evaluate(()=>window.atelierDesktop.exportPdf("Báo giá kiểm thử")),true);
     const bytes=fs.readFileSync(pdf);assert.equal(bytes.subarray(0,5).toString(),"%PDF-");assert.ok(bytes.length>2000);
+    await page.goto('atelier://app/chat.html');
+    assert.equal(await page.locator('h1').textContent(),'Chat & chăm sóc khách');
+    assert.equal(await page.evaluate(()=>fetch('atelier://app/assets/chat.js').then(r=>r.status)),200);
+    assert.equal(await page.locator('#chat-support a').getAttribute('href'),'https://dashboard.tawk.to/');
     assert.deepEqual(errors,[]);
     console.log("Electron smoke passed: local UI, sandbox, context isolation, encrypted session, resource boundaries, update state, native quote PDF.");
   }finally{await app.close();}

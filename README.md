@@ -148,3 +148,7 @@ GitHub Actions cũng chạy bài kiểm thử API, trình duyệt Chromium và t
 CRM v1.5.0 truy vấn **phân trang 25 hồ sơ/lần** sau khi Admin xác thực. Tìm kiếm và bộ lọc chạy trong Supabase; thống kê tổng khách, số yêu cầu mới, đã liên hệ và đã báo giá dùng `count: exact` từ dữ liệu đầy đủ, không còn dựa trên 200 hồ sơ đã tải. Nút **Xuất CSV trang này** chỉ xuất tối đa 25 hồ sơ đang hiện và yêu cầu xác nhận; CSV có bảo vệ khỏi công thức bảng tính. Không gửi tệp ra máy chủ bên thứ ba; file chỉ được tạo trong trình duyệt Admin. Khi tìm kiếm bằng tên tiếng Việt ở máy chủ, nên nhập chữ có dấu phù hợp. Dữ liệu chỉ hiển thị sau khi đăng nhập tài khoản Admin được xác minh.
 
 Chi tiết: [SUPABASE_SETUP.md](SUPABASE_SETUP.md) và [EMAIL_NOTIFICATIONS_SETUP.md](EMAIL_NOTIFICATIONS_SETUP.md).
+
+## Giao diện kính mờ và chat 1.30
+
+Chat nội bộ/nhóm và lối vào hộp thư tawk.to trong web quản trị/Manager 1.3.0: xem [CHAT_RUNBOOK.md](CHAT_RUNBOOK.md), [release web](RELEASE_NOTES_V1_30_0.md) và [bằng chứng phục hồi database](BACKUP_RESTORE_EVIDENCE_20261118.md). Nghiệm thu tài khoản thật và nâng cấp PC giữ riêng với kiểm thử fixture.

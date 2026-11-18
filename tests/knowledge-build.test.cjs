@@ -44,3 +44,5 @@ test("Discovery enhances a complete public listing while article outlines need n
   assert.match(article,/class="article-toc" open/);assert.match(article,/href="#phan-muc-thu-hai"/);
   assert.match(article,/Khoảng \d+ phút đọc/);assert.doesNotMatch(article,/<script src=/);
 });
+
+test('Article cards show configured covers with escaped alternative text',()=>{const output=temp();buildPages({output,cmsPosts:[post({cover_image_url:'https://example.invalid/approved.jpg',image_alt:'Ảnh <đã duyệt>'})]});const html=fs.readFileSync(path.join(output,'kien-thuc.html'),'utf8');assert.ok(html.includes('<img src="https://example.invalid/approved.jpg" alt="Ảnh &lt;đã duyệt&gt;" width="900" height="600" loading="lazy" decoding="async">'));});

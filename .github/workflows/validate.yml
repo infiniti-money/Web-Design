@@ -77,6 +77,13 @@ jobs:
 
 
 
+      - name: Verify staff chat RLS, sessions and idempotency in isolated database
+        env:
+          PGPASSWORD: isolated-ci-only
+        run: |
+          psql -h 127.0.0.1 -U ci -d postgres -v ON_ERROR_STOP=1 -c 'CREATE DATABASE chat_test'
+          psql -h 127.0.0.1 -U ci -d chat_test -v ON_ERROR_STOP=1 -f tests/chat-isolated.sql
+
   consultation-browser:
     name: Public consultation UX (isolated Playwright)
     runs-on: ubuntu-24.04
@@ -124,6 +131,10 @@ jobs:
         run: node tests/hero-gallery-browser.cjs
       - name: Verify role-aware workspace, theme and mobile navigation with synthetic sessions
         run: node tests/workspace-ux-browser.cjs
+      - name: Verify staff chat with isolated accounts and RPC fixtures
+        env:
+          NODE_PATH: ./desktop/node_modules
+        run: node tests/chat-browser.cjs
       - name: Verify secure advanced reports, CSV gating and expired sessions with fixtures
         env:
           SITE_URL: http://127.0.0.1:4173/
@@ -168,7 +179,7 @@ jobs:
         run: node tests/payments-browser.cjs
 
   windows-manager-qa:
-    name: Windows Manager 1.2.2 smoke and installer QA
+    name: Windows Manager 1.3.0 smoke and installer QA
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
@@ -200,7 +211,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: atelier-home-manager-1.2.2-qa
+          name: atelier-home-manager-1.3.0-qa
           path: |
             desktop/dist/*.exe
             desktop/dist/*.blockmap
