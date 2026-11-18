@@ -7,7 +7,7 @@
  document.addEventListener('keydown',event=>{if(event.key==='Escape')closeMenu(true);});
  document.addEventListener('click',event=>{if(menu?.open&&!menu.contains(event.target))closeMenu();if(homeMenu?.classList.contains('menu-open')&&!homeMenu.contains(event.target)&&!hamb?.contains(event.target))closeMenu();if(event.target.closest('.public-menu nav a'))closeMenu();});
  // Trigger inside the viewport, not before the visitor can see the transition.
- let observer,imageObserver;const reveal=el=>{el.dataset.atelierReveal='done';observer?.unobserve(el);};
+ let observer,imageObserver,prepareObserver;const reveal=el=>{el.dataset.atelierReveal='done';observer?.unobserve(el);};
  if(!motion.matches&&'IntersectionObserver'in window){
   observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)reveal(entry.target);}),{rootMargin:'0px 0px -8% 0px',threshold:0.12});
   const candidates=[...document.querySelectorAll('.intro-copy,.section-head,.turnkey-heading,.estimate-copy,.consult-copy,.process .step,.advantage-grid>article,.public-page .cards>*,.public-page .split>*,.public-page .faq>details')].filter(el=>el.getBoundingClientRect().top>innerHeight);
@@ -35,15 +35,18 @@
  }
  // Read geometry in one batch after wrapping, then write states. Interleaving
  // each image's DOM writes and layout reads forces a full page layout per image.
- function flushImages(){const frames=[...queuedFrames];queuedFrames.clear();const waiting=frames.map(frame=>frame.getBoundingClientRect().top>=innerHeight);frames.forEach((frame,index)=>{frame.dataset.atelierImageState=waiting[index]?'waiting':'shown';if(!motion.matches)imageObserver?.observe(frame);});}
- document.querySelectorAll(imageSelector).forEach(registerImage);
- flushImages();
+ function flushImages(){const frames=[...queuedFrames];queuedFrames.clear();const waiting=frames.map(frame=>{const box=frame.getBoundingClientRect();return box.top>=innerHeight||box.left>=innerWidth*.8||box.right<=0;});frames.forEach((frame,index)=>{frame.dataset.atelierImageState=waiting[index]?'waiting':'shown';if(!motion.matches)imageObserver?.observe(frame);});}
+ // Prepare only images approaching the viewport. Building every offscreen frame
+ // during startup delays the hero and spends layout work on unseen pictures.
+ if('IntersectionObserver'in window)prepareObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){prepareObserver.unobserve(entry.target);registerImage(entry.target);}});flushImages();},{rootMargin:'280px 0px',threshold:0});
+ function watchImage(image){if(motion.matches||!image.matches(imageSelector)||image.closest('[data-comparison]'))return;if(registered.has(image)){const frame=image.closest('[data-atelier-media]');if(frame)imageObserver?.observe(frame);}else if(prepareObserver)prepareObserver.observe(image);else{registerImage(image);flushImages();}}
+ document.querySelectorAll(imageSelector).forEach(watchImage);
  const main=document.querySelector('main');if(main)new MutationObserver(records=>{records.forEach(record=>{
-  record.removedNodes.forEach(node=>{if(node.nodeType!==1||node.isConnected)return;if(node.matches('[data-atelier-media]'))imageObserver?.unobserve(node);node.querySelectorAll('[data-atelier-media]').forEach(frame=>imageObserver?.unobserve(frame));});
-  record.addedNodes.forEach(node=>{if(node.nodeType!==1)return;if(node.matches('img'))registerImage(node);node.querySelectorAll('img').forEach(registerImage);});
+  record.removedNodes.forEach(node=>{if(node.nodeType!==1||node.isConnected)return;if(node.matches('img'))prepareObserver?.unobserve(node);node.querySelectorAll('img').forEach(image=>prepareObserver?.unobserve(image));if(node.matches('[data-atelier-media]'))imageObserver?.unobserve(node);node.querySelectorAll('[data-atelier-media]').forEach(frame=>imageObserver?.unobserve(frame));});
+  record.addedNodes.forEach(node=>{if(node.nodeType!==1)return;if(node.matches('img'))watchImage(node);node.querySelectorAll('img').forEach(watchImage);});
  });flushImages();}).observe(main,{childList:true,subtree:true});
- function showAll(){observer?.disconnect();imageObserver?.disconnect();document.querySelectorAll('[data-atelier-reveal=pending]').forEach(el=>reveal(el));document.querySelectorAll('[data-atelier-media]').forEach(el=>{el.dataset.atelierImageState='shown';});}
- const observeImages=()=>document.querySelectorAll('[data-atelier-media]').forEach(el=>imageObserver?.observe(el));
+ function showAll(){observer?.disconnect();imageObserver?.disconnect();prepareObserver?.disconnect();document.querySelectorAll('[data-atelier-reveal=pending]').forEach(el=>reveal(el));document.querySelectorAll('[data-atelier-media]').forEach(el=>{el.dataset.atelierImageState='shown';});}
+ const observeImages=()=>document.querySelectorAll(imageSelector).forEach(watchImage);
  motion.addEventListener?.('change',event=>{if(event.matches)showAll();else observeImages();});
  addEventListener('pageshow',event=>{if(event.persisted){showAll();if(!motion.matches)observeImages();}});
  document.addEventListener('focusin',event=>{const group=event.target.closest('[data-atelier-reveal=pending]');if(group)reveal(group);});

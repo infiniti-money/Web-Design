@@ -11,7 +11,7 @@
 - Khung ảnh clip zoom: desktop hover/focus 1.065; vào viewport từ 1.12 về 1 (desktop) hoặc 1.015 (touch), transition 0.85s. IO có ngưỡng 22% và mép viewport âm 6% để người dùng thấy chuyển động. Ảnh ra ngoài rồi trở lại có thể chuyển động lại; ảnh kế tiếp trong rail được quan sát riêng.
 - Text reveal chọn từng khối, kích hoạt sau khi vào viewport (rootMargin -8%, threshold .12); không giấu nội dung đầu trang.
 - Nhận ảnh tải động qua MutationObserver, không thay URL hoặc thuộc tính img. Exclude hero/gallery ưu tiên và data-comparison để không sai tỷ lệ cặp ảnh thiết kế/thực tế. Không gọi API, không intercept wheel/touchmove, không vòng lặp animation/scroll JS.
-- Reduced motion dừng hiệu ứng, giữ ảnh/nội dung; bật lại preference hoặc quay lại BFCache tái quan sát ảnh. Khi JS lỗi, HTML/ảnh gốc vẫn đọc được. CSS/JS query version 1.29.1 tránh cache bản cũ.
+- Reduced motion dừng hiệu ứng, giữ ảnh/nội dung; bật lại preference hoặc quay lại BFCache tái quan sát ảnh. Khi JS lỗi, HTML/ảnh gốc vẫn đọc được. CSS/JS query version 1.29.1-r2 tránh cache bản cũ; gallery CSS/JS có query 1.29.1.
 
 ## Kiểm chứng cục bộ
 
@@ -22,3 +22,14 @@
 - Ảnh trước/sau hover và nút: screenshots/image-{before,after}-hover.png, buttons-unified-{desktop,mobile}.png. Video touch local: screenshots/motion-v1291/page@465aba94a9395e39708c2ed4a52621ac.webm. Đây là giả lập browser, chưa phải UAT trên điện thoại vật lý.
 
 CI, Pages và release ghi bổ sung sau triển khai. Không đánh dấu CWV/conversion/UAT tài khoản đạt từ những kiểm thử này.
+
+## Kiểm tra bổ sung khi triển khai
+
+- Dọn observer của khung ảnh đã bị xóa khi phân trang/lọc; fixture thêm ảnh động rồi xóa đã xác nhận observer được giải phóng.
+- Lighthouse chỉ ra khởi tạo ảnh đọc/ghi layout xen kẽ (một mẫu quy chiếu public-experience lên đến 1071ms gồm layout). Đã batch toàn bộ thao tác tạo khung, đọc hình học một lần rồi ghi trạng thái; một mẫu sau sửa ghi 110ms. Các mẫu khác nhau về cache/timing, không dùng làm cam kết tỷ lệ tăng tốc cố định.
+- Smoke đầu phát hiện gallery controls có thể ló ra khi JavaScript tắt và DOMContentLoaded đến trước CSS. Tái hiện kiểm tra chặn stylesheet, sửa bằng thuộc tính hidden trong HTML và chỉ bỏ hidden sau khi gắn handler; không bỏ qua bài smoke.
+- Ảnh hero không nhận khung zoom; slider so sánh được loại trừ. AI browser fixture, menu, chữ tiếng Việt, điều hướng, turnkey và Node kiểm tra lại đều đạt ở bản sửa.
+
+## Bản tối ưu tiếp v1.29.2
+
+Bản v1.29.1 đã phát hành. Phép đo lạnh tiếp theo còn phát hiện khởi tạo nhiều khung ảnh ngoài màn hình, nên v1.29.2 bổ sung prepareObserver rootMargin 280px: chỉ chuẩn bị ảnh sắp tới viewport, batch hình học rồi dùng imageObserver giữ ngưỡng 22% như trước. Ảnh ngoài vùng chuẩn bị không bị bọc/biến đổi lúc tải đầu. Test hover/touch sửa phần thiết lập vị trí để chờ ảnh tới vùng chuẩn bị; vẫn kiểm tra nội suy và gesture thực tế, không nới tiêu chí hiệu ứng. CSS/JS query cuối là 1.29.2.

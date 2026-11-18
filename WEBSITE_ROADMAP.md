@@ -186,3 +186,7 @@ Triển khai trang chủ/dịch vụ/công trình/Catalog/kiến thức và chi 
 ### 18/11/2026 — v1.29.1: nút đồng nhất và chuyển động ảnh
 
 Đưa AI opener vào cùng bốn action; ảnh có hover/focus và chuyển động vào viewport/vuốt mobile theo từng khung. Kiểm thử kích thước nút, transform nội suy và touch gesture thật trong browser. Bằng chứng tại IMAGE_MOTION_ACCEPTANCE.md.
+
+### 18/11/2026 — v1.29.2: chuẩn bị ảnh theo viewport
+
+Chỉ chuẩn bị khung zoom khi ảnh sắp vào màn hình, giảm công việc khi tải hero; giữ hành vi hover/touch và các điều kiện giảm chuyển động của v1.29.1.
