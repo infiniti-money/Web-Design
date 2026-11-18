@@ -48,3 +48,10 @@ body.workspace-theme-dark .chat-message{background:#2a4432c9;border-color:#71916
 body .ops-button{background:#24513bd9;color:white}
 body:not(.workspace-theme-dark) :is(.cms-tools button,.cms-history button){background:#f5fbedc9;border:1px solid #a9bfa6;border-radius:12px}
 @media print{body:before{display:none}body{background:white!important}body :is(.ops-metric,.ops-summary,.delivery-panel,.payment-panel,.chat-panel,.uat-shell,.uat-gate){background:white!important;box-shadow:none;backdrop-filter:none}}
+
+/* A compact workspace frame: less exterior space, unchanged data density preferences. */
+.workspace-ready>main,.workspace-ready>main.shell{padding:86px 24px 32px}.workspace-topbar{height:64px}
+.workspace-modules-grid{gap:12px}.workspace-module{min-height:100px;padding:18px}.workspace-modules-heading{margin-block:12px}
+.workspace-ready .ops-heading,.workspace-ready .toolbar{margin-bottom:18px}.workspace-ready .ops-summary{padding:18px}
+.workspace-ready .ops-metrics{gap:16px}.workspace-ready .ops-metric{padding:20px}.workspace-ready .ops-next-steps,.workspace-ready .ops-governance{padding:22px;margin-top:20px}
+@media(max-width:760px){.workspace-topbar{height:60px}.workspace-ready>main,.workspace-ready>main.shell{padding:78px 16px 26px}.workspace-module{min-height:94px;padding:16px}}

@@ -7,12 +7,28 @@
  document.addEventListener('keydown',event=>{if(event.key==='Escape')closeMenu(true);});
  document.addEventListener('click',event=>{if(menu?.open&&!menu.contains(event.target))closeMenu();if(homeMenu?.classList.contains('menu-open')&&!homeMenu.contains(event.target)&&!hamb?.contains(event.target))closeMenu();if(event.target.closest('.public-menu nav a'))closeMenu();});
  // Trigger inside the viewport, not before the visitor can see the transition.
- let observer,imageObserver,prepareObserver;const reveal=el=>{el.dataset.atelierReveal='done';observer?.unobserve(el);};
+ let observer,imageObserver,prepareObserver,pairObserver,sideObserver;const reveal=el=>{el.dataset.atelierReveal='done';observer?.unobserve(el);};
  if(!motion.matches&&'IntersectionObserver'in window){
   observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)reveal(entry.target);}),{rootMargin:'0px 0px -8% 0px',threshold:0.12});
   const candidates=[...document.querySelectorAll('.intro-copy h2,.intro-copy>p,.section-head h2,.section-head p,.turnkey-heading h2,.turnkey-heading>p,.estimate-copy h2,.consult-copy h2,.process .step h3,.advantage-grid h3,.public-page .cards>*,.public-page .split>*,.public-page .faq>details,.public-page .section h2')].filter(el=>el.getBoundingClientRect().top>innerHeight);
   candidates.forEach((el,index)=>{el.style.setProperty('--atelier-reveal-delay',(index%3)*70+'ms');el.dataset.atelierReveal='pending';observer.observe(el);});
  }
+ // A shared row clock on desktop; stacked mobile sides enter when individually visible.
+ function revealSide(el){el.dataset.atelierEntry='done';sideObserver?.unobserve(el);el.querySelectorAll('[data-atelier-reveal=pending]').forEach(reveal);const parent=el.parentElement;if([...parent.children].every(child=>child.dataset.atelierEntry==='done'))parent.dataset.atelierPair='done';}
+ function revealPair(group){group.dataset.atelierPair='done';pairObserver?.unobserve(group);group.querySelectorAll('[data-atelier-entry=pending]').forEach(revealSide);group.querySelectorAll('[data-atelier-reveal=pending]').forEach(reveal);}
+ function registerPair(group){
+  if(!group||group.dataset.atelierPair||motion.matches||!('IntersectionObserver'in window))return;
+  const children=[...group.children].filter(el=>!el.hidden);if(children.length!==2)return;
+  children[0].dataset.atelierPairSide='left';children[1].dataset.atelierPairSide='right';
+  if(matchMedia('(max-width:620px)').matches&&group.getBoundingClientRect().height>innerHeight*.72){group.dataset.atelierPair='individual';children.forEach(el=>{el.dataset.atelierEntry=el.getBoundingClientRect().top>innerHeight*.8?'pending':'done';if(el.dataset.atelierEntry==='pending')sideObserver.observe(el);});}
+  else{group.dataset.atelierPair=group.getBoundingClientRect().top>innerHeight*.8?'pending':'done';if(group.dataset.atelierPair==='pending')pairObserver.observe(group);}
+ }
+ if('IntersectionObserver'in window){
+  pairObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)revealPair(entry.target);}),{rootMargin:'0px 0px -6% 0px',threshold:.14});
+  sideObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)revealSide(entry.target);}),{rootMargin:'0px 0px -6% 0px',threshold:.14});
+ }
+ const observePairs=()=>document.querySelectorAll('.intro-grid,.estimate-layout,.consult-grid,.public-page .split').forEach(registerPair);
+ observePairs();
  // Frames clip image zoom without moving captions or changing image sources/dimensions.
  // Keep the priority hero/gallery images outside this enhancement.
  const imageSelector='.intro-photo>img,.service img,.project .image img,.mosaic img,.atelier-service-visual img,.project-gallery img,.project-card img,.featured-card img,.public-page .item img,.article-cover,.project-cover,.knowledge-card img';
@@ -35,7 +51,7 @@
  }
  // Read geometry in one batch after wrapping, then write states. Interleaving
  // each image's DOM writes and layout reads forces a full page layout per image.
- function flushImages(){const frames=[...queuedFrames];queuedFrames.clear();const waiting=frames.map(frame=>{const box=frame.getBoundingClientRect();return box.top>=innerHeight||box.left>=innerWidth*.8||box.right<=0;});frames.forEach((frame,index)=>{frame.dataset.atelierImageState=waiting[index]?'waiting':'shown';if(!motion.matches)imageObserver?.observe(frame);});}
+ function flushImages(){const frames=[...queuedFrames];queuedFrames.clear();const waiting=frames.map(frame=>{const box=frame.getBoundingClientRect();return box.top>=innerHeight||box.left>=innerWidth*.8||box.right<=0;});frames.forEach((frame,index)=>{frame.dataset.atelierImageState=waiting[index]?'waiting':'shown';if(!motion.matches)imageObserver?.observe(frame);if(frame.parentElement?.matches('.knowledge-card>a'))registerPair(frame.parentElement);});}
  // Prepare only images approaching the viewport. Building every offscreen frame
  // during startup delays the hero and spends layout work on unseen pictures.
  if('IntersectionObserver'in window)prepareObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){prepareObserver.unobserve(entry.target);registerImage(entry.target);}});flushImages();},{rootMargin:'280px 0px',threshold:0});
@@ -45,11 +61,11 @@
   record.removedNodes.forEach(node=>{if(node.nodeType!==1||node.isConnected)return;if(node.matches('img'))prepareObserver?.unobserve(node);node.querySelectorAll('img').forEach(image=>prepareObserver?.unobserve(image));if(node.matches('[data-atelier-media]'))imageObserver?.unobserve(node);node.querySelectorAll('[data-atelier-media]').forEach(frame=>imageObserver?.unobserve(frame));});
   record.addedNodes.forEach(node=>{if(node.nodeType!==1)return;if(node.matches('img'))watchImage(node);node.querySelectorAll('img').forEach(watchImage);});
  });flushImages();}).observe(main,{childList:true,subtree:true});
- function showAll(){observer?.disconnect();imageObserver?.disconnect();prepareObserver?.disconnect();document.querySelectorAll('[data-atelier-reveal=pending]').forEach(el=>reveal(el));document.querySelectorAll('[data-atelier-media]').forEach(el=>{el.dataset.atelierImageState='shown';});}
+ function showAll(){observer?.disconnect();imageObserver?.disconnect();prepareObserver?.disconnect();pairObserver?.disconnect();sideObserver?.disconnect();document.querySelectorAll('[data-atelier-entry=pending]').forEach(revealSide);document.querySelectorAll('[data-atelier-pair=pending]').forEach(revealPair);document.querySelectorAll('[data-atelier-reveal=pending]').forEach(el=>reveal(el));document.querySelectorAll('[data-atelier-media]').forEach(el=>{el.dataset.atelierImageState='shown';});}
  const observeImages=()=>document.querySelectorAll(imageSelector).forEach(watchImage);
- motion.addEventListener?.('change',event=>{if(event.matches)showAll();else observeImages();});
+ motion.addEventListener?.('change',event=>{if(event.matches)showAll();else{observeImages();observePairs();}});
  addEventListener('pageshow',event=>{if(event.persisted){showAll();if(!motion.matches)observeImages();}});
- document.addEventListener('focusin',event=>{const group=event.target.closest('[data-atelier-reveal=pending]');if(group)reveal(group);});
+ document.addEventListener('focusin',event=>{const side=event.target.closest('[data-atelier-entry=pending]');if(side)revealSide(side);const pair=event.target.closest('[data-atelier-pair=pending]');if(pair)revealPair(pair);const group=event.target.closest('[data-atelier-reveal=pending]');if(group)reveal(group);});
  // Native overflow/snap handles touch, trackpads and keyboard. Buttons add a visible alternative.
  document.querySelectorAll('.atelier-home .service-grid,.atelier-home .project-grid,.atelier-home .mosaic').forEach((rail,index)=>{
   const labels=['Các dịch vụ','Ý tưởng không gian','Góc cảm hứng'];const name=rail.classList.contains('service-grid')?labels[0]:rail.classList.contains('project-grid')?labels[1]:labels[2];
