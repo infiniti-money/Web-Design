@@ -9,3 +9,5 @@ Quản trị: sidebar nổi inset16px, rộng252px, sáng/tối dùng charcoal; 
 Kiểm thử: full-canvas18route x4 độ rộng kiểm tra màu khung không còn bias xanh/ngà; workspace kiểm tra sidebar inset mới, palette,3role, dark/mobile/logout; chat kiểm tra3role, retry/XSS/archive/signout; giữ font, bố cục, motion, form và bảo toàn SEO. Ảnh kiểm thử quản trị dùng fixture trong bộ nhớ, không gửi tin production.
 
 Chuẩn bị web1.33.0/PC1.4.0. Bằng chứng CI/Pages/release và checksum bổ sung sau phát hành. UAT tài khoản thật, cài đè và thiết bị vật lý vẫn riêng với fixture.
+
+Đã phát hành tiếp web1.33.1/Manager1.4.1 cùng nhận diện doanh nghiệp. Giao diện trung tính và logo dùng chung đã qua CI 44511290784 và smoke website 44511374920. Bằng chứng/giới hạn hiệu năng ghi trong BRAND_IDENTITY_20261119.md.
