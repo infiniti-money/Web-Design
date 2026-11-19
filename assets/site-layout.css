@@ -1,8 +1,8 @@
 /* One grid, spacing scale and palette for the complete public experience. */
 :root{
  --site-width:1360px;--site-gutter:32px;--site-gap:20px;
- --site-ink:#213b2e;--site-muted:#516452;--site-accent:#85683c;
- --site-glass:rgba(246,250,239,.83);--site-dark:rgba(23,55,38,.9);
+ --site-ink:#363636;--site-muted:#5f5f5f;--site-accent:#6d6d6d;
+ --site-glass:rgba(248,248,248,.83);--site-dark:rgba(49,49,49,.9);
  --glass-fill:var(--site-glass);--glass-radius:22px;
 }
 body:is(.atelier-home,.public-page){--ink:var(--site-ink);--muted:var(--site-muted);color:var(--site-ink)}
@@ -29,7 +29,7 @@ body:is(.atelier-home,.public-page){--ink:var(--site-ink);--muted:var(--site-mut
 .atelier-home .service-overlay{padding:22px}
 .atelier-home .process .process-steps{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}
 .atelier-home .process .step{padding:18px;min-height:0}
-.atelier-home .process .step b{font-size:30px;color:#5c7456}
+.atelier-home .process .step b{font-size:30px;color:#6d6d6d}
 .atelier-home .process .step h3{font-size:23px;margin:10px 0}
 .atelier-home .process .step p{font-size:13px;line-height:1.65;margin:0}
 .atelier-home .turnkey-advantages>.wrap{padding:28px}
@@ -149,4 +149,4 @@ body:is(.atelier-home,.public-page){--ink:var(--site-ink);--muted:var(--site-mut
 
 .article-layout .atelier-article-media{margin-top:0}
 
-@media(prefers-reduced-transparency:reduce){:root{--site-glass:#f3f7ed;--site-dark:#173726}}
+@media(prefers-reduced-transparency:reduce){:root{--site-glass:#f5f5f5;--site-dark:#313131}}

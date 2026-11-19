@@ -89,13 +89,13 @@ function renderPage({ site, title, description, route, prefix, image, schema, no
   return `${generatedMarker}
 <!doctype html>
 <html lang="vi"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#1e2c27">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#24262b">
 <title>${escapeHtml(title)}</title><meta name="description" content="${escapeHtml(description)}">${noindex ? '\n<meta name="robots" content="noindex,follow">' : ""}
 <link rel="canonical" href="${url}"><link rel="icon" href="${prefix}assets/favicon.svg" type="image/svg+xml">
 <meta property="og:site_name" content="${escapeHtml(site.name)}"><meta property="og:locale" content="vi_VN"><meta property="og:type" content="website"><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:url" content="${url}"><meta property="og:image" content="${escapeHtml(socialImage)}"><meta property="og:image:alt" content="${escapeHtml(image?.alt || site.name)}">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${escapeHtml(title)}"><meta name="twitter:description" content="${escapeHtml(description)}"><meta name="twitter:image" content="${escapeHtml(socialImage)}">
 <script type="application/ld+json">${jsonLd({ "@context": "https://schema.org", "@graph": schema })}</script>
-<link rel="stylesheet" href="${prefix}assets/service-pages.css"><link rel="stylesheet" href="${prefix}assets/project-pages.css">
+<link rel="stylesheet" href="${prefix}assets/service-pages.css?v=1.33.0"><link rel="stylesheet" href="${prefix}assets/project-pages.css?v=1.33.0">
 ${fontLinks(prefix)}</head><body class="public-page"><a class="skip" href="#main">Bỏ qua điều hướng</a>
 ${publicHeader(prefix,{active:route.startsWith("catalog")?"catalog":"projects"})}
 ${glassHeroes(content).replace(/<\/h1>/,"</h1><span id=\"public-ready\" hidden></span>")}

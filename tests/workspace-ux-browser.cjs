@@ -41,6 +41,8 @@ const {buildPages}=require("../scripts/build-pages.cjs");
     await page.locator(".workspace-sidebar").waitFor();
   };
   await login("admin");
+  assert.equal(await page.locator(".workspace-sidebar").evaluate(el=>Math.round(el.getBoundingClientRect().x)),16,"Floating desktop sidebar inset");
+  for(const selector of [".workspace-sidebar",".workspace-topbar",".workspace-module",".workspace-welcome"]){const color=await page.locator(selector).first().evaluate(el=>getComputedStyle(el).backgroundColor);const v=color.match(/[\d.]+/g).map(Number);assert.ok(!(v[1]>Math.max(v[0],v[2])+2||(v[0]-v[2]>5&&v[1]-v[2]>3)),selector+" neutral palette "+color);}
   assert.equal(await page.locator(".workspace-modules-grid a[href$='payments.html']").count(),1);
   assert.equal(await page.locator(".workspace-modules-grid a[href$='reports-advanced.html']").count(),1);
   assert.equal(await page.locator(".workspace-modules-grid a[href$='#staff']").count(),1);
@@ -69,10 +71,10 @@ const {buildPages}=require("../scripts/build-pages.cjs");
   // Wait for the actual bounding box to reach the visible state, not just the body class.
   await page.waitForFunction(()=>{
     const drawer=document.querySelector(".workspace-sidebar");
-    return !!drawer && Math.abs(drawer.getBoundingClientRect().x)<2;
+    return !!drawer && Math.abs(drawer.getBoundingClientRect().x-16)<2;
   },null,{timeout:3000});
   const drawerBox=await page.locator(".workspace-sidebar").boundingBox();
-  assert.ok(drawerBox&&Math.abs(drawerBox.x)<2,"Mobile drawer must be visible");
+  assert.ok(drawerBox&&Math.abs(drawerBox.x-16)<2,"Mobile drawer must be visible");
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,"Mobile page overflow");
   await page.locator(".workspace-mask").click({position:{x:350,y:100}});
   assert.equal(await page.locator("body.workspace-drawer-open").count(),0);

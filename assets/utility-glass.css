@@ -1,14 +1,14 @@
 /* Account, recovery, payment-return and error pages share a local, private canvas. */
-html:has(body.utility-glass){background:#e5ecdf}
-body.utility-glass{isolation:isolate;min-height:100svh;background:#e5ecdf;color:#243a2c;font-family:"Be Vietnam Pro","Segoe UI",sans-serif}
-body.utility-glass::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:#e5ecdf url('./workspace-backdrop.svg') center/cover no-repeat}
-.utility-glass>main{background:#f9fcf1c9;border:1px solid #ffffffed;border-radius:28px;box-shadow:0 26px 80px #1a402c14,inset 0 1px 0 #fff;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);max-width:780px}
+html:has(body.utility-glass){background:#eaeaea}
+body.utility-glass{isolation:isolate;min-height:100svh;background:#eaeaea;color:#353535;font-family:"Be Vietnam Pro","Segoe UI",sans-serif}
+body.utility-glass::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:#eaeaea url('./workspace-backdrop.svg') center/cover no-repeat}
+.utility-glass>main{background:#fbfbfbc9;border:1px solid #ffffffed;border-radius:28px;box-shadow:0 26px 80px #39393914,inset 0 1px 0 #ffffff;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);max-width:780px}
 .utility-glass>main.wrap.section{width:min(780px,calc(100% - 36px));margin:clamp(32px,8vh,90px) auto;padding:clamp(26px,5vw,54px)}
 .utility-glass h1{font-family:"Playfair Display",Georgia,serif;line-height:1.25;letter-spacing:-.03em}
-.utility-glass input{background:#ffffffbf;border:1px solid #94ad96;color:#243a2c;border-radius:12px;min-height:46px}
-.utility-glass button,.utility-glass .button{border-radius:999px;min-height:46px;background:#244e38de;color:#fff;border:1px solid #ffffff8c;box-shadow:inset 0 1px 0 #ffffff38;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.utility-glass input:focus-visible,.utility-glass a:focus-visible,.utility-glass button:focus-visible{outline:3px solid #8f713e;outline-offset:3px}
-.utility-glass p{color:#49614d}
+.utility-glass input{background:#ffffffbf;border:1px solid #a6a6a6;color:#353535;border-radius:12px;min-height:46px}
+.utility-glass button,.utility-glass .button{border-radius:999px;min-height:46px;background:#464646de;color:#ffffff;border:1px solid #ffffff8c;box-shadow:inset 0 1px 0 #ffffff38;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.utility-glass input:focus-visible,.utility-glass a:focus-visible,.utility-glass button:focus-visible{outline:3px solid #767676;outline-offset:3px}
+.utility-glass p{color:#5b5b5b}
 @media(max-width:600px){.utility-glass>main{border-radius:22px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}}
-@media(prefers-reduced-transparency:reduce){.utility-glass>main{background:#f5f9ef;backdrop-filter:none}.utility-glass input{background:#fff}}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.utility-glass>main{background:#f5f9eff5}}
+@media(prefers-reduced-transparency:reduce){.utility-glass>main{background:#f7f7f7;backdrop-filter:none}.utility-glass input{background:#ffffff}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.utility-glass>main{background:#f7f7f7f5}}

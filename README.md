@@ -7,13 +7,13 @@ Website nội thất tiếng Việt, responsive, kết nối Supabase và GitHub
 
 [Chương trình nâng cấp UI/UX, hiệu suất, bảo toàn SEO, đặt cọc và chat nhân viên](UPGRADE_SCOPE_20261107.md): phạm vi website + quản trị/PC, ngày công và tiêu chí nghiệm thu. Chat tawk.to đã bật, chủ website xác nhận mở được. payOS đã qua pilot thực tế và **mở thu đặt cọc cho các báo giá đủ điều kiện**; Admin tạo link trong phần còn lại và xử lý đối soát. [Bản phát hành thu chính thức](PAYOS_GENERAL_RELEASE.md) · [Hướng dẫn đối soát](PAYOS_RECONCILIATION_ADMIN.md) · [Hướng dẫn sao lưu và thử khôi phục](SUPABASE_BACKUP_RESTORE_GUIDE.md).
 
-Bản nâng cấp web hiện tại: [v1.32.0 — Nền full trang và kính mờ](RELEASE_NOTES_V1_32_0.md). [Bố cục và hiệu ứng hai phía](DESIGNER_LAYOUT_20261119.md) · [Vận hành chat](CHAT_RUNBOOK.md).
+Bản nâng cấp web hiện tại: [v1.33.0 — Nền full trang và kính mờ](RELEASE_NOTES_V1_33_0.md). [Hệ màu và quản trị mới](NEUTRAL_DESIGN_20261119.md) · [Vận hành chat](CHAT_RUNBOOK.md).
 
 [Lộ trình website chuyên nghiệp](WEBSITE_ROADMAP.md) · [Web v1.19: kiến thức HTML và nội dung gốc](RELEASE_NOTES_V1_19_0.md) · [Hướng dẫn biên tập](content/KNOWLEDGE_PUBLISHING.md).
 
 Theo dõi [lịch sử phiên bản và việc còn thiếu](RELEASE_HISTORY.md). Bản web [v1.18.0](RELEASE_NOTES_V1_18_0.md) hoàn thiện tìm CRM tiếng Việt không dấu; phiên bản PC độc lập với phiên bản web.
 
-Bản phát hành: [web v1.32.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.32.0) · [Windows Manager 1.3.2](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.3.2). Kiểm tra revision website qua release.json.
+Bản phát hành: [web v1.33.0](https://github.com/infiniti-money/Web-Design/releases/tag/v1.33.0) · [Windows Manager 1.4.0](https://github.com/infiniti-money/Web-Design/releases/tag/desktop-v1.4.0). Kiểm tra revision website qua release.json.
 
 ## Giao diện quản trị chuyên nghiệp — 05/11/2026
 

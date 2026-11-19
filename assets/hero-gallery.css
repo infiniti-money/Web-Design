@@ -5,7 +5,7 @@
   isolation:isolate;
   min-height:max(690px,calc(100svh - 110px));
   width:100%;
-  background:#172a25;
+  background:#262626;
 }
 .hero#home .hero-photo{z-index:0;object-position:center center}
 .hero#home .hero-slides{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
@@ -19,7 +19,7 @@
 .hero#home .hero-slide.is-active{opacity:1}
 .hero#home::after{
   z-index:1;pointer-events:none;
-  background:linear-gradient(90deg,rgba(12,26,22,.84) 0%,rgba(12,26,22,.57) 45%,rgba(12,26,22,.12) 100%);
+  background:linear-gradient(90deg,rgba(23,23,23,.84) 0%,rgba(23,23,23,.57) 45%,rgba(23,23,23,.12) 100%);
 }
 .hero#home .hero-content{
   z-index:2;
@@ -36,18 +36,18 @@
 .hero-carousel-controls{
   display:flex;align-items:center;gap:10px;
   position:absolute;left:max(44px,calc((100% - 1240px)/2));bottom:27px;
-  z-index:3;color:#fff;
+  z-index:3;color:#ffffff;
 }
 html:not(.hero-gallery-ready) .hero-carousel-controls{display:none}
 .hero-carousel-controls button{
   display:grid;place-items:center;min-width:46px;min-height:46px;
   border:1px solid rgba(255,255,255,.55);border-radius:999px;
-  background:rgba(16,30,25,.25);color:#fff;font:600 20px/1 system-ui,sans-serif;
+  background:rgba(27,27,27,.25);color:#ffffff;font:600 20px/1 system-ui,sans-serif;
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   transition:background-color .2s,border-color .2s,transform .2s;
 }
-.hero-carousel-controls button:hover{background:rgba(255,255,255,.2);border-color:#fff;transform:translateY(-1px)}
-.hero-carousel-controls button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.hero-carousel-controls button:hover{background:rgba(255,255,255,.2);border-color:#ffffff;transform:translateY(-1px)}
+.hero-carousel-controls button:focus-visible{outline:3px solid #ffffff;outline-offset:3px}
 .hero-carousel-controls .hero-carousel-pause{font-size:13px;padding:0 14px;min-width:80px;letter-spacing:.015em}
 .hero-carousel-announcement{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .hero#home .hero-caption{max-width:620px}
@@ -61,7 +61,7 @@ html:not(.hero-gallery-ready) .hero-carousel-controls{display:none}
   .hero#home h1{font-size:clamp(42px,7vw,68px);max-width:690px}
   .hero#home .hero-indicator{right:26px;bottom:40px}
   .hero-carousel-controls{left:26px;bottom:26px}
-  .hero#home::after{background:linear-gradient(90deg,rgba(10,25,20,.85),rgba(10,25,20,.46) 74%,rgba(10,25,20,.22))}
+  .hero#home::after{background:linear-gradient(90deg,rgba(22,22,22,.85),rgba(22,22,22,.46) 74%,rgba(22,22,22,.22))}
 }
 @media(max-width:600px){
   .hero#home{min-height:max(680px,calc(100svh - 68px));align-items:flex-start}
@@ -75,7 +75,7 @@ html:not(.hero-gallery-ready) .hero-carousel-controls{display:none}
   .hero#home .hero-indicator{left:18px;right:auto;bottom:96px;font-size:10px}
   .hero-carousel-controls{left:18px;bottom:22px;gap:9px}
   .hero-carousel-controls button{min-width:44px;min-height:44px}
-  .hero#home::after{background:linear-gradient(180deg,rgba(9,24,19,.72),rgba(9,24,19,.46) 54%,rgba(9,24,19,.58))}
+  .hero#home::after{background:linear-gradient(180deg,rgba(21,21,21,.72),rgba(21,21,21,.46) 54%,rgba(21,21,21,.58))}
 }
 @media(max-width:360px){
   .hero#home .hero-content{padding-top:48px;padding-bottom:170px}

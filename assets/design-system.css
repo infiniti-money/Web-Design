@@ -1,0 +1,76 @@
+/* ATELIER HOME — one neutral material system across public, accounts and Manager. */
+:root{
+ --design-ink:#202124;--design-muted:#595e66;--design-line:#c5c9cf;
+ --design-paper:#e9ebee;--design-glass:rgba(250,251,253,.84);
+ --design-glass-strong:rgba(252,253,255,.94);--design-charcoal:rgba(34,36,40,.88);
+ --design-shadow:0 16px 48px #171a2010,inset 0 1px 0 #ffffffc4;
+ --site-ink:var(--design-ink);--site-muted:var(--design-muted);--site-accent:#5a6069;
+ --site-glass:var(--design-glass);--site-dark:var(--design-charcoal);
+ --glass-fill:var(--design-glass);--glass-fill-strong:var(--design-glass-strong);
+}
+html{background:var(--design-paper)}
+body:is(.atelier-home,.public-page,.utility-glass){color:var(--design-ink);--ink:var(--design-ink);--muted:var(--design-muted)}
+body:is(.atelier-home,.public-page)::before{background:linear-gradient(110deg,#edf0f3e6,#e7e9edc9 52%,#e4e7ece0),url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=960&q=70') center/cover no-repeat}
+.public-header,.public-home-header.nav{background:#f8fafcce;border-color:#ffffffc9}
+.public-menu[open] .public-links,.public-home-header .links.menu-open{background:#f4f6faf5}
+.atelier-home .turnkey-advantages>.wrap,.atelier-home .consult-copy{background:var(--design-charcoal);border-color:#ffffff7a}
+:is(.atelier-home,.public-page) footer{background:#1f2125ed!important;color:#f8fafc}
+:is(.atelier-home,.public-page) footer :is(p,a){color:#e4e7ec}
+.atelier-home :is(.turnkey-advantages,.consult-copy) :is(h2,h3,p,a,strong,span){color:#f5f7fb}
+.atelier-home .consult-card{background:var(--design-glass-strong);color:var(--design-ink)}
+.public-page :is(.card,.note,.article-toc,.knowledge-card,.item,.project-facts),.atelier-home :is(.project,.featured-card,.estimate-panel,.featured-empty){border-color:#fff;box-shadow:var(--design-shadow)}
+.public-page .hero .glass-hero-copy,.atelier-home .hero-story{background:#24272ba8;border-color:#ffffff70}
+.public-page .hero:before{background-image:linear-gradient(90deg,#1f2229bd,#22252b6b),url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=960&q=70')}
+.public-page .atelier-service-hero:before{background:linear-gradient(90deg,#1c202888,#1c202826)}
+.public-page .cta{background:#dfe3e9ad;border-color:#ffffffb3}
+.atelier-home .atelier-discover-title{color:#4c515a}
+.public-links a[aria-current=page],.public-links a:hover{color:#474c55}
+body.utility-glass{background:var(--design-paper);color:var(--design-ink)}
+body.utility-glass::before{background:#e9ebee url('./workspace-backdrop.svg') center/cover no-repeat}
+.utility-glass>main{background:var(--design-glass-strong);border-color:#fff;box-shadow:var(--design-shadow)}
+.utility-glass p{color:var(--design-muted)}
+
+/* Floating workspace shell. Existing role gating, drawer and density controls are retained. */
+body:where(:not(.atelier-home):not(.public-page):not(.utility-glass)){--ink:var(--design-ink);--muted:var(--design-muted);--line:var(--design-line);--bg:var(--design-paper)}
+body.workspace-ready{--side:252px;color:var(--design-ink)}
+.workspace-ready .workspace-sidebar{inset:16px auto 16px 16px;width:var(--side);padding:24px 14px 16px;border:1px solid #ffffff40;border-radius:24px;background:#26282de8;box-shadow:0 20px 60px #11141c1a;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.workspace-ready .workspace-topbar{top:16px;left:calc(var(--side) + 48px);right:16px;height:64px;border:1px solid #fff;border-radius:18px;background:var(--design-glass);box-shadow:var(--design-shadow)}
+.workspace-ready>main,.workspace-ready>main.shell{width:calc(100% - var(--side) - 32px);max-width:none;margin-left:calc(var(--side) + 32px);padding:104px 16px 32px}
+body.workspace-ready .workspace-sidebar .workspace-logo{color:#fff!important}
+body.workspace-ready .workspace-sidebar .workspace-logo small,body.workspace-ready .workspace-sidebar .workspace-group,body.workspace-ready .workspace-sidebar .workspace-user-role{color:#b9bec7}
+body.workspace-ready .workspace-sidebar :is(.tab,.workspace-link){color:#e0e3e9!important;border-radius:12px;min-height:42px}
+body.workspace-ready .workspace-sidebar :is(.tab:hover,.workspace-link:hover){background:#ffffff13}
+body.workspace-ready .workspace-sidebar .tab[aria-selected=true],body.workspace-ready .workspace-sidebar .workspace-link[aria-current=page]{color:#1e2126!important;background:#f4f6fa;box-shadow:inset 3px 0 #9ba3b0}
+body.workspace-ready .workspace-sidebar .workspace-user-name{color:#f5f7fb}
+body.workspace-ready .workspace-sidebar :is(.workspace-collapse,.workspace-user button){color:#eef1f6;background:#ffffff0d;border-color:#ffffff38;border-radius:10px}
+.workspace-ready .workspace-welcome{background:linear-gradient(115deg,#292c33ed,#464b56de);border-color:#ffffff70;border-radius:22px;padding:26px}
+.workspace-ready .workspace-welcome :is(h2,p,.eyebrow){color:#f3f5fa}
+.workspace-ready .workspace-welcome a{background:#f4f6fae6;color:#24272e;border-color:#fff;border-radius:12px}
+.workspace-ready .workspace-module{background:#fbfcfedb;border-color:#fff;border-radius:18px;padding:20px;min-height:108px;box-shadow:var(--design-shadow)}
+.workspace-ready .workspace-module .workspace-icon{background:#e9edf3;color:#414750;border-radius:12px}
+.workspace-ready .workspace-module:hover{background:#fff;border-color:#aeb5c0;box-shadow:0 14px 32px #20253214}
+.workspace-ready .workspace-module-body strong{color:#252931}
+.workspace-ready .workspace-module-body small{color:#5a616d}
+.workspace-ready .workspace-topbar :is(button,kbd){color:#383e48!important;border-color:#c6ccd5!important;background:#ffffffb3!important}
+body.workspace-theme-dark{--ink:#eef1f6;--muted:#c1c6d0;--line:#535965;--bg:#202228;color:#eef1f6}
+.workspace-theme-dark .workspace-topbar{background:#2b2e36e6;border-color:#ffffff24}
+.workspace-theme-dark .workspace-module{background:#30343de6;border-color:#68707b60}
+.workspace-theme-dark .workspace-module:hover{background:#3a404beb}
+.workspace-theme-dark .workspace-module .workspace-icon{background:#494f5c;color:#e4e9f3}
+.workspace-theme-dark .workspace-module-body strong{color:#f2f5fa}
+.workspace-theme-dark .workspace-module-body small{color:#c1c7d1}
+.workspace-theme-dark .workspace-topbar :is(button,kbd){background:#3a404dcc!important;color:#edf1f8!important;border-color:#626b7b!important}
+.workspace-theme-dark .workspace-location{color:#edf1f8}
+@media(min-width:761px){body.workspace-ready.workspace-collapsed{--side:78px}}
+@media(max-width:760px){
+ .workspace-ready .workspace-topbar{inset:12px 16px auto;height:60px;border-radius:16px}
+ .workspace-ready>main,.workspace-ready>main.shell{width:100%;margin-left:0;padding:88px 16px 26px}
+ .workspace-ready .workspace-sidebar{inset:84px auto 16px 16px;width:min(288px,calc(100vw - 32px));transform:translateX(calc(-100% - 32px));border-radius:20px}
+ .workspace-ready.workspace-drawer-open .workspace-sidebar{transform:translateX(0)}
+}
+@media(prefers-reduced-transparency:reduce){
+ :root{--design-glass:#f5f7fa;--design-glass-strong:#fbfcfe;--design-charcoal:#272a30;--site-glass:#f5f7fa}
+ body:is(.atelier-home,.public-page)::before{background:linear-gradient(110deg,#e5e9ee,#edf0f4)}
+ .workspace-ready .workspace-sidebar{background:#26282d;backdrop-filter:none}
+}
+@media print{.workspace-ready>main,.workspace-ready>main.shell{margin:0;width:100%;padding:0}.workspace-sidebar,.workspace-topbar{display:none!important}html,body{background:#fff}}
