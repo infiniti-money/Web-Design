@@ -74,3 +74,16 @@ body.workspace-theme-dark{--ink:#eef1f6;--muted:#c1c6d0;--line:#535965;--bg:#202
  .workspace-ready .workspace-sidebar{background:#26282d;backdrop-filter:none}
 }
 @media print{.workspace-ready>main,.workspace-ready>main.shell{margin:0;width:100%;padding:0}.workspace-sidebar,.workspace-topbar{display:none!important}html,body{background:#fff}}
+/* Owner-supplied identity. Keep black artwork readable on a neutral plate. */
+.atelier-brand-image{display:block;object-fit:contain;flex:none;width:62px;height:62px;background:#fff;border-radius:10px}
+.public-brand,.public-home-header .logo,.top>.brand{display:flex;align-items:center;gap:12px}
+.atelier-brand-name{display:block}
+.footer .logo{display:flex;align-items:center;gap:16px}
+.footer .atelier-brand-image{width:112px;height:112px;border-radius:16px}
+.account-brand{display:block;width:150px;margin:0 auto 18px}
+.account-brand .atelier-brand-image{width:150px;height:150px;background:transparent}
+.workspace-ready .workspace-logo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0 4px 20px;font-size:18px;letter-spacing:.12em}
+.workspace-ready .workspace-logo .atelier-brand-image{width:60px;height:60px}
+.workspace-ready .workspace-logo small{flex-basis:100%;margin-top:0;padding-left:70px;font-size:8px;letter-spacing:.18em}
+@media(min-width:761px){.workspace-collapsed .workspace-logo{padding:0 0 20px;gap:0}.workspace-collapsed .workspace-logo:before{display:none}.workspace-collapsed .workspace-logo .atelier-brand-name{display:none}.workspace-collapsed .workspace-logo .atelier-brand-image{width:42px;height:42px}}
+@media(max-width:620px){.public-brand,.public-home-header .logo{gap:9px}.public-brand .atelier-brand-image,.public-home-header .logo .atelier-brand-image{width:48px;height:48px}.public-brand,.public-home-header .logo{font-size:16px}.public-brand small,.public-home-header .logo small{font-size:8px;letter-spacing:.23em}}

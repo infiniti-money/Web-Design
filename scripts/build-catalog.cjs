@@ -47,7 +47,7 @@ function buildCatalog({root,output,catalogItems=[],now=Date.now(),publication}={
  const items=entries(catalogItems,publication),indexable=items.filter(x=>x.indexable),base=site.baseUrl;
  if(fs.existsSync(path.join(output,'catalog')))throw Error('Catalog output must be fresh');
  const breadcrumb=(name,url)=>({'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Trang chủ',item:base},{'@type':'ListItem',position:2,name:'Catalog',item:new URL('catalog/',base).href},...(name?[{'@type':'ListItem',position:3,name,item:url}]:[])]});
- const render=options=>renderPage({site,generatedMarker:'<!-- ATELIER GENERATED CATALOG PAGE -->',...options}).replace('</head>','<link rel="stylesheet" href="'+options.prefix+'assets/catalog-static.css?v=1.33.0"></head>');
+ const render=options=>renderPage({site,generatedMarker:'<!-- ATELIER GENERATED CATALOG PAGE -->',...options}).replace('</head>','<link rel="stylesheet" href="'+options.prefix+'assets/catalog-static.css?v=1.33.1"></head>');
  const media=(x,priority=false)=>x.image?`<figure><img src="${esc(x.image.src)}" alt="${esc(x.image.alt)}" width="${x.image.width}" height="${x.image.height}" loading="${priority?'eager':'lazy'}" decoding="async" referrerpolicy="no-referrer"><figcaption>${esc(x.image.credit)}</figcaption></figure>`:'';
  const card=x=>`<article class="card catalog-static-card"><p class="eyebrow">${esc(x.category)}</p><h2><a href="./muc-${x.id}/">${esc(x.name)}</a></h2><p>${esc(x.description.slice(0,180)||'Thông tin tham khảo đang được bổ sung.')}</p>${!x.indexable?'<p class="catalog-review-note">Thông tin tham khảo đang được biên tập và xác minh.</p>':''}</article>`;
  const listingUrl=new URL('catalog/',base).href;

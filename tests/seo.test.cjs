@@ -6,10 +6,10 @@ const path = require("node:path");
 const base = "https://infiniti-money.github.io/Web-Design";
 const pages = [
   { file: "index.html", url: `${base}/`, schemaType: ["WebSite", "WebPage"] },
-  { file: "dich-vu/index.html", url: `${base}/dich-vu/`, schemaType: ["CollectionPage"], favicon: "../assets/favicon.svg" },
-  { file: "dich-vu/thiet-ke-noi-that.html", url: `${base}/dich-vu/thiet-ke-noi-that.html`, schemaType: ["WebPage"], favicon: "../assets/favicon.svg" },
-  { file: "dich-vu/thi-cong-noi-that.html", url: `${base}/dich-vu/thi-cong-noi-that.html`, schemaType: ["WebPage"], favicon: "../assets/favicon.svg" },
-  { file: "dich-vu/tu-van-trang-tri.html", url: `${base}/dich-vu/tu-van-trang-tri.html`, schemaType: ["WebPage"], favicon: "../assets/favicon.svg" },
+  { file: "dich-vu/index.html", url: `${base}/dich-vu/`, schemaType: ["CollectionPage"], favicon: "../assets/brand/favicon.png" },
+  { file: "dich-vu/thiet-ke-noi-that.html", url: `${base}/dich-vu/thiet-ke-noi-that.html`, schemaType: ["WebPage"], favicon: "../assets/brand/favicon.png" },
+  { file: "dich-vu/thi-cong-noi-that.html", url: `${base}/dich-vu/thi-cong-noi-that.html`, schemaType: ["WebPage"], favicon: "../assets/brand/favicon.png" },
+  { file: "dich-vu/tu-van-trang-tri.html", url: `${base}/dich-vu/tu-van-trang-tri.html`, schemaType: ["WebPage"], favicon: "../assets/brand/favicon.png" },
   { file: "catalog.html", url: `${base}/catalog.html`, schemaType: ["CollectionPage"] },
   { file: "privacy.html", url: `${base}/privacy.html`, schemaType: ["WebPage"] },
 ];
@@ -37,7 +37,7 @@ function schemaTypes(value) {
 const generatedFiles = JSON.parse(read("du-an/_generated.json"));
 for (const file of generatedFiles) {
   if ((metaValue(read(file), "name", "robots") || "").includes("noindex")) continue;
-  pages.push({ file, url: `${base}/${file.replace(/index\.html$/, "")}`, schemaType: [file === "du-an/index.html" ? "CollectionPage" : "WebPage"], favicon: "../".repeat(file.split("/").length - 1) + "assets/favicon.svg", customSocialImage: file !== "du-an/index.html" });
+  pages.push({ file, url: `${base}/${file.replace(/index\.html$/, "")}`, schemaType: [file === "du-an/index.html" ? "CollectionPage" : "WebPage"], favicon: "../".repeat(file.split("/").length - 1) + "assets/brand/favicon.png", customSocialImage: file !== "du-an/index.html" });
 }
 
 test("Indexable public pages have canonical URLs, social metadata, and valid JSON-LD", () => {
@@ -61,7 +61,7 @@ test("Indexable public pages have canonical URLs, social metadata, and valid JSO
     if (!page.customSocialImage) assert.equal(socialImage, `${base}/assets/og-card.png`);
     assert.equal(metaValue(html, "name", "twitter:card"), "summary_large_image");
     const faviconTag = [...html.matchAll(/<link\b[^>]*>/gi)].find(match => attr(match[0], "rel") === "icon");
-    assert.equal(faviconTag && attr(faviconTag[0], "href"), page.favicon || "./assets/favicon.svg");
+    assert.equal(faviconTag && attr(faviconTag[0], "href"), page.favicon || "./assets/brand/favicon.png");
     assert.equal((html.match(/<h1\b/gi) || []).length, 1, `${page.file} must have one H1`);
 
     const jsonLd = [...html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
@@ -117,7 +117,7 @@ test("Internal links in SEO pages resolve to local files and anchors", () => {
 });
 
 test("Favicon and Open Graph image assets are present and correctly sized", () => {
-  assert.match(read("assets/favicon.svg"), /<svg\b/);
+  assert.equal(fs.readFileSync("assets/brand/favicon.png").subarray(1,4).toString(), "PNG");
   const png = fs.readFileSync("assets/og-card.png");
   assert.equal(png.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
   assert.equal(png.readUInt32BE(16), 1200);

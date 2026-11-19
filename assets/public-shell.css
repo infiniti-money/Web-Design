@@ -8,3 +8,6 @@
 
 /* Keep the previous document until the destination is ready; no fade/zoom. */
 html{scrollbar-gutter:stable;background:#f5f5f5}@view-transition{navigation:auto}::view-transition-group(root){animation-duration:0s}::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}::view-transition-old(root){display:none}@media(prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+
+/* Cross-document transitions need scripting enabled in Chromium. */
+@media(scripting:none){@view-transition{navigation:none}}

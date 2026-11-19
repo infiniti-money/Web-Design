@@ -106,7 +106,7 @@
     scheme.addEventListener("change",syncSystemTheme);
     themeCleanup=()=>scheme.removeEventListener("change",syncSystemTheme);
     sidebar=node("aside",undefined,"workspace-sidebar");sidebar.setAttribute("aria-label","Điều hướng quản trị");
-    const logo=node("a","ATELIER", "workspace-logo");logo.href="./admin.html";logo.append(node("small","HOME · MANAGER"));sidebar.append(logo,node("p","Không gian làm việc","workspace-group"));
+    const logo=node("a","", "workspace-logo");const brandImage=node("img");brandImage.src="./assets/brand/atelier-logo-web.png";brandImage.alt="ATELIER HOME";brandImage.width=512;brandImage.height=512;brandImage.className="atelier-brand-image";logo.append(brandImage,node("span","ATELIER","atelier-brand-name"));logo.href="./admin.html";logo.append(node("small","HOME · MANAGER"));sidebar.append(logo,node("p","Không gian làm việc","workspace-group"));
     const links=[];
     const rootTabs=document.querySelector("#dashboard .tabs");
     if(rootTabs){

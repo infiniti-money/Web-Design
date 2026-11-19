@@ -5,7 +5,7 @@ const row=(patch={})=>({id,name:'Mẫu vật liệu kiểm thử',category:'Vậ
 test('Published catalog has stable standalone HTML, keeps legacy links and excludes unreviewed content from sitemap',()=>{
  const output=temp(),result=buildPages({output,catalogItems:[row(),row({id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',published:false})]});
  const route='catalog/muc-'+id+'/index.html',html=fs.readFileSync(path.join(output,route),'utf8');
- assert.equal(result.catalog.items,1);assert.equal(result.catalog.indexable,0);assert.match(html,/noindex,follow/);assert.match(html,/Mẫu vật liệu kiểm thử/);assert.match(html,/"@type":"BreadcrumbList"/);assert.match(html,/catalog\.html\?item=aaaaaaaa/);assert.doesNotMatch(html,/<img|"@type":"Product"|Offer|aggregateRating/);assert.equal((html.match(/<h1\b/g)||[]).length,1);
+ assert.equal(result.catalog.items,1);assert.equal(result.catalog.indexable,0);assert.match(html,/noindex,follow/);assert.match(html,/Mẫu vật liệu kiểm thử/);assert.match(html,/"@type":"BreadcrumbList"/);assert.match(html,/catalog\.html\?item=aaaaaaaa/);assert.doesNotMatch(html.replace(/<img\b[^>]*class="atelier-brand-image"[^>]*>/g,""),/<img|"@type":"Product"|Offer|aggregateRating/);assert.equal((html.match(/<h1\b/g)||[]).length,1);
  assert.ok(!fs.readFileSync(path.join(output,'sitemap.xml'),'utf8').includes('catalog/muc-'));
  const index=fs.readFileSync(path.join(output,'catalog.html'),'utf8');assert.match(index,/href="\.\/catalog\/"/);assert.match(index,/<noscript>[\s\S]*Đọc 1 mục catalog/);
  assert.equal(fs.existsSync(path.join(output,'catalog/muc-bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb')),false);
